@@ -189,6 +189,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/tasks/:id/updates", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const taskId = parseInt(req.params.id);
+      
+      if (isNaN(taskId)) {
+        return res.status(400).json({ message: "Invalid task ID" });
+      }
+
+      const task = await storage.getTask(taskId);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      // Check if user has permission to view this task
+      if (task.clientId !== userId && task.specialistId !== userId) {
+        const user = await storage.getUser(userId);
+        if (!user || user.role !== "admin") {
+          return res.status(403).json({ message: "Access denied" });
+        }
+      }
+
+      const updates = await storage.getTaskUpdates(taskId);
+      res.json(updates);
+    } catch (error) {
+      console.error("Error fetching task updates:", error);
+      res.status(500).json({ message: "Failed to fetch task updates" });
+    }
+  });
+
+  app.post("/api/tasks/:id/updates", isAuthenticated, [
+    body('content').trim().isLength({ min: 1 }).withMessage('Content is required'),
+    handleValidationErrors,
+  ], async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const taskId = parseInt(req.params.id);
+      
+      if (isNaN(taskId)) {
+        return res.status(400).json({ message: "Invalid task ID" });
+      }
+
+      const task = await storage.getTask(taskId);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      // Check if user has permission to comment on this task
+      if (task.clientId !== userId && task.specialistId !== userId) {
+        const user = await storage.getUser(userId);
+        if (!user || user.role !== "admin") {
+          return res.status(403).json({ message: "Access denied" });
+        }
+      }
+
+      const update = await storage.createTaskUpdate({
+        taskId,
+        userId,
+        content: req.body.content,
+        type: "comment"
+      });
+      
+      res.status(201).json(update);
+    } catch (error) {
+      console.error("Error creating task update:", error);
+      res.status(500).json({ message: "Failed to create task update" });
+    }
+  });
+
   app.patch("/api/tasks/:id/status", isAuthenticated, async (req: any, res) => {
     try {
       const taskId = parseInt(req.params.id);

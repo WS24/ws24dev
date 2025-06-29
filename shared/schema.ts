@@ -95,7 +95,7 @@ export const taskUpdates = pgTable("task_updates", {
   id: serial("id").primaryKey(),
   taskId: integer("task_id").notNull(),
   userId: varchar("user_id").notNull(),
-  message: text("message").notNull(),
+  content: text("content").notNull(),
   type: varchar("type", { length: 50 }).notNull().default("update"), // 'update', 'comment', 'status_change'
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -323,7 +323,7 @@ export const insertEvaluationSchema = createInsertSchema(taskEvaluations).pick({
 });
 
 export const insertUpdateSchema = createInsertSchema(taskUpdates).pick({
-  message: true,
+  content: true,
   type: true,
 });
 

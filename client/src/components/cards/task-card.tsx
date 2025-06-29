@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { Link } from "wouter";
 import { 
   Calendar, 
   Clock, 
@@ -169,14 +170,15 @@ export function TaskCard({ task, userRole, onUpdate }: TaskCardProps) {
     }
 
     return (
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => {}} // Navigate to task details
-      >
-        <Eye className="mr-2 w-4 h-4" />
-        View Details
-      </Button>
+      <Link href={`/tasks/${task.id}`}>
+        <Button
+          size="sm"
+          variant="outline"
+        >
+          <Eye className="mr-2 w-4 h-4" />
+          View Details
+        </Button>
+      </Link>
     );
   };
 
@@ -188,7 +190,11 @@ export function TaskCard({ task, userRole, onUpdate }: TaskCardProps) {
             <div className={`w-2 h-2 rounded-full ${getStatusIndicatorColor(task.status)}`}></div>
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-2">
-                <h3 className="font-medium text-gray-900">{task.title}</h3>
+                <Link href={`/tasks/${task.id}`}>
+                  <h3 className="font-medium text-gray-900 hover:text-blue-600 cursor-pointer transition-colors">
+                    {task.title}
+                  </h3>
+                </Link>
                 {getStatusBadge(task.status)}
                 {getPriorityBadge(task.priority)}
               </div>

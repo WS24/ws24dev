@@ -32,6 +32,7 @@ import CreateTask from "@/pages/create-task";
 import Evaluations from "@/pages/evaluations";
 import Profile from "@/pages/profile";
 import AdminUsers from "@/pages/admin-users";
+import TaskView from "@/pages/task-view";
 import NotFound from "@/pages/not-found";
 
 /**
@@ -70,6 +71,7 @@ function Router() {
           <Route path="/announcements" component={Announcements} />
           <Route path="/admin-demo" component={AdminDemo} />
           <Route path="/profile" component={Profile} />
+          <Route path="/tasks/:id" component={TaskView} />
         </>
       )}
       <Route component={NotFound} />

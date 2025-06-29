@@ -182,6 +182,13 @@ Changelog:
   * Updated section title from "Recent Tasks" to "Created Tasks"
   * Enhanced empty state messaging to clarify filtering criteria
   * Improved user experience by focusing on actionable tasks requiring attention
+- June 29, 2025. Task view page with commenting system:
+  * Created dedicated task view page (/tasks/:id) for detailed task viewing
+  * Implemented commenting system for client-specialist communication
+  * Added API endpoints for task comments and updates with proper authentication
+  * Updated task cards with clickable titles and "View Details" buttons
+  * Enhanced user collaboration with real-time comment posting and viewing
+  * Integrated permission-based access control for task viewing and commenting
 ```
 
 ## Project Versions
