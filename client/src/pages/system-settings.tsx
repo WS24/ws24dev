@@ -191,84 +191,391 @@ export default function SystemSettings() {
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* Site Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Globe className="w-5 h-5" />
-                      Site Information
-                    </CardTitle>
-                    <CardDescription>
-                      Basic information about your website
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="siteName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Site Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter site name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="siteDescription"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Site Description</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Brief description of your site" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="siteEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Site Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="admin@example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="siteTheme"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Site Theme</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                {/* General Settings */}
+                {activeTab === "general" && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="w-5 h-5" />
+                        General Settings
+                      </CardTitle>
+                      <CardDescription>
+                        Basic platform configuration
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="siteName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Site Name</FormLabel>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select theme" />
-                              </SelectTrigger>
+                              <Input placeholder="Enter site name" {...field} />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="default">Default</SelectItem>
-                              <SelectItem value="dark">Dark</SelectItem>
-                              <SelectItem value="light">Light</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-                </Card>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="siteDescription"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Site Description</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Brief description of your site" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="siteTheme"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Site Theme</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select theme" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="default">Default</SelectItem>
+                                <SelectItem value="dark">Dark</SelectItem>
+                                <SelectItem value="light">Light</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Site Configuration */}
+                {activeTab === "site" && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Globe className="w-5 h-5" />
+                        Site Configuration
+                      </CardTitle>
+                      <CardDescription>
+                        Website information and branding
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="siteEmail"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Site Email</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="admin@example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="logoType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Logo Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select logo type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="text">Text Logo</SelectItem>
+                                <SelectItem value="image">Image Logo</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="logoWidth"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Logo Width (px)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  {...field} 
+                                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="logoHeight"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Logo Height (px)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  {...field} 
+                                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* File Settings */}
+                {activeTab === "files" && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Upload className="w-5 h-5" />
+                        File Upload Settings
+                      </CardTitle>
+                      <CardDescription>
+                        Configure file upload restrictions and paths
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="uploadPath"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Upload Path</FormLabel>
+                            <FormControl>
+                              <Input placeholder="/uploads" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="allowedFileTypes"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Allowed File Types</FormLabel>
+                            <FormControl>
+                              <Input placeholder="jpg,jpeg,png,gif,pdf,doc,docx" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="maxFileSize"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Max File Size (MB)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                {...field} 
+                                onChange={(e) => field.onChange(parseInt(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* User Defaults */}
+                {activeTab === "users" && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <User className="w-5 h-5" />
+                        User Defaults
+                      </CardTitle>
+                      <CardDescription>
+                        Default settings for new users
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="defaultUserRole"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Default User Role</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select default role" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="client">Client</SelectItem>
+                                <SelectItem value="specialist">Specialist</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="disableRegistration"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Disable Registration</FormLabel>
+                              <div className="text-sm text-gray-600">
+                                Prevent new user registrations
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="allowAvatarUpload"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Allow Avatar Upload</FormLabel>
+                              <div className="text-sm text-gray-600">
+                                Allow users to upload profile pictures
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Security Settings */}
+                {activeTab === "security" && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5" />
+                        Security Settings
+                      </CardTitle>
+                      <CardDescription>
+                        Security and protection configurations
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="passwordBruteForceProtection"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Brute Force Protection</FormLabel>
+                              <div className="text-sm text-gray-600">
+                                Enable protection against password attacks
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="emailAccountActivation"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-base">Email Account Activation</FormLabel>
+                              <div className="text-sm text-gray-600">
+                                Require email verification for new accounts
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="recaptchaSecretKey"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Google reCAPTCHA Secret Key</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="Enter secret key" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="recaptchaSiteKey"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Google reCAPTCHA Site Key</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter site key" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Submit Button */}
                 <div className="flex justify-end">
