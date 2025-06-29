@@ -25,7 +25,7 @@ const app = express();
 
 // Security middleware - must be first
 app.use(helmet({
-  contentSecurityPolicy: {
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
@@ -37,7 +37,7 @@ app.use(helmet({
       mediaSrc: ["'self'"],
       frameSrc: ["'none'"],
     },
-  },
+  } : false,
   crossOriginEmbedderPolicy: false
 }));
 
