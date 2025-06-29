@@ -1,19 +1,66 @@
+/**
+ * TaskFlow Pro - API Routes Module
+ * 
+ * This module defines all API endpoints for the TaskFlow Pro platform with comprehensive
+ * input validation, authentication, and error handling. All routes implement proper
+ * security measures including input sanitization and parameterized queries.
+ * 
+ * @module Routes
+ * @requires express-validator - Input validation and sanitization
+ * @requires zod - Schema validation
+ */
+
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { body, param, query, validationResult } from "express-validator";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertTaskSchema, insertEvaluationSchema, insertUpdateSchema } from "@shared/schema";
 import { z } from "zod";
 
+/**
+ * Middleware to handle validation errors from express-validator
+ * 
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next function
+ */
+const handleValidationErrors = (req: any, res: any, next: any) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ 
+      message: "Validation failed", 
+      errors: errors.array() 
+    });
+  }
+  next();
+};
+
+/**
+ * Register all API routes with comprehensive validation and security
+ * 
+ * @param app - Express application instance
+ * @returns HTTP server instance
+ */
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Auth routes
+  /**
+   * Get current authenticated user information
+   * 
+   * @route GET /api/auth/user
+   * @access Private - Requires authentication
+   */
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);

@@ -1,0 +1,36 @@
+INSTRUCTION FOR REPLIT AGENT
+
+This project must follow strict standards for quality, maintainability, and security. You are responsible for ensuring full technical correctness and readiness for production deployment.
+
+1. Frontend (React) Guidelines
+	•	Use component-based architecture; each component should be small and reusable.
+	•	Centralize all routing logic in a single routes.js or router.tsx file.
+	•	Do not leave any unused or placeholder links (e.g., href="#", empty routes).
+	•	Use ESLint and Prettier to maintain code style consistency.
+	•	All side-effects (API calls, timers, subscriptions) must be handled via useEffect or custom hooks.
+	•	Application state and loading/error indicators must be properly visible in the UI.
+	•	Do not leave any unhandled errors or console warnings.
+	•	Write unit tests for route rendering using Jest and React Testing Library.
+
+2. Backend (Express.js) Guidelines
+	•	Validate all request inputs using joi, zod, or express-validator.
+	•	Use a query builder (knex, sequelize) or parameterized queries to avoid SQL injection.
+	•	Organize the code into layered structure: routes, controllers, services, middlewares.
+	•	Use environment variables with dotenv for configuration (do not hardcode anything).
+	•	Implement centralized error handling middleware.
+	•	Log all incoming requests and server-side errors (use winston or morgan).
+	•	Do not expose raw error stack traces to users in production mode.
+
+3. Database (PostgreSQL) Guidelines
+	•	Use parameterized queries or ORM abstraction (never concatenate user input into SQL).
+	•	Set up proper database roles. The application should use a restricted user, not the default postgres.
+	•	Use schema migration tools (knex, db-migrate, or sequelize-cli).
+	•	Index frequently filtered or joined columns.
+	•	Handle database connection errors gracefully.
+
+4. Security Best Practices
+	•	All external input (including webhooks and query parameters) must be validated and sanitized.
+	•	Use helmet, CORS, and appropriate HTTP headers to protect against XSS, CSRF, clickjacking.
+	•	Secrets and tokens must only exist in .env and must not be committed to the repo.
+	•	HTTPS and secure cookies must be enforced for production.
+	•	Disable error stack traces in production responses.

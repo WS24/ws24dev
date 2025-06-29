@@ -1,3 +1,14 @@
+/**
+ * TaskFlow Pro - Main Application Component
+ * 
+ * Root component that configures routing, query client, and global providers.
+ * Implements authentication-based routing with role-based access control.
+ * 
+ * @module App
+ * @requires wouter - Lightweight routing library
+ * @requires @tanstack/react-query - Server state management
+ */
+
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -22,6 +33,16 @@ import Profile from "@/pages/profile";
 import AdminUsers from "@/pages/admin-users";
 import NotFound from "@/pages/not-found";
 
+/**
+ * Application router with authentication-based route protection
+ * 
+ * Routes are conditionally rendered based on authentication status:
+ * - Unauthenticated users see landing page
+ * - Authenticated users access full application functionality
+ * - 404 fallback for invalid routes
+ * 
+ * @returns JSX element containing route configuration
+ */
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -54,6 +75,17 @@ function Router() {
   );
 }
 
+/**
+ * Main application component with global providers
+ * 
+ * Provides:
+ * - React Query client for server state management
+ * - Tooltip provider for UI components
+ * - Global toast notifications
+ * - Application routing
+ * 
+ * @returns JSX element containing the complete application
+ */
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
