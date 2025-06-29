@@ -606,8 +606,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const targetUserId = req.params.id;
       const { role } = req.body;
 
-      if (!["client", "specialist", "admin"].includes(role)) {
+      if (!["client", "specialist", "admin", "blocked"].includes(role)) {
         return res.status(400).json({ message: "Invalid role" });
+      }
+
+      // Prevent self-demotion from admin
+      if (targetUserId === userId && role !== "admin") {
+        return res.status(400).json({ message: "Cannot change your own admin role" });
       }
 
       await storage.updateUserRole(targetUserId, role);

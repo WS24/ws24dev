@@ -189,6 +189,13 @@ Changelog:
   * Updated task cards with clickable titles and "View Details" buttons
   * Enhanced user collaboration with real-time comment posting and viewing
   * Integrated permission-based access control for task viewing and commenting
+- June 29, 2025. User Roles management system:
+  * Created comprehensive User Roles page (/admin/user-roles) in Admin Panel
+  * Implemented role management with Admin, Specialist, Client, and Blocked roles
+  * Added detailed workflow documentation: Admin assigns → Specialist evaluates → Client pays → Specialist completes → 50% commission
+  * Created role editing interface with permissions and validation
+  * Enhanced API endpoint with blocked role support and self-demotion protection
+  * Integrated User Roles into Admin Panel navigation with Shield icon
 ```
 
 ## Project Versions

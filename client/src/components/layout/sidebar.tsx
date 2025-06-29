@@ -234,6 +234,14 @@ export function Sidebar() {
                 </SidebarLink>
                 
                 <SidebarLink 
+                  href="/admin/user-roles" 
+                  icon={Shield}
+                  isActive={isActive("/admin/user-roles")}
+                >
+                  User Roles
+                </SidebarLink>
+                
+                <SidebarLink 
                   href="/admin/settings" 
                   icon={Settings}
                   isActive={isActive("/admin/settings")}
