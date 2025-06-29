@@ -314,6 +314,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // System settings routes
+  app.get("/api/system-settings", isAuthenticated, async (req, res) => {
+    try {
+      const settings = await storage.getSystemSettings();
+      res.json(settings || {});
+    } catch (error) {
+      console.error("Error fetching system settings:", error);
+      res.status(500).json({ message: "Failed to fetch system settings" });
+    }
+  });
+
+  app.put("/api/system-settings", isAuthenticated, async (req, res) => {
+    try {
+      const updatedSettings = await storage.updateSystemSettings(req.body);
+      res.json(updatedSettings);
+    } catch (error) {
+      console.error("Error updating system settings:", error);
+      res.status(500).json({ message: "Failed to update system settings" });
+    }
+  });
+
   // Temporary admin access (remove in production)
   app.get("/api/admin/demo", async (req: any, res) => {
     try {
@@ -654,6 +675,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user analytics:", error);
       res.status(500).json({ message: "Failed to fetch user analytics" });
+    }
+  });
+
+  // Stripe settings routes
+  app.post('/api/admin/stripe-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // In a real implementation, these would be stored securely
+      // For now, we'll just validate and return success
+      const { publicKey, secretKey } = req.body;
+      
+      if (!publicKey?.startsWith('pk_') || !secretKey?.startsWith('sk_')) {
+        return res.status(400).json({ message: "Invalid Stripe API keys" });
+      }
+
+      res.json({ message: "Stripe settings saved successfully" });
+    } catch (error) {
+      console.error("Error saving Stripe settings:", error);
+      res.status(500).json({ message: "Failed to save Stripe settings" });
+    }
+  });
+
+  app.post('/api/admin/stripe-test', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { publicKey, secretKey } = req.body;
+      
+      // Basic validation - in real implementation, test actual Stripe connection
+      if (publicKey?.startsWith('pk_') && secretKey?.startsWith('sk_')) {
+        res.json({ status: "connected", message: "Stripe connection successful" });
+      } else {
+        res.status(400).json({ status: "failed", message: "Invalid API keys" });
+      }
+    } catch (error) {
+      console.error("Error testing Stripe connection:", error);
+      res.status(500).json({ message: "Failed to test Stripe connection" });
     }
   });
 

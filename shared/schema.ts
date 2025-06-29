@@ -370,3 +370,56 @@ export type UserCustomField = typeof userCustomFields.$inferSelect;
 export type TicketFile = typeof ticketFiles.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = typeof transactions.$inferInsert;
+
+// System Settings table
+export const systemSettings = pgTable("system_settings", {
+  id: serial("id").primaryKey(),
+  siteName: varchar("site_name", { length: 255 }).default("eCommerce Решения WS24.pro"),
+  siteDescription: text("site_description"),
+  siteEmail: varchar("site_email", { length: 255 }).default("ticket@ws24.pro"),
+  siteTheme: varchar("site_theme", { length: 100 }).default("Titan"),
+  logoType: varchar("logo_type", { length: 10 }).default("text"),
+  logoWidth: integer("logo_width").default(93),
+  logoHeight: integer("logo_height").default(32),
+  logoPath: varchar("logo_path", { length: 500 }),
+  uploadPath: varchar("upload_path", { length: 500 }).default("/srv/html/helpdesk/public_html/uploads"),
+  relativeUploadPath: varchar("relative_upload_path", { length: 500 }),
+  allowedFileTypes: text("allowed_file_types").default("txt|gif|png|jpg|jpeg|pdf|doc|docx|xls|xlsx|txt|csv|ppt|zip|mov|mpeg|mp4|avi|zip|rar|tar|7z|gzip|psd|html|xml|json"),
+  maxFileSize: integer("max_file_size").default(1181929),
+  dashboardNotes: text("dashboard_notes"),
+  defaultUserRole: varchar("default_user_role", { length: 50 }).default("client"),
+  disableRegistration: boolean("disable_registration").default(false),
+  recaptchaSecretKey: varchar("recaptcha_secret_key", { length: 255 }),
+  recaptchaSiteKey: varchar("recaptcha_site_key", { length: 255 }),
+  allowAvatarUpload: boolean("allow_avatar_upload").default(true),
+  passwordBruteForceProtection: boolean("password_brute_force_protection").default(true),
+  emailAccountActivation: boolean("email_account_activation").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSystemSettingsSchema = createInsertSchema(systemSettings).pick({
+  siteName: true,
+  siteDescription: true,
+  siteEmail: true,
+  siteTheme: true,
+  logoType: true,
+  logoWidth: true,
+  logoHeight: true,
+  logoPath: true,
+  uploadPath: true,
+  relativeUploadPath: true,
+  allowedFileTypes: true,
+  maxFileSize: true,
+  dashboardNotes: true,
+  defaultUserRole: true,
+  disableRegistration: true,
+  recaptchaSecretKey: true,
+  recaptchaSiteKey: true,
+  allowAvatarUpload: true,
+  passwordBruteForceProtection: true,
+  emailAccountActivation: true,
+});
+
+export type SystemSettings = typeof systemSettings.$inferSelect;
+export type InsertSystemSettings = z.infer<typeof insertSystemSettingsSchema>;

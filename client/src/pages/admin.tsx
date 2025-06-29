@@ -73,19 +73,24 @@ export default function AdminPanel() {
     }
   }, [isAuthenticated, isLoading, user, toast]);
 
-  const { data: adminStats, isLoading: statsLoading } = useQuery({
+  const { data: adminStats, isLoading: adminStatsLoading } = useQuery<{
+    totalTasks: string;
+    totalUsers: string;
+    activeTasks: string;
+    totalRevenue: string;
+  }>({
     queryKey: ["/api/admin/stats"],
     retry: false,
     enabled: !!user && user.role === "admin",
   });
 
-  const { data: adminTasks, isLoading: tasksLoading, refetch: refetchTasks } = useQuery({
+  const { data: tasks, isLoading: tasksLoading, refetch: refetchTasks } = useQuery<any[]>({
     queryKey: ["/api/admin/tasks"],
     retry: false,
     enabled: !!user && user.role === "admin",
   });
 
-  const { data: adminUsers, isLoading: usersLoading } = useQuery({
+  const { data: users, isLoading: usersLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/users"],
     retry: false,
     enabled: !!user && user.role === "admin",
@@ -138,7 +143,7 @@ export default function AdminPanel() {
   }
 
   // Filter tasks
-  const filteredTasks = (adminTasks || []).filter((task: any) => {
+  const filteredTasks = (tasks || []).filter((task: any) => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          task.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
@@ -228,7 +233,7 @@ export default function AdminPanel() {
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Всего заявок</p>
                         <p className="text-2xl font-bold text-gray-900">
-                          {statsLoading ? "..." : adminStats?.totalTasks || 0}
+                          {adminStatsLoading ? "..." : adminStats?.totalTasks || 0}
                         </p>
                       </div>
                     </div>
@@ -244,7 +249,7 @@ export default function AdminPanel() {
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Пользователи</p>
                         <p className="text-2xl font-bold text-gray-900">
-                          {statsLoading ? "..." : adminStats?.totalUsers || 0}
+                          {adminStatsLoading ? "..." : adminStats?.totalUsers || 0}
                         </p>
                       </div>
                     </div>
@@ -260,7 +265,7 @@ export default function AdminPanel() {
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Активные</p>
                         <p className="text-2xl font-bold text-gray-900">
-                          {statsLoading ? "..." : adminStats?.activeTasks || 0}
+                          {adminStatsLoading ? "..." : adminStats?.activeTasks || 0}
                         </p>
                       </div>
                     </div>
@@ -276,7 +281,7 @@ export default function AdminPanel() {
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Доход</p>
                         <p className="text-2xl font-bold text-gray-900">
-                          {statsLoading ? "..." : formatCurrency(adminStats?.totalRevenue || 0)}
+                          {adminStatsLoading ? "..." : formatCurrency(adminStats?.totalRevenue || "0")}
                         </p>
                       </div>
                     </div>

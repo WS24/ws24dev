@@ -56,7 +56,13 @@ export function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
 
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<{
+    activeTasks: string;
+    completedTasks: string;
+    pendingTasks: string;
+    assignedTasks?: string;
+    pendingEvaluations?: string;
+  }>({
     queryKey: ["/api/stats"],
     retry: false,
     enabled: !!user,
@@ -85,7 +91,7 @@ export function Sidebar() {
           <SidebarLink 
             href="/tasks" 
             icon={CheckSquare}
-            badge={user.role === "client" ? stats?.activeTasks : undefined}
+            badge={user.role === "client" ? parseInt(stats?.activeTasks || "0") : undefined}
             isActive={isActive("/tasks")}
           >
             My Tasks
@@ -101,21 +107,55 @@ export function Sidebar() {
                 Create Task
               </SidebarLink>
               
-              <SidebarLink 
-                href="/billing" 
-                icon={DollarSign}
-                isActive={isActive("/billing")}
-              >
-                Billing
-              </SidebarLink>
-              
-              <SidebarLink 
-                href="/analytics" 
-                icon={BarChart3}
-                isActive={isActive("/analytics")}
-              >
-                Analytics
-              </SidebarLink>
+            </>
+          )}
+          
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">
+              Billing & Finance
+            </p>
+            
+            <SidebarLink 
+              href="/billing" 
+              icon={DollarSign}
+              isActive={isActive("/billing")}
+            >
+              Finance Dashboard
+            </SidebarLink>
+            
+            <SidebarLink 
+              href="/analytics" 
+              icon={BarChart3}
+              isActive={isActive("/analytics")}
+            >
+              Analytics
+            </SidebarLink>
+            
+            <SidebarLink 
+              href="/stripe-settings" 
+              icon={CreditCard}
+              isActive={isActive("/stripe-settings")}
+            >
+              Payment Settings
+            </SidebarLink>
+          </div>
+          
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">
+              Settings
+            </p>
+            
+            <SidebarLink 
+              href="/system-settings" 
+              icon={Settings}
+              isActive={isActive("/system-settings")}
+            >
+              System Settings
+            </SidebarLink>
+          </div>
+          
+          {user?.role === "client" && (
+            <>
             </>
           )}
           
@@ -129,7 +169,7 @@ export function Sidebar() {
                 <SidebarLink 
                   href="/assignments" 
                   icon={ClipboardList}
-                  badge={stats?.assignedTasks}
+                  badge={parseInt(stats?.assignedTasks || "0")}
                   isActive={isActive("/assignments")}
                 >
                   Assignments
@@ -138,7 +178,7 @@ export function Sidebar() {
                 <SidebarLink 
                   href="/evaluations" 
                   icon={Calculator}
-                  badge={stats?.pendingEvaluations}
+                  badge={parseInt(stats?.pendingEvaluations || "0")}
                   isActive={isActive("/evaluations")}
                 >
                   Evaluations

@@ -14,6 +14,8 @@ import AdminDemo from "@/pages/admin-demo";
 import KnowledgeBase from "@/pages/knowledge-base";
 import Announcements from "@/pages/announcements";
 import Analytics from "@/pages/analytics";
+import StripeSettings from "@/pages/stripe-settings";
+import SystemSettings from "@/pages/system-settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,6 +35,8 @@ function Router() {
       )}
       <Route path="/billing" component={Billing} />
       <Route path="/analytics" component={Analytics} />
+      <Route path="/stripe-settings" component={StripeSettings} />
+      <Route path="/system-settings" component={SystemSettings} />
       <Route path="/knowledge-base" component={KnowledgeBase} />
       <Route path="/announcements" component={Announcements} />
       <Route path="/admin-demo" component={AdminDemo} />

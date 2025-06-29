@@ -23,12 +23,12 @@ export default function KnowledgeBase() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const { data: categories, isLoading: categoriesLoading } = useQuery<any[]>({
     queryKey: ["/api/knowledge/categories"],
     retry: false,
   });
 
-  const { data: articles, isLoading: articlesLoading } = useQuery({
+  const { data: articles, isLoading: articlesLoading } = useQuery<any[]>({
     queryKey: ["/api/knowledge/articles", selectedCategory],
     retry: false,
   });

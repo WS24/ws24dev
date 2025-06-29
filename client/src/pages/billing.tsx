@@ -30,12 +30,17 @@ export default function Billing() {
   const [selectedYear, setSelectedYear] = useState("2018");
   const [recordsPerPage, setRecordsPerPage] = useState("100");
 
-  const { data: transactions, isLoading } = useQuery({
+  const { data: transactions, isLoading } = useQuery<any[]>({
     queryKey: ["/api/billing/transactions", selectedYear],
     retry: false,
   });
 
-  const { data: billingStats, isLoading: statsLoading } = useQuery({
+  const { data: billingStats, isLoading: statsLoading } = useQuery<{
+    totalInAccount: string;
+    incomeInOrders: string;
+    expensesInOrders: string;
+    monthlyRevenue: string;
+  }>({
     queryKey: ["/api/billing/stats"],
     retry: false,
   });

@@ -13,6 +13,7 @@ import {
   userCustomFields,
   ticketFiles,
   transactions,
+  systemSettings,
   type User,
   type UpsertUser,
   type Task,
@@ -37,6 +38,8 @@ import {
   type TicketFile,
   type Transaction,
   type InsertTransaction,
+  type SystemSettings,
+  type InsertSystemSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, or, sql, gte } from "drizzle-orm";
@@ -142,6 +145,10 @@ export interface IStorage {
   getTaskAnalytics(startDate: Date): Promise<any>;
   getRevenueAnalytics(startDate: Date): Promise<any>;
   getUserAnalytics(startDate: Date): Promise<any>;
+  
+  // System Settings operations
+  getSystemSettings(): Promise<SystemSettings | undefined>;
+  updateSystemSettings(settings: Partial<InsertSystemSettings>): Promise<SystemSettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -756,6 +763,33 @@ export class DatabaseStorage implements IStorage {
       specialists: userStats?.specialists || 0,
       newUsers: userStats?.newUsers || 0
     };
+  }
+
+  async getSystemSettings(): Promise<SystemSettings | undefined> {
+    const [settings] = await db.select().from(systemSettings).limit(1);
+    return settings;
+  }
+
+  async updateSystemSettings(settingsData: Partial<InsertSystemSettings>): Promise<SystemSettings> {
+    const existingSettings = await this.getSystemSettings();
+    
+    if (existingSettings) {
+      const [updatedSettings] = await db
+        .update(systemSettings)
+        .set({
+          ...settingsData,
+          updatedAt: new Date(),
+        })
+        .where(eq(systemSettings.id, existingSettings.id))
+        .returning();
+      return updatedSettings;
+    } else {
+      const [newSettings] = await db
+        .insert(systemSettings)
+        .values(settingsData)
+        .returning();
+      return newSettings;
+    }
   }
 }
 

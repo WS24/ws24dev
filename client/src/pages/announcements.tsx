@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 export default function Announcements() {
-  const { data: announcements, isLoading } = useQuery({
+  const { data: announcements, isLoading } = useQuery<any[]>({
     queryKey: ["/api/announcements"],
     retry: false,
   });
