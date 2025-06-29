@@ -12,12 +12,63 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Phone, DollarSign, Users, MapPin, Calendar, Shield } from "lucide-react";
+import { User, Mail, Phone, DollarSign, Users, MapPin, Calendar, Shield, Settings, Key, Bell } from "lucide-react";
+
+const ProfileMenu = ({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) => (
+  <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg mb-6">
+    <Button
+      variant={activeTab === "profile" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("profile")}
+      className="flex items-center gap-2"
+    >
+      <User className="h-4 w-4" />
+      Profile
+    </Button>
+    <Button
+      variant={activeTab === "account" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("account")}
+      className="flex items-center gap-2"
+    >
+      <Settings className="h-4 w-4" />
+      Account
+    </Button>
+    <Button
+      variant={activeTab === "security" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("security")}
+      className="flex items-center gap-2"
+    >
+      <Shield className="h-4 w-4" />
+      Security
+    </Button>
+    <Button
+      variant={activeTab === "notifications" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("notifications")}
+      className="flex items-center gap-2"
+    >
+      <Bell className="h-4 w-4" />
+      Notifications
+    </Button>
+    <Button
+      variant={activeTab === "billing" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("billing")}
+      className="flex items-center gap-2"
+    >
+      <DollarSign className="h-4 w-4" />
+      Billing
+    </Button>
+  </div>
+);
 
 export default function Profile() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("profile");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -102,6 +153,9 @@ export default function Profile() {
         <h1 className="text-3xl font-bold">User Profile</h1>
         <p className="text-muted-foreground">Manage your personal information and account settings</p>
       </div>
+
+      {/* Profile Menu */}
+      <ProfileMenu activeTab={activeTab} onTabChange={setActiveTab} />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}

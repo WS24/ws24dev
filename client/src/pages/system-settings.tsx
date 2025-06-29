@@ -13,7 +13,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Settings, Upload, Globe, Mail, User, Shield, FileText, Image } from "lucide-react";
+import { Settings, Upload, Globe, Mail, User, Shield, FileText, Image, Database } from "lucide-react";
+
+const SystemSettingsMenu = ({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) => (
+  <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg mb-6">
+    <Button
+      variant={activeTab === "general" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("general")}
+      className="flex items-center gap-2"
+    >
+      <Settings className="h-4 w-4" />
+      General
+    </Button>
+    <Button
+      variant={activeTab === "site" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("site")}
+      className="flex items-center gap-2"
+    >
+      <Globe className="h-4 w-4" />
+      Site Config
+    </Button>
+    <Button
+      variant={activeTab === "files" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("files")}
+      className="flex items-center gap-2"
+    >
+      <Upload className="h-4 w-4" />
+      File Settings
+    </Button>
+    <Button
+      variant={activeTab === "users" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("users")}
+      className="flex items-center gap-2"
+    >
+      <User className="h-4 w-4" />
+      User Defaults
+    </Button>
+    <Button
+      variant={activeTab === "security" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("security")}
+      className="flex items-center gap-2"
+    >
+      <Shield className="h-4 w-4" />
+      Security
+    </Button>
+  </div>
+);
 
 const systemSettingsSchema = z.object({
   siteName: z.string().min(1, "Site name is required"),
@@ -43,6 +93,7 @@ export default function SystemSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [activeTab, setActiveTab] = useState("general");
 
   const { data: settings, isLoading } = useQuery<SystemSettings>({
     queryKey: ["/api/system-settings"],
@@ -129,6 +180,9 @@ export default function SystemSettings() {
           <p className="text-gray-600">Configure your platform settings and preferences</p>
         </div>
       </div>
+
+      {/* System Settings Menu */}
+      <SystemSettingsMenu activeTab={activeTab} onTabChange={setActiveTab} />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

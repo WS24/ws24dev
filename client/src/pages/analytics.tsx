@@ -35,9 +35,60 @@ import {
   Download
 } from "lucide-react";
 
+const AnalyticsMenu = ({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) => (
+  <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg mb-6">
+    <Button
+      variant={activeTab === "overview" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("overview")}
+      className="flex items-center gap-2"
+    >
+      <Activity className="h-4 w-4" />
+      Overview
+    </Button>
+    <Button
+      variant={activeTab === "tasks" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("tasks")}
+      className="flex items-center gap-2"
+    >
+      <CheckCircle className="h-4 w-4" />
+      Tasks
+    </Button>
+    <Button
+      variant={activeTab === "revenue" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("revenue")}
+      className="flex items-center gap-2"
+    >
+      <DollarSign className="h-4 w-4" />
+      Revenue
+    </Button>
+    <Button
+      variant={activeTab === "users" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("users")}
+      className="flex items-center gap-2"
+    >
+      <Users className="h-4 w-4" />
+      Users
+    </Button>
+    <Button
+      variant={activeTab === "reports" ? "default" : "ghost"}
+      size="sm"
+      onClick={() => onTabChange("reports")}
+      className="flex items-center gap-2"
+    >
+      <FileText className="h-4 w-4" />
+      Reports
+    </Button>
+  </div>
+);
+
 export default function Analytics() {
   const [dateRange, setDateRange] = useState("30");
   const [reportType, setReportType] = useState("overview");
+  const [activeTab, setActiveTab] = useState("overview");
 
   const { data: analyticsData, isLoading } = useQuery({
     queryKey: ["/api/analytics", dateRange, reportType],
@@ -138,6 +189,9 @@ export default function Analytics() {
                 </Button>
               </div>
             </div>
+
+            {/* Analytics Menu */}
+            <AnalyticsMenu activeTab={activeTab} onTabChange={setActiveTab} />
 
             {/* Key Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
