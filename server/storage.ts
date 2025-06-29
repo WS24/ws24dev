@@ -4,6 +4,14 @@ import {
   taskEvaluations,
   payments,
   taskUpdates,
+  ticketCategories,
+  ticketReplies,
+  announcements,
+  knowledgeArticles,
+  knowledgeCategories,
+  customFields,
+  userCustomFields,
+  ticketFiles,
   type User,
   type UpsertUser,
   type Task,
@@ -13,6 +21,19 @@ import {
   type Payment,
   type TaskUpdate,
   type InsertUpdate,
+  type TicketCategory,
+  type InsertTicketCategory,
+  type TicketReply,
+  type InsertTicketReply,
+  type Announcement,
+  type InsertAnnouncement,
+  type KnowledgeArticle,
+  type InsertKnowledgeArticle,
+  type KnowledgeCategory,
+  type InsertKnowledgeCategory,
+  type CustomField,
+  type UserCustomField,
+  type TicketFile,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, or, sql } from "drizzle-orm";
@@ -74,6 +95,35 @@ export interface IStorage {
     completedTasks: number;
     totalRevenue: string;
   }>;
+  
+  // New entity operations (from MySQL backup)
+  // Announcements
+  createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement>;
+  getAnnouncements(): Promise<Announcement[]>;
+  updateAnnouncement(id: number, updates: Partial<Announcement>): Promise<void>;
+  deleteAnnouncement(id: number): Promise<void>;
+  
+  // Knowledge Base
+  createKnowledgeCategory(category: InsertKnowledgeCategory): Promise<KnowledgeCategory>;
+  getKnowledgeCategories(): Promise<KnowledgeCategory[]>;
+  createKnowledgeArticle(article: InsertKnowledgeArticle): Promise<KnowledgeArticle>;
+  getKnowledgeArticles(categoryId?: number): Promise<KnowledgeArticle[]>;
+  getKnowledgeArticle(id: number): Promise<KnowledgeArticle | undefined>;
+  updateKnowledgeArticle(id: number, updates: Partial<KnowledgeArticle>): Promise<void>;
+  incrementArticleViews(id: number): Promise<void>;
+  
+  // Ticket Categories
+  createTicketCategory(category: InsertTicketCategory): Promise<TicketCategory>;
+  getTicketCategories(): Promise<TicketCategory[]>;
+  updateTicketCategory(id: number, updates: Partial<TicketCategory>): Promise<void>;
+  
+  // Ticket Replies
+  createTicketReply(reply: InsertTicketReply & { userId: string }): Promise<TicketReply>;
+  getTicketReplies(ticketId: number): Promise<TicketReply[]>;
+  
+  // Custom Fields
+  getCustomFields(): Promise<CustomField[]>;
+  getUserCustomFields(userId: string): Promise<UserCustomField[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -390,6 +440,162 @@ export class DatabaseStorage implements IStorage {
       completedTasks: taskStats?.completedTasks || 0,
       totalRevenue: taskStats?.totalRevenue || "0",
     };
+  }
+
+  // New entity operations (from MySQL backup)
+  
+  // Announcements
+  async createAnnouncement(announcementData: InsertAnnouncement): Promise<Announcement> {
+    const [announcement] = await db
+      .insert(announcements)
+      .values(announcementData)
+      .returning();
+    return announcement;
+  }
+
+  async getAnnouncements(): Promise<Announcement[]> {
+    return await db
+      .select()
+      .from(announcements)
+      .where(eq(announcements.status, 1))
+      .orderBy(desc(announcements.createdAt));
+  }
+
+  async updateAnnouncement(id: number, updates: Partial<Announcement>): Promise<void> {
+    await db
+      .update(announcements)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(announcements.id, id));
+  }
+
+  async deleteAnnouncement(id: number): Promise<void> {
+    await db
+      .update(announcements)
+      .set({ status: 0 })
+      .where(eq(announcements.id, id));
+  }
+
+  // Knowledge Base
+  async createKnowledgeCategory(categoryData: InsertKnowledgeCategory): Promise<KnowledgeCategory> {
+    const [category] = await db
+      .insert(knowledgeCategories)
+      .values(categoryData)
+      .returning();
+    return category;
+  }
+
+  async getKnowledgeCategories(): Promise<KnowledgeCategory[]> {
+    return await db
+      .select()
+      .from(knowledgeCategories)
+      .orderBy(knowledgeCategories.sortOrder, knowledgeCategories.name);
+  }
+
+  async createKnowledgeArticle(articleData: InsertKnowledgeArticle): Promise<KnowledgeArticle> {
+    const [article] = await db
+      .insert(knowledgeArticles)
+      .values(articleData)
+      .returning();
+    return article;
+  }
+
+  async getKnowledgeArticles(categoryId?: number): Promise<KnowledgeArticle[]> {
+    if (categoryId) {
+      return await db
+        .select()
+        .from(knowledgeArticles)
+        .where(and(eq(knowledgeArticles.status, 1), eq(knowledgeArticles.categoryId, categoryId)))
+        .orderBy(desc(knowledgeArticles.createdAt));
+    }
+    
+    return await db
+      .select()
+      .from(knowledgeArticles)
+      .where(eq(knowledgeArticles.status, 1))
+      .orderBy(desc(knowledgeArticles.createdAt));
+  }
+
+  async getKnowledgeArticle(id: number): Promise<KnowledgeArticle | undefined> {
+    const [article] = await db
+      .select()
+      .from(knowledgeArticles)
+      .where(and(eq(knowledgeArticles.id, id), eq(knowledgeArticles.status, 1)));
+    return article;
+  }
+
+  async updateKnowledgeArticle(id: number, updates: Partial<KnowledgeArticle>): Promise<void> {
+    await db
+      .update(knowledgeArticles)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(knowledgeArticles.id, id));
+  }
+
+  async incrementArticleViews(id: number): Promise<void> {
+    await db
+      .update(knowledgeArticles)
+      .set({
+        views: sql`${knowledgeArticles.views} + 1`,
+      })
+      .where(eq(knowledgeArticles.id, id));
+  }
+
+  // Ticket Categories
+  async createTicketCategory(categoryData: InsertTicketCategory): Promise<TicketCategory> {
+    const [category] = await db
+      .insert(ticketCategories)
+      .values(categoryData)
+      .returning();
+    return category;
+  }
+
+  async getTicketCategories(): Promise<TicketCategory[]> {
+    return await db
+      .select()
+      .from(ticketCategories)
+      .orderBy(ticketCategories.name);
+  }
+
+  async updateTicketCategory(id: number, updates: Partial<TicketCategory>): Promise<void> {
+    await db
+      .update(ticketCategories)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(ticketCategories.id, id));
+  }
+
+  // Ticket Replies
+  async createTicketReply(replyData: InsertTicketReply & { userId: string }): Promise<TicketReply> {
+    const [reply] = await db
+      .insert(ticketReplies)
+      .values({
+        ...replyData,
+        timestamp: Math.floor(Date.now() / 1000),
+      })
+      .returning();
+    return reply;
+  }
+
+  async getTicketReplies(ticketId: number): Promise<TicketReply[]> {
+    return await db
+      .select()
+      .from(ticketReplies)
+      .where(eq(ticketReplies.ticketId, ticketId))
+      .orderBy(ticketReplies.timestamp);
+  }
+
+  // Custom Fields
+  async getCustomFields(): Promise<CustomField[]> {
+    return await db
+      .select()
+      .from(customFields)
+      .where(eq(customFields.status, 1))
+      .orderBy(customFields.sortOrder);
+  }
+
+  async getUserCustomFields(userId: string): Promise<UserCustomField[]> {
+    return await db
+      .select()
+      .from(userCustomFields)
+      .where(eq(userCustomFields.userId, userId));
   }
 }
 

@@ -11,7 +11,9 @@ import {
   Calculator,
   Settings,
   Users,
-  Shield
+  Shield,
+  BookOpen,
+  Megaphone
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -135,6 +137,28 @@ export function Sidebar() {
             </>
           )}
           
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">
+              Resources
+            </p>
+            
+            <SidebarLink 
+              href="/knowledge-base" 
+              icon={BookOpen}
+              isActive={isActive("/knowledge-base")}
+            >
+              Knowledge Base
+            </SidebarLink>
+            
+            <SidebarLink 
+              href="/announcements" 
+              icon={Megaphone}
+              isActive={isActive("/announcements")}
+            >
+              Announcements
+            </SidebarLink>
+          </div>
+
           {user.role === "admin" && (
             <>
               <div className="border-t border-gray-200 pt-4 mt-4">

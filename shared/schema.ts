@@ -144,6 +144,132 @@ export const taskUpdatesRelations = relations(taskUpdates, ({ one }) => ({
   }),
 }));
 
+// Ticket Categories (from MySQL backup)
+export const ticketCategories = pgTable("ticket_categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull().default(""),
+  parentId: integer("parent_id").default(0),
+  image: varchar("image", { length: 1000 }).default(""),
+  ticketCount: integer("ticket_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Ticket Replies (from MySQL backup)
+export const ticketReplies = pgTable("ticket_replies", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  body: text("body").notNull(),
+  timestamp: integer("timestamp").notNull(),
+  replyId: integer("reply_id").default(0),
+  files: integer("files").default(0),
+  hash: varchar("hash", { length: 255 }).default(""),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Announcements (from MySQL backup)
+export const announcements = pgTable("announcements", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 500 }).notNull(),
+  body: text("body").notNull(),
+  status: integer("status").notNull().default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Knowledge Base Articles (from MySQL backup)
+export const knowledgeArticles = pgTable("knowledge_articles", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 500 }).notNull(),
+  body: text("body").notNull(),
+  categoryId: integer("category_id").notNull(),
+  status: integer("status").notNull().default(1),
+  views: integer("views").default(0),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Knowledge Categories (from MySQL backup)
+export const knowledgeCategories = pgTable("knowledge_categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").default(""),
+  parentId: integer("parent_id").default(0),
+  icon: varchar("icon", { length: 100 }).default(""),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Custom Fields (from MySQL backup)
+export const customFields = pgTable("custom_fields", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: varchar("type", { length: 50 }).notNull(),
+  options: text("options").default(""),
+  required: boolean("required").default(false),
+  defaultValue: text("default_value").default(""),
+  sortOrder: integer("sort_order").default(0),
+  status: integer("status").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Custom Field Values
+export const userCustomFields = pgTable("user_custom_fields", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  fieldId: integer("field_id").notNull(),
+  value: text("value").default(""),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Ticket Files (from MySQL backup)
+export const ticketFiles = pgTable("ticket_files", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").notNull(),
+  replyId: integer("reply_id").default(0),
+  filename: varchar("filename", { length: 255 }).notNull(),
+  originalName: varchar("original_name", { length: 255 }).notNull(),
+  fileSize: integer("file_size").default(0),
+  mimeType: varchar("mime_type", { length: 100 }).default(""),
+  uploadedBy: varchar("uploaded_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Relations for new entities
+export const ticketCategoriesRelations = relations(ticketCategories, ({ many, one }) => ({
+  tickets: many(tasks),
+  parent: one(ticketCategories, { fields: [ticketCategories.parentId], references: [ticketCategories.id] }),
+  children: many(ticketCategories),
+}));
+
+export const ticketRepliesRelations = relations(ticketReplies, ({ one }) => ({
+  ticket: one(tasks, { fields: [ticketReplies.ticketId], references: [tasks.id] }),
+  user: one(users, { fields: [ticketReplies.userId], references: [users.id] }),
+}));
+
+export const knowledgeArticlesRelations = relations(knowledgeArticles, ({ one }) => ({
+  category: one(knowledgeCategories, { fields: [knowledgeArticles.categoryId], references: [knowledgeCategories.id] }),
+}));
+
+export const knowledgeCategoriesRelations = relations(knowledgeCategories, ({ many, one }) => ({
+  articles: many(knowledgeArticles),
+  parent: one(knowledgeCategories, { fields: [knowledgeCategories.parentId], references: [knowledgeCategories.id] }),
+  children: many(knowledgeCategories),
+}));
+
+export const userCustomFieldsRelations = relations(userCustomFields, ({ one }) => ({
+  user: one(users, { fields: [userCustomFields.userId], references: [users.id] }),
+  field: one(customFields, { fields: [userCustomFields.fieldId], references: [customFields.id] }),
+}));
+
+export const ticketFilesRelations = relations(ticketFiles, ({ one }) => ({
+  ticket: one(tasks, { fields: [ticketFiles.ticketId], references: [tasks.id] }),
+  user: one(users, { fields: [ticketFiles.uploadedBy], references: [users.id] }),
+}));
+
 // Insert schemas
 export const insertTaskSchema = createInsertSchema(tasks).pick({
   title: true,
@@ -166,6 +292,33 @@ export const insertUpdateSchema = createInsertSchema(taskUpdates).pick({
   type: true,
 });
 
+// Insert schemas for new entities
+export const insertAnnouncementSchema = createInsertSchema(announcements).pick({
+  title: true,
+  body: true,
+  status: true,
+});
+
+export const insertKnowledgeArticleSchema = createInsertSchema(knowledgeArticles).pick({
+  title: true,
+  body: true,
+  categoryId: true,
+  status: true,
+});
+
+export const insertKnowledgeCategorySchema = createInsertSchema(knowledgeCategories).pick({
+  name: true,
+  description: true,
+  parentId: true,
+  icon: true,
+  sortOrder: true,
+});
+
+export const insertTicketReplySchema = createInsertSchema(ticketReplies).pick({
+  ticketId: true,
+  body: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -176,3 +329,18 @@ export type InsertEvaluation = z.infer<typeof insertEvaluationSchema>;
 export type Payment = typeof payments.$inferSelect;
 export type TaskUpdate = typeof taskUpdates.$inferSelect;
 export type InsertUpdate = z.infer<typeof insertUpdateSchema>;
+
+// New entity types
+export type TicketCategory = typeof ticketCategories.$inferSelect;
+export type InsertTicketCategory = typeof ticketCategories.$inferInsert;
+export type TicketReply = typeof ticketReplies.$inferSelect;
+export type InsertTicketReply = z.infer<typeof insertTicketReplySchema>;
+export type Announcement = typeof announcements.$inferSelect;
+export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
+export type KnowledgeArticle = typeof knowledgeArticles.$inferSelect;
+export type InsertKnowledgeArticle = z.infer<typeof insertKnowledgeArticleSchema>;
+export type KnowledgeCategory = typeof knowledgeCategories.$inferSelect;
+export type InsertKnowledgeCategory = z.infer<typeof insertKnowledgeCategorySchema>;
+export type CustomField = typeof customFields.$inferSelect;
+export type UserCustomField = typeof userCustomFields.$inferSelect;
+export type TicketFile = typeof ticketFiles.$inferSelect;

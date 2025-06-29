@@ -409,6 +409,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Announcements routes
+  app.get("/api/announcements", async (req: any, res) => {
+    try {
+      const announcements = await storage.getAnnouncements();
+      res.json(announcements);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+      res.status(500).json({ message: "Failed to fetch announcements" });
+    }
+  });
+
+  app.post("/api/admin/announcements", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const announcement = await storage.createAnnouncement(req.body);
+      res.status(201).json(announcement);
+    } catch (error) {
+      console.error("Error creating announcement:", error);
+      res.status(500).json({ message: "Failed to create announcement" });
+    }
+  });
+
+  // Knowledge Base routes
+  app.get("/api/knowledge/categories", async (req: any, res) => {
+    try {
+      const categories = await storage.getKnowledgeCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching knowledge categories:", error);
+      res.status(500).json({ message: "Failed to fetch knowledge categories" });
+    }
+  });
+
+  app.get("/api/knowledge/articles", async (req: any, res) => {
+    try {
+      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId) : undefined;
+      const articles = await storage.getKnowledgeArticles(categoryId);
+      res.json(articles);
+    } catch (error) {
+      console.error("Error fetching knowledge articles:", error);
+      res.status(500).json({ message: "Failed to fetch knowledge articles" });
+    }
+  });
+
+  app.get("/api/knowledge/articles/:id", async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const article = await storage.getKnowledgeArticle(id);
+      
+      if (!article) {
+        return res.status(404).json({ message: "Article not found" });
+      }
+
+      // Increment view count
+      await storage.incrementArticleViews(id);
+      
+      res.json(article);
+    } catch (error) {
+      console.error("Error fetching knowledge article:", error);
+      res.status(500).json({ message: "Failed to fetch knowledge article" });
+    }
+  });
+
+  app.post("/api/admin/knowledge/articles", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const article = await storage.createKnowledgeArticle(req.body);
+      res.status(201).json(article);
+    } catch (error) {
+      console.error("Error creating knowledge article:", error);
+      res.status(500).json({ message: "Failed to create knowledge article" });
+    }
+  });
+
+  // Ticket Categories routes
+  app.get("/api/ticket-categories", async (req: any, res) => {
+    try {
+      const categories = await storage.getTicketCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching ticket categories:", error);
+      res.status(500).json({ message: "Failed to fetch ticket categories" });
+    }
+  });
+
+  // Ticket Replies routes
+  app.get("/api/tasks/:id/replies", isAuthenticated, async (req: any, res) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const replies = await storage.getTicketReplies(taskId);
+      res.json(replies);
+    } catch (error) {
+      console.error("Error fetching ticket replies:", error);
+      res.status(500).json({ message: "Failed to fetch ticket replies" });
+    }
+  });
+
+  app.post("/api/tasks/:id/replies", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const taskId = parseInt(req.params.id);
+      
+      const reply = await storage.createTicketReply({
+        ticketId: taskId,
+        userId: userId,
+        body: req.body.body,
+      });
+      
+      res.status(201).json(reply);
+    } catch (error) {
+      console.error("Error creating ticket reply:", error);
+      res.status(500).json({ message: "Failed to create ticket reply" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

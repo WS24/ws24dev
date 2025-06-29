@@ -11,6 +11,8 @@ import Billing from "@/pages/billing";
 import Assignments from "@/pages/assignments";
 import AdminPanel from "@/pages/admin";
 import AdminDemo from "@/pages/admin-demo";
+import KnowledgeBase from "@/pages/knowledge-base";
+import Announcements from "@/pages/announcements";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -27,6 +29,8 @@ function Router() {
           <Route path="/billing" component={Billing} />
           <Route path="/assignments" component={Assignments} />
           <Route path="/admin" component={AdminPanel} />
+          <Route path="/knowledge-base" component={KnowledgeBase} />
+          <Route path="/announcements" component={Announcements} />
         </>
       )}
       <Route path="/admin-demo" component={AdminDemo} />

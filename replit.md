@@ -99,6 +99,14 @@ TaskFlow Pro is a full-stack web application that connects clients with web deve
 ```
 Changelog:
 - June 29, 2025. Initial setup
+- June 29, 2025. MySQL backup integration completed:
+  * Added new database entities from MySQL backup (announcements, knowledge_articles, knowledge_categories, ticket_categories, ticket_replies, custom_fields, user_custom_fields, ticket_files)
+  * Created Knowledge Base system with categories and articles
+  * Implemented Announcements system for service updates
+  * Added comprehensive admin panel with task management interface matching original design
+  * Extended storage layer with full CRUD operations for new entities
+  * Added frontend components for Knowledge Base and Announcements
+  * Updated navigation with Resources section
 ```
 
 ## User Preferences
