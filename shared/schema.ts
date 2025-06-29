@@ -34,8 +34,17 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  username: varchar("username").unique(),
+  balance: varchar("balance").default("0.00"),
+  bio: text("bio"),
+  phone: varchar("phone"),
   role: varchar("role").notNull().default("client"), // 'client', 'specialist', or 'admin'
   specialization: text("specialization"), // For specialists
+  lastLogin: timestamp("last_login"),
+  ipAddress: varchar("ip_address"),
+  isActive: boolean("is_active").default(true),
+  clientNotes: text("client_notes"),
+  userGroups: varchar("user_groups").default("Пользователи"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

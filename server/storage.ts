@@ -73,6 +73,9 @@ export interface IStorage {
   createTaskUpdate(update: InsertUpdate & { taskId: number; userId: string }): Promise<TaskUpdate>;
   getTaskUpdates(taskId: number): Promise<TaskUpdate[]>;
   
+  // User profile operations
+  updateUserProfile(userId: string, profileData: Partial<User>): Promise<User>;
+  
   // Stats operations
   getClientStats(clientId: string): Promise<{
     activeTasks: number;
@@ -161,14 +164,30 @@ export class DatabaseStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({
+        ...userData,
+        lastLogin: new Date(),
+      })
       .onConflictDoUpdate({
         target: users.id,
         set: {
           ...userData,
           updatedAt: new Date(),
+          lastLogin: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  async updateUserProfile(userId: string, profileData: Partial<User>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...profileData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
       .returning();
     return user;
   }

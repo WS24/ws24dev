@@ -9,7 +9,7 @@ import Dashboard from "@/pages/dashboard";
 import Tasks from "@/pages/tasks";
 import Billing from "@/pages/billing";
 import Assignments from "@/pages/assignments";
-import AdminPanel from "@/pages/admin";
+import AdminPanel from "@/pages/admin-fixed";
 import AdminDemo from "@/pages/admin-demo";
 import KnowledgeBase from "@/pages/knowledge-base";
 import Announcements from "@/pages/announcements";
@@ -18,6 +18,7 @@ import StripeSettings from "@/pages/stripe-settings";
 import SystemSettings from "@/pages/system-settings";
 import CreateTask from "@/pages/create-task";
 import Evaluations from "@/pages/evaluations";
+import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -42,6 +43,7 @@ function Router() {
           <Route path="/knowledge-base" component={KnowledgeBase} />
           <Route path="/announcements" component={Announcements} />
           <Route path="/admin-demo" component={AdminDemo} />
+          <Route path="/profile" component={Profile} />
         </>
       )}
       <Route component={NotFound} />

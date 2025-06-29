@@ -4,11 +4,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navigation } from "@/components/layout/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
+import { UserManagementTable } from "@/components/admin/user-management-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Table, 
   TableBody, 
@@ -47,6 +49,7 @@ export default function AdminPanel() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("tasks"); // "tasks" or "users"
 
   // Redirect if not admin
   useEffect(() => {
@@ -289,18 +292,60 @@ export default function AdminPanel() {
                 </Card>
               </div>
 
-              {/* Tasks Table */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center space-x-2">
-                      <CheckSquare className="w-5 h-5" />
-                      <span>Заявки</span>
-                    </CardTitle>
-                    <Button size="sm" className="bg-primary hover:bg-blue-700">
-                      Добавить новую заявку
-                    </Button>
-                  </div>
+              {/* Tabs for Tasks and Users Management */}
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="tasks" className="flex items-center gap-2">
+                    <CheckSquare className="w-4 h-4" />
+                    Управление задачами
+                  </TabsTrigger>
+                  <TabsTrigger value="users" className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Управление пользователями
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="tasks">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center space-x-2">
+                          <CheckSquare className="w-5 h-5" />
+                          <span>Заявки</span>
+                        </CardTitle>
+                        <Button size="sm" className="bg-primary hover:bg-blue-700">
+                          Добавить новую заявку
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {tasksLoading ? (
+                          <div className="flex justify-center p-8">
+                            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+                          </div>
+                        ) : (
+                          <p className="text-center text-gray-500 p-8">Управление задачами будет добавлено в следующих версиях</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="users">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Users className="w-5 h-5" />
+                        <span>Управление пользователями</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <UserManagementTable users={users || []} isLoading={usersLoading} />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
                   
                   {/* Filters */}
                   <div className="flex flex-col sm:flex-row gap-4 mt-4">

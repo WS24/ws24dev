@@ -100,7 +100,7 @@ export function Navigation() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
-                  Profile Settings
+                  <a href="/profile" className="w-full">Profile Settings</a>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
