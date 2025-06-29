@@ -33,7 +33,11 @@ export default function Billing() {
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["/api/billing/transactions", selectedYear],
     retry: false,
-    enabled: false, // Disable API calls for demo
+  });
+
+  const { data: billingStats, isLoading: statsLoading } = useQuery({
+    queryKey: ["/api/billing/stats"],
+    retry: false,
   });
 
   const getStatusBadge = (type: string) => {
@@ -75,10 +79,17 @@ export default function Billing() {
     { id: 101, year: 2018, month: 8, day: 11, order: 0, info: "Bank card replenishment JSC CB MindBank 4024979000000xxx", type: "Completed", income: "30.00", expense: "", user: "adminds" },
   ];
 
-  const filteredData = billingData.filter(item => 
-    item.info.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.user.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Use real transaction data from API, fallback to sample data if not available
+  const transactionData = transactions || billingData;
+  
+  const filteredData = transactionData.filter((item: any) => {
+    const searchText = searchTerm.toLowerCase();
+    return (
+      (item.description || item.info || '').toLowerCase().includes(searchText) ||
+      (item.userId || item.user || '').toLowerCase().includes(searchText) ||
+      (item.type || '').toLowerCase().includes(searchText)
+    );
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -104,7 +115,11 @@ export default function Billing() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-blue-100 text-sm">Total in Account</p>
-                        <p className="text-2xl font-bold">0.00</p>
+                        {statsLoading ? (
+                          <div className="h-8 bg-blue-300/20 rounded animate-pulse"></div>
+                        ) : (
+                          <p className="text-2xl font-bold">${billingStats?.totalInAccount || "0.00"}</p>
+                        )}
                       </div>
                       <DollarSign className="w-8 h-8 text-blue-200" />
                     </div>
@@ -116,7 +131,11 @@ export default function Billing() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-green-100 text-sm">Income in Orders</p>
-                        <p className="text-2xl font-bold">0.00</p>
+                        {statsLoading ? (
+                          <div className="h-8 bg-green-300/20 rounded animate-pulse"></div>
+                        ) : (
+                          <p className="text-2xl font-bold">${billingStats?.incomeInOrders || "0.00"}</p>
+                        )}
                       </div>
                       <TrendingUp className="w-8 h-8 text-green-200" />
                     </div>
@@ -128,7 +147,11 @@ export default function Billing() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-yellow-100 text-sm">Expenses in Orders</p>
-                        <p className="text-2xl font-bold">0.00</p>
+                        {statsLoading ? (
+                          <div className="h-8 bg-yellow-300/20 rounded animate-pulse"></div>
+                        ) : (
+                          <p className="text-2xl font-bold">${billingStats?.expensesInOrders || "0.00"}</p>
+                        )}
                       </div>
                       <AlertTriangle className="w-8 h-8 text-yellow-200" />
                     </div>
@@ -139,8 +162,12 @@ export default function Billing() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-red-100 text-sm">Expenses in Orders</p>
-                        <p className="text-2xl font-bold">0.00</p>
+                        <p className="text-red-100 text-sm">Monthly Revenue</p>
+                        {statsLoading ? (
+                          <div className="h-8 bg-red-300/20 rounded animate-pulse"></div>
+                        ) : (
+                          <p className="text-2xl font-bold">${billingStats?.monthlyRevenue || "0.00"}</p>
+                        )}
                       </div>
                       <CheckCircle className="w-8 h-8 text-red-200" />
                     </div>
@@ -253,38 +280,38 @@ export default function Billing() {
                             </TableCell>
                           </TableRow>
                         ) : (
-                          filteredData.map((transaction) => (
+                          filteredData.map((transaction: any) => (
                             <TableRow key={transaction.id} className="hover:bg-gray-50">
                               <TableCell className="font-medium">{transaction.id}</TableCell>
                               <TableCell>{transaction.year}</TableCell>
                               <TableCell>{transaction.month}</TableCell>
                               <TableCell>{transaction.day}</TableCell>
-                              <TableCell>{transaction.order || "-"}</TableCell>
+                              <TableCell>{transaction.taskId || transaction.order || "-"}</TableCell>
                               <TableCell className="max-w-sm">
-                                <div className="truncate" title={transaction.info}>
-                                  {transaction.info}
+                                <div className="truncate" title={transaction.description || transaction.info}>
+                                  {transaction.description || transaction.info}
                                 </div>
                               </TableCell>
                               <TableCell>
-                                {getStatusBadge(transaction.type)}
+                                {getStatusBadge(transaction.status || transaction.type)}
                               </TableCell>
                               <TableCell className="text-right">
-                                {transaction.income && (
+                                {(transaction.type === 'payment' || transaction.income) && (
                                   <span className="text-green-600 font-medium">
-                                    {transaction.income}
+                                    ${transaction.amount || transaction.income}
                                   </span>
                                 )}
                               </TableCell>
                               <TableCell className="text-right">
-                                {transaction.expense && (
+                                {(transaction.type === 'debit' || transaction.expense) && (
                                   <span className="text-red-600 font-medium">
-                                    -{transaction.expense}
+                                    -${transaction.amount || transaction.expense}
                                   </span>
                                 )}
                               </TableCell>
                               <TableCell>
                                 <span className="text-blue-600 hover:underline cursor-pointer">
-                                  {transaction.user || "-"}
+                                  {transaction.userId || transaction.user || "-"}
                                 </span>
                               </TableCell>
                             </TableRow>

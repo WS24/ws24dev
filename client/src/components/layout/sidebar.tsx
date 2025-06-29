@@ -13,7 +13,8 @@ import {
   Users,
   Shield,
   BookOpen,
-  Megaphone
+  Megaphone,
+  DollarSign
 } from "lucide-react";
 import { useLocation } from "wouter";
 
