@@ -83,7 +83,7 @@ export function Navigation() {
                     </div>
                   </div>
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src={user.profileImageUrl} alt={getUserDisplayName()} />
+                    <AvatarImage src={user.profileImageUrl ?? undefined} alt={getUserDisplayName()} />
                     <AvatarFallback className="bg-primary text-white text-sm">
                       {getUserInitials()}
                     </AvatarFallback>
@@ -98,9 +98,9 @@ export function Navigation() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => window.location.href = '/profile'}>
                   <User className="mr-2 h-4 w-4" />
-                  <a href="/profile" className="w-full">Profile Settings</a>
+                  Profile Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 

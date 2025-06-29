@@ -30,7 +30,7 @@ export default function Profile() {
     balance: "0.00",
     isActive: true,
     clientNotes: "",
-    userGroups: "Пользователи",
+    userGroups: "Users",
   });
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function Profile() {
         balance: user.balance || "0.00",
         isActive: user.isActive !== false,
         clientNotes: user.clientNotes || "",
-        userGroups: user.userGroups || "Пользователи",
+        userGroups: user.userGroups || "Users",
       });
     }
   }, [user]);
@@ -99,20 +99,20 @@ export default function Profile() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Профиль пользователя</h1>
-        <p className="text-muted-foreground">Управление личными данными и настройками аккаунта</p>
+        <h1 className="text-3xl font-bold">User Profile</h1>
+        <p className="text-muted-foreground">Manage your personal information and account settings</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Основная информация */}
+        {/* Basic Information */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="w-5 h-5" />
-              Основная информация
+              Basic Information
             </CardTitle>
             <CardDescription>
-              Базовые данные вашего профиля
+              Your profile's core data
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -128,7 +128,7 @@ export default function Profile() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="username">Имя пользователя</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
                   id="username"
                   value={formData.username}
@@ -137,71 +137,71 @@ export default function Profile() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="firstName">Имя</Label>
+                <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  placeholder="Андрей"
+                  placeholder="John"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Фамилия</Label>
+                <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
                   value={formData.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  placeholder="Захарченко"
+                  placeholder="Smith"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Телефон</Label>
+                <Label htmlFor="phone">Phone</Label>
                 <Input
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
-                  placeholder="+7 (xxx) xxx-xx-xx"
+                  placeholder="+1 (555) 123-4567"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="role">Роль пользователя</Label>
+                <Label htmlFor="role">User Role</Label>
                 <Select value={formData.role} onValueChange={(value) => handleInputChange("role", value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="client">Заказчик</SelectItem>
-                    <SelectItem value="specialist">Специалист</SelectItem>
-                    <SelectItem value="admin">Администратор</SelectItem>
+                    <SelectItem value="client">Client</SelectItem>
+                    <SelectItem value="specialist">Specialist</SelectItem>
+                    <SelectItem value="admin">Administrator</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bio">Обо мне</Label>
+              <Label htmlFor="bio">About Me</Label>
               <Textarea
                 id="bio"
                 value={formData.bio}
                 onChange={(e) => handleInputChange("bio", e.target.value)}
                 rows={3}
-                placeholder="Расскажите о себе..."
+                placeholder="Tell us about yourself..."
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* Финансовая информация */}
+        {/* Financial Information */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="w-5 h-5" />
-              Финансовая информация
+              Financial Information
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Label htmlFor="balance">Баланс</Label>
+              <Label htmlFor="balance">Account Balance</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="balance"
@@ -209,49 +209,49 @@ export default function Profile() {
                   onChange={(e) => handleInputChange("balance", e.target.value)}
                   placeholder="0.00"
                 />
-                <Badge variant="secondary">₽</Badge>
+                <Badge variant="secondary">$</Badge>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Системная информация */}
+        {/* System Information */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5" />
-              Системная информация
+              System Information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>IP адрес</Label>
+                <Label>IP Address</Label>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
-                  <span className="text-sm">{user.ipAddress || "172.68.244.5"}</span>
+                  <span className="text-sm">{user?.ipAddress || "172.68.244.5"}</span>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Зарегистрирован</Label>
+                <Label>Member Since</Label>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   <span className="text-sm">
-                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : "04/07/2018 17:12"}
+                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US') : "07/04/2018"}
                   </span>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Последний вход</Label>
+                <Label>Last Login</Label>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   <span className="text-sm">
-                    {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('ru-RU') : "02/06/2025 13:04"}
+                    {user?.lastLogin ? new Date(user.lastLogin).toLocaleDateString('en-US') : "06/02/2025"}
                   </span>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="userGroups">Группы пользователя</Label>
+                <Label htmlFor="userGroups">User Groups</Label>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   <Input
@@ -267,9 +267,9 @@ export default function Profile() {
 
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <Label htmlFor="isActive">Активировать пользователя</Label>
+                <Label htmlFor="isActive">Activate User Account</Label>
                 <p className="text-sm text-muted-foreground">
-                  Включение/отключение доступа к системе
+                  Enable/disable system access
                 </p>
               </div>
               <Switch
@@ -281,36 +281,36 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* Клиентские заметки */}
+        {/* Client Notes */}
         <Card>
           <CardHeader>
-            <CardTitle>Клиентские доступы и заметки</CardTitle>
+            <CardTitle>Client Access & Notes</CardTitle>
             <CardDescription>
-              Специальные инструкции для работы с проектами
+              Special instructions for project work
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Label htmlFor="clientNotes">Заметки</Label>
+              <Label htmlFor="clientNotes">Notes</Label>
               <Textarea
                 id="clientNotes"
                 value={formData.clientNotes}
                 onChange={(e) => handleInputChange("clientNotes", e.target.value)}
                 rows={4}
-                placeholder="ВСЕГДА КОММЕНТИРОВАТЬ КОД!! ПРИМЕР&#10;{% comment %}WS24 Задача: №3179 Дата...{% endcomment %}&#10;/*WS24 Задача: №3179 Дата...*/"
+                placeholder="ALWAYS COMMENT CODE!! EXAMPLE:&#10;<!-- Task: #3179 Date... -->&#10;/* Task: #3179 Date... */"
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* Кнопка сохранения */}
+        {/* Save Button */}
         <div className="flex justify-end">
           <Button
             type="submit"
             disabled={updateProfileMutation.isPending}
             className="min-w-32"
           >
-            {updateProfileMutation.isPending ? "Сохранение..." : "Сохранить профиль"}
+            {updateProfileMutation.isPending ? "Saving..." : "Save Profile"}
           </Button>
         </div>
       </form>

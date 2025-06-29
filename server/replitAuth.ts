@@ -128,6 +128,23 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  // Development mode bypass for testing
+  if (process.env.NODE_ENV === "development") {
+    // Create a mock user for development
+    if (!req.user) {
+      req.user = {
+        claims: {
+          sub: "40361721",
+          email: "ws24adwords@gmail.com",
+          first_name: "Test",
+          last_name: "User"
+        },
+        expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+      };
+    }
+    return next();
+  }
+
   const user = req.user as any;
 
   if (!req.isAuthenticated() || !user.expires_at) {

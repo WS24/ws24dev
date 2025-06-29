@@ -17,7 +17,7 @@ import {
   DollarSign,
   BarChart3
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 
 interface SidebarLinkProps {
   href: string;
@@ -29,26 +29,27 @@ interface SidebarLinkProps {
 
 function SidebarLink({ href, icon: Icon, children, badge, isActive }: SidebarLinkProps) {
   return (
-    <a
-      href={href}
-      className={cn(
-        "group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200",
-        isActive
-          ? "bg-primary text-white"
-          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-      )}
-    >
-      <Icon className="mr-3 w-5 h-5" />
-      {children}
-      {badge !== undefined && badge > 0 && (
-        <Badge 
-          variant={isActive ? "secondary" : "outline"} 
-          className="ml-auto text-xs px-2 py-1"
-        >
-          {badge}
-        </Badge>
-      )}
-    </a>
+    <Link href={href}>
+      <span
+        className={cn(
+          "group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 cursor-pointer",
+          isActive
+            ? "bg-primary text-white"
+            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+        )}
+      >
+        <Icon className="mr-3 w-5 h-5" />
+        {children}
+        {badge !== undefined && badge > 0 && (
+          <Badge 
+            variant={isActive ? "secondary" : "outline"} 
+            className="ml-auto text-xs px-2 py-1"
+          >
+            {badge}
+          </Badge>
+        )}
+      </span>
+    </Link>
   );
 }
 

@@ -1,81 +1,34 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Navigation } from "@/components/layout/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { UserManagementTable } from "@/components/admin/user-management-table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { apiRequest } from "@/lib/queryClient";
-import { 
-  Search, 
   Users, 
   CheckSquare, 
   DollarSign, 
-  TrendingUp,
-  Eye,
-  Edit,
-  Settings,
-  MessageSquare,
-  Filter
+  TrendingUp
 } from "lucide-react";
 
 export default function AdminPanel() {
-  const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
-  const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("tasks"); // "tasks" or "users"
+  const [location] = useLocation();
+  const [activeTab, setActiveTab] = useState("tasks");
 
-  // Redirect if not admin
+  // Set active tab based on URL
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
+    if (location.includes('/admin/users')) {
+      setActiveTab("users");
+    } else {
+      setActiveTab("tasks");
     }
+  }, [location]);
 
-    if (user && user.role !== "admin") {
-      toast({
-        title: "Access Denied",
-        description: "This page is only available to administrators.",
-        variant: "destructive",
-      });
-      window.location.href = "/";
-      return;
-    }
-  }, [isAuthenticated, isLoading, user, toast]);
-
+  // Fetch admin stats
   const { data: adminStats, isLoading: adminStatsLoading } = useQuery<{
     totalTasks: string;
     totalUsers: string;
@@ -87,126 +40,38 @@ export default function AdminPanel() {
     enabled: !!user && user.role === "admin",
   });
 
-  const { data: tasks, isLoading: tasksLoading, refetch: refetchTasks } = useQuery<any[]>({
-    queryKey: ["/api/admin/tasks"],
-    retry: false,
-    enabled: !!user && user.role === "admin",
-  });
-
+  // Fetch users for user management tab
   const { data: users, isLoading: usersLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/users"],
     retry: false,
-    enabled: !!user && user.role === "admin",
+    enabled: !!user && user.role === "admin" && activeTab === "users",
   });
 
-  const updateUserRoleMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
-      await apiRequest("PATCH", `/api/admin/users/${userId}/role`, { role });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "User role updated successfully!",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to update user role.",
-        variant: "destructive",
-      });
-    },
-  });
+  const formatCurrency = (amount: string) => {
+    return new Intl.NumberFormat('ru-RU', {
+      style: 'currency',
+      currency: 'RUB',
+    }).format(parseFloat(amount || "0"));
+  };
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading admin panel...</p>
-        </div>
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
 
-  if (user.role !== "admin") {
-    return null;
+  if (!isAuthenticated || !user || user.role !== "admin") {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600">This page is only available to administrators.</p>
+        </div>
+      </div>
+    );
   }
-
-  // Filter tasks
-  const filteredTasks = (tasks || []).filter((task: any) => {
-    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         task.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || task.status === statusFilter;
-    const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
-    const matchesCategory = categoryFilter === "all" || task.category === categoryFilter;
-    
-    return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
-  });
-
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; className: string }> = {
-      created: { label: "Новый", className: "bg-blue-100 text-blue-800" },
-      evaluating: { label: "Оценка", className: "bg-yellow-100 text-yellow-800" },
-      evaluated: { label: "Оценен", className: "bg-orange-100 text-orange-800" },
-      paid: { label: "Оплачен", className: "bg-purple-100 text-purple-800" },
-      in_progress: { label: "В работе", className: "bg-green-100 text-green-800" },
-      completed: { label: "Завершен", className: "bg-gray-100 text-gray-800" },
-    };
-
-    const config = statusConfig[status] || { label: status, className: "bg-gray-100 text-gray-800" };
-    return <Badge className={config.className}>{config.label}</Badge>;
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    const priorityConfig: Record<string, { label: string; className: string }> = {
-      high: { label: "Высокий", className: "bg-red-100 text-red-800" },
-      medium: { label: "Средний", className: "bg-yellow-100 text-yellow-800" },
-      low: { label: "Низкий", className: "bg-green-100 text-green-800" },
-    };
-
-    const config = priorityConfig[priority] || { label: priority, className: "bg-gray-100 text-gray-800" };
-    return <Badge className={config.className}>{config.label}</Badge>;
-  };
-
-  const formatCurrency = (amount: string | number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(Number(amount) || 0);
-  };
-
-  const getUserDisplayName = (task: any) => {
-    if (task.clientFirstName && task.clientLastName) {
-      return `${task.clientFirstName} ${task.clientLastName}`;
-    }
-    if (task.clientFirstName) {
-      return task.clientFirstName;
-    }
-    return task.clientEmail || "Unknown";
-  };
-
-  const getUserInitials = (task: any) => {
-    if (task.clientFirstName && task.clientLastName) {
-      return `${task.clientFirstName.charAt(0)}${task.clientLastName.charAt(0)}`;
-    }
-    if (task.clientEmail) {
-      return task.clientEmail.charAt(0).toUpperCase();
-    }
-    return "?";
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -293,40 +158,38 @@ export default function AdminPanel() {
               </div>
 
               {/* Tabs for Tasks and Users Management */}
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs value={activeTab} onValueChange={(value) => {
+                setActiveTab(value);
+                if (value === 'users') {
+                  window.history.pushState(null, '', '/admin/users');
+                } else {
+                  window.history.pushState(null, '', '/admin');
+                }
+              }} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="tasks" className="flex items-center gap-2">
                     <CheckSquare className="w-4 h-4" />
-                    Управление задачами
+                    Task Management
                   </TabsTrigger>
                   <TabsTrigger value="users" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    Управление пользователями
+                    User Management
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="tasks">
                   <Card>
                     <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center space-x-2">
-                          <CheckSquare className="w-5 h-5" />
-                          <span>Заявки</span>
-                        </CardTitle>
-                        <Button size="sm" className="bg-primary hover:bg-blue-700">
-                          Добавить новую заявку
-                        </Button>
-                      </div>
+                      <CardTitle className="flex items-center space-x-2">
+                        <CheckSquare className="w-5 h-5" />
+                        <span>Task Management</span>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        {tasksLoading ? (
-                          <div className="flex justify-center p-8">
-                            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-                          </div>
-                        ) : (
-                          <p className="text-center text-gray-500 p-8">Управление задачами будет добавлено в следующих версиях</p>
-                        )}
+                      <div className="text-center text-gray-500 p-8">
+                        <CheckSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p className="text-lg font-medium mb-2">Управление задачами</p>
+                        <p>Функционал управления задачами будет добавлен в следующих версиях</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -337,7 +200,7 @@ export default function AdminPanel() {
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
                         <Users className="w-5 h-5" />
-                        <span>Управление пользователями</span>
+                        <span>User Management</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -346,138 +209,6 @@ export default function AdminPanel() {
                   </Card>
                 </TabsContent>
               </Tabs>
-                  
-                  {/* Filters */}
-                  <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                    <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        placeholder="Поиск заявок..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Статус" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Все статусы</SelectItem>
-                        <SelectItem value="created">Новый</SelectItem>
-                        <SelectItem value="evaluating">Оценка</SelectItem>
-                        <SelectItem value="evaluated">Оценен</SelectItem>
-                        <SelectItem value="paid">Оплачен</SelectItem>
-                        <SelectItem value="in_progress">В работе</SelectItem>
-                        <SelectItem value="completed">Завершен</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                      <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Приоритет" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Все приоритеты</SelectItem>
-                        <SelectItem value="high">Высокий</SelectItem>
-                        <SelectItem value="medium">Средний</SelectItem>
-                        <SelectItem value="low">Низкий</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {tasksLoading ? (
-                    <div className="space-y-4">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="animate-pulse">
-                          <div className="h-16 bg-gray-200 rounded"></div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-16">#</TableHead>
-                            <TableHead>Название</TableHead>
-                            <TableHead>Приоритет</TableHead>
-                            <TableHead>Статус</TableHead>
-                            <TableHead>Категория</TableHead>
-                            <TableHead>Пользователь</TableHead>
-                            <TableHead>Назначен</TableHead>
-                            <TableHead>Последний ответ</TableHead>
-                            <TableHead className="text-right">Опции</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredTasks.map((task: any) => (
-                            <TableRow key={task.id} className="hover:bg-gray-50">
-                              <TableCell className="font-medium">{task.id}</TableCell>
-                              <TableCell>
-                                <div>
-                                  <p className="font-medium text-gray-900">{task.title}</p>
-                                  <p className="text-sm text-gray-500 truncate max-w-xs">
-                                    {task.description}
-                                  </p>
-                                </div>
-                              </TableCell>
-                              <TableCell>{getPriorityBadge(task.priority)}</TableCell>
-                              <TableCell>{getStatusBadge(task.status)}</TableCell>
-                              <TableCell>
-                                <Badge variant="outline">{task.category}</Badge>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center space-x-2">
-                                  <Avatar className="w-8 h-8">
-                                    <AvatarImage src={task.clientProfileImageUrl} />
-                                    <AvatarFallback className="text-xs">
-                                      {getUserInitials(task)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span className="text-sm">{getUserDisplayName(task)}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                {task.specialistId ? (
-                                  <div className="flex items-center space-x-2">
-                                    <Avatar className="w-8 h-8">
-                                      <AvatarFallback className="text-xs bg-green-100 text-green-700">
-                                        S
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="text-sm">Specialist</span>
-                                  </div>
-                                ) : (
-                                  <span className="text-sm text-gray-400">Не назначен</span>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <span className="text-sm text-gray-500">
-                                  {new Date(task.updatedAt).toLocaleDateString()}
-                                </span>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex items-center justify-end space-x-2">
-                                  <Button size="sm" variant="outline">
-                                    <Eye className="w-4 h-4" />
-                                  </Button>
-                                  <Button size="sm" variant="outline">
-                                    <MessageSquare className="w-4 h-4" />
-                                  </Button>
-                                  <Button size="sm" variant="outline">
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ import Dashboard from "@/pages/dashboard";
 import Tasks from "@/pages/tasks";
 import Billing from "@/pages/billing";
 import Assignments from "@/pages/assignments";
-import AdminPanel from "@/pages/admin-fixed";
+import AdminPanel from "@/pages/admin";
 import AdminDemo from "@/pages/admin-demo";
 import KnowledgeBase from "@/pages/knowledge-base";
 import Announcements from "@/pages/announcements";
@@ -36,6 +36,8 @@ function Router() {
           <Route path="/assignments" component={Assignments} />
           <Route path="/evaluations" component={Evaluations} />
           <Route path="/admin" component={AdminPanel} />
+          <Route path="/admin/users" component={AdminPanel} />
+          <Route path="/admin/settings" component={SystemSettings} />
           <Route path="/billing" component={Billing} />
           <Route path="/analytics" component={Analytics} />
           <Route path="/stripe-settings" component={StripeSettings} />
