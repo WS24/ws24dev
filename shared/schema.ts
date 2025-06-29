@@ -434,3 +434,64 @@ export const insertSystemSettingsSchema = createInsertSchema(systemSettings).pic
 
 export type SystemSettings = typeof systemSettings.$inferSelect;
 export type InsertSystemSettings = z.infer<typeof insertSystemSettingsSchema>;
+
+// Ticket Settings Schema
+export const ticketSettings = pgTable("ticket_settings", {
+  id: serial("id").primaryKey(),
+  // General Ticket Settings
+  allowFileUpload: boolean("allow_file_upload").default(true),
+  allowGuestTickets: boolean("allow_guest_tickets").default(false),
+  allowTicketEdit: boolean("allow_ticket_edit").default(true),
+  requireLogin: boolean("require_login").default(false),
+  allowTicketRating: boolean("allow_ticket_rating").default(true),
+  preventRepliesAfterClose: boolean("prevent_replies_after_close").default(true),
+  
+  // Auto Status Settings
+  staffReplyAction: varchar("staff_reply_action").default("nothing"),
+  clientReplyAction: varchar("client_reply_action").default("nothing"),
+  
+  // IMAP Settings
+  imapProtocol: varchar("imap_protocol").default("imap"),
+  imapHost: varchar("imap_host").default("imap.timeweb.ru:993"),
+  imapSsl: boolean("imap_ssl").default(true),
+  imapSkipCertValidation: boolean("imap_skip_cert_validation").default(false),
+  imapEmail: varchar("imap_email").default("ticket@ws24.pro"),
+  imapPassword: varchar("imap_password"),
+  
+  // Default Settings
+  ticketTitle: varchar("ticket_title").default("Support Ticket"),
+  defaultCategory: varchar("default_category").default("general"),
+  defaultStatus: varchar("default_status").default("new"),
+  
+  // IMAP String Settings
+  imapTicketString: varchar("imap_ticket_string").default("## Номер заявки:"),
+  imapReplyString: varchar("imap_reply_string").default("##- Введите свой ответ над этой строкой -##"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTicketSettingsSchema = createInsertSchema(ticketSettings).pick({
+  allowFileUpload: true,
+  allowGuestTickets: true,
+  allowTicketEdit: true,
+  requireLogin: true,
+  allowTicketRating: true,
+  preventRepliesAfterClose: true,
+  staffReplyAction: true,
+  clientReplyAction: true,
+  imapProtocol: true,
+  imapHost: true,
+  imapSsl: true,
+  imapSkipCertValidation: true,
+  imapEmail: true,
+  imapPassword: true,
+  ticketTitle: true,
+  defaultCategory: true,
+  defaultStatus: true,
+  imapTicketString: true,
+  imapReplyString: true,
+});
+
+export type TicketSettings = typeof ticketSettings.$inferSelect;
+export type InsertTicketSettings = z.infer<typeof insertTicketSettingsSchema>;

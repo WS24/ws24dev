@@ -240,6 +240,14 @@ export function Sidebar() {
                 >
                   Settings
                 </SidebarLink>
+                
+                <SidebarLink 
+                  href="/ticket-settings" 
+                  icon={Settings}
+                  isActive={isActive("/ticket-settings")}
+                >
+                  Ticket Settings
+                </SidebarLink>
               </div>
             </>
           )}

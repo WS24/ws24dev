@@ -27,6 +27,7 @@ import Announcements from "@/pages/announcements";
 import Analytics from "@/pages/analytics";
 import StripeSettings from "@/pages/stripe-settings";
 import SystemSettings from "@/pages/system-settings";
+import TicketSettings from "@/pages/ticket-settings";
 import CreateTask from "@/pages/create-task";
 import Evaluations from "@/pages/evaluations";
 import Profile from "@/pages/profile";
@@ -64,6 +65,7 @@ function Router() {
           <Route path="/analytics" component={Analytics} />
           <Route path="/stripe-settings" component={StripeSettings} />
           <Route path="/system-settings" component={SystemSettings} />
+          <Route path="/ticket-settings" component={TicketSettings} />
           <Route path="/knowledge-base" component={KnowledgeBase} />
           <Route path="/announcements" component={Announcements} />
           <Route path="/admin-demo" component={AdminDemo} />

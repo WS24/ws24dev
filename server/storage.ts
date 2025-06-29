@@ -14,6 +14,7 @@ import {
   ticketFiles,
   transactions,
   systemSettings,
+  ticketSettings,
   type User,
   type UpsertUser,
   type Task,
@@ -40,6 +41,8 @@ import {
   type InsertTransaction,
   type SystemSettings,
   type InsertSystemSettings,
+  type TicketSettings,
+  type InsertTicketSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, or, sql, gte } from "drizzle-orm";
@@ -152,6 +155,10 @@ export interface IStorage {
   // System Settings operations
   getSystemSettings(): Promise<SystemSettings | undefined>;
   updateSystemSettings(settings: Partial<InsertSystemSettings>): Promise<SystemSettings>;
+  
+  // Ticket Settings operations
+  getTicketSettings(): Promise<TicketSettings | undefined>;
+  updateTicketSettings(settings: Partial<InsertTicketSettings>): Promise<TicketSettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -808,6 +815,38 @@ export class DatabaseStorage implements IStorage {
         .values(settingsData)
         .returning();
       return newSettings;
+    }
+  }
+
+  // Ticket Settings operations
+  async getTicketSettings(): Promise<TicketSettings | undefined> {
+    const [settings] = await db.select().from(ticketSettings).limit(1);
+    return settings;
+  }
+
+  async updateTicketSettings(settingsData: Partial<InsertTicketSettings>): Promise<TicketSettings> {
+    const existingSettings = await this.getTicketSettings();
+    
+    if (existingSettings) {
+      const [settings] = await db
+        .update(ticketSettings)
+        .set({
+          ...settingsData,
+          updatedAt: new Date(),
+        })
+        .where(eq(ticketSettings.id, existingSettings.id))
+        .returning();
+      return settings;
+    } else {
+      const [settings] = await db
+        .insert(ticketSettings)
+        .values({
+          ...settingsData,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+      return settings;
     }
   }
 }

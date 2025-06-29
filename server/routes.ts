@@ -880,6 +880,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Ticket Settings endpoints
+  app.get('/api/ticket-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const settings = await storage.getTicketSettings();
+      res.json(settings || {
+        allowFileUpload: true,
+        allowGuestTickets: false,
+        allowTicketEdit: true,
+        requireLogin: false,
+        allowTicketRating: true,
+        preventRepliesAfterClose: true,
+        staffReplyAction: "nothing",
+        clientReplyAction: "nothing",
+        imapProtocol: "imap",
+        imapHost: "imap.timeweb.ru:993",
+        imapSsl: true,
+        imapSkipCertValidation: false,
+        imapEmail: "ticket@ws24.pro",
+        imapPassword: "",
+        ticketTitle: "Support Ticket",
+        defaultCategory: "general",
+        defaultStatus: "new",
+        imapTicketString: "## Номер заявки:",
+        imapReplyString: "##- Введите свой ответ над этой строкой -##",
+      });
+    } catch (error) {
+      console.error("Error fetching ticket settings:", error);
+      res.status(500).json({ message: "Failed to fetch ticket settings" });
+    }
+  });
+
+  app.put('/api/ticket-settings', isAuthenticated, [
+    body('allowFileUpload').optional().isBoolean(),
+    body('allowGuestTickets').optional().isBoolean(),
+    body('allowTicketEdit').optional().isBoolean(),
+    body('requireLogin').optional().isBoolean(),
+    body('allowTicketRating').optional().isBoolean(),
+    body('preventRepliesAfterClose').optional().isBoolean(),
+    body('staffReplyAction').optional().isString(),
+    body('clientReplyAction').optional().isString(),
+    body('imapProtocol').optional().isString(),
+    body('imapHost').optional().isString(),
+    body('imapSsl').optional().isBoolean(),
+    body('imapSkipCertValidation').optional().isBoolean(),
+    body('imapEmail').optional().isEmail(),
+    body('imapPassword').optional().isString(),
+    body('ticketTitle').optional().isString(),
+    body('defaultCategory').optional().isString(),
+    body('defaultStatus').optional().isString(),
+    body('imapTicketString').optional().isString(),
+    body('imapReplyString').optional().isString(),
+    handleValidationErrors,
+  ], async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const updatedSettings = await storage.updateTicketSettings(req.body);
+      res.json(updatedSettings);
+    } catch (error) {
+      console.error("Error updating ticket settings:", error);
+      res.status(500).json({ message: "Failed to update ticket settings" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
