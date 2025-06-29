@@ -177,6 +177,11 @@ Changelog:
   * Achieved enterprise-grade security standards compliance (OWASP, SOC 2, ISO 27001)
   * SECURITY STATUS: All penetration testing passed, 100/100 security score
   * PROJECT STATE: ENTERPRISE PRODUCTION READY Ver03 - Full security audit complete
+- June 29, 2025. Dashboard filtering enhancement:
+  * Modified Dashboard to display only tasks with "Created" status instead of Recent Tasks
+  * Updated section title from "Recent Tasks" to "Created Tasks"
+  * Enhanced empty state messaging to clarify filtering criteria
+  * Improved user experience by focusing on actionable tasks requiring attention
 ```
 
 ## Project Versions

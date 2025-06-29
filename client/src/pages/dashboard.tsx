@@ -66,7 +66,7 @@ export default function Dashboard() {
     );
   }
 
-  const recentTasks = (tasks || []).slice(0, 3);
+  const createdTasks = (tasks || []).filter(task => task.status === "created").slice(0, 3);
 
   const getStatsCards = () => {
     if (user.role === "specialist") {
@@ -163,7 +163,7 @@ export default function Dashboard() {
                 <div className="lg:col-span-2">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Recent {user.role === "specialist" ? "Assignments" : "Tasks"}</CardTitle>
+                      <CardTitle>Created {user.role === "specialist" ? "Assignments" : "Tasks"}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       {tasksLoading ? (
@@ -174,10 +174,10 @@ export default function Dashboard() {
                             </div>
                           ))}
                         </div>
-                      ) : recentTasks.length === 0 ? (
+                      ) : createdTasks.length === 0 ? (
                         <div className="text-center py-12 text-gray-500">
                           <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                          <p>No {user.role === "specialist" ? "assignments" : "tasks"} yet</p>
+                          <p>No created {user.role === "specialist" ? "assignments" : "tasks"} found</p>
                           {user.role === "client" && (
                             <Button
                               onClick={() => setIsCreateModalOpen(true)}
@@ -191,7 +191,7 @@ export default function Dashboard() {
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          {recentTasks.map((task: any) => (
+                          {createdTasks.map((task: any) => (
                             <TaskCard key={task.id} task={task} userRole={user.role} />
                           ))}
                           <div className="mt-6">
@@ -266,13 +266,13 @@ export default function Dashboard() {
                       <CardTitle>Recent Updates</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {recentTasks.length === 0 ? (
+                      {createdTasks.length === 0 ? (
                         <p className="text-sm text-gray-500 text-center py-4">
                           No recent updates
                         </p>
                       ) : (
                         <div className="space-y-4">
-                          {recentTasks.slice(0, 2).map((task: any) => (
+                          {createdTasks.slice(0, 2).map((task: any) => (
                             <div key={task.id} className="flex items-start space-x-3">
                               <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                               <div>
