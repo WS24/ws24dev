@@ -52,7 +52,7 @@ export function Navigation() {
                   <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-gray-900">TaskFlow Pro</span>
+              <span className="text-xl font-bold text-gray-900">WS24 Dev</span>
             </div>
           </div>
           

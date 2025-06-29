@@ -1,5 +1,5 @@
 /**
- * TaskFlow Pro - Main Server Entry Point
+ * WS24 Dev - Main Server Entry Point
  * 
  * This module initializes and configures the Express.js server with comprehensive
  * security middleware, error handling, and development/production environment support.

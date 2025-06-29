@@ -17,7 +17,7 @@ export default function Landing() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">TaskFlow Pro</span>
+            <span className="text-xl font-bold text-gray-900">WS24 Dev</span>
           </div>
           <Button onClick={handleLogin} className="bg-primary hover:bg-blue-700">
             Sign In
@@ -128,7 +128,7 @@ export default function Landing() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                  Why Choose TaskFlow Pro?
+                  Why Choose WS24 Dev?
                 </h2>
                 <div className="space-y-4">
                   <div className="flex items-start space-x-3">
@@ -164,7 +164,7 @@ export default function Landing() {
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Get Started?</h3>
                 <p className="text-gray-600 mb-6">
-                  Join thousands of businesses who trust TaskFlow Pro for their web development needs.
+                  Join thousands of businesses who trust WS24 Dev for their web development needs.
                 </p>
                 <Button 
                   onClick={handleLogin} 

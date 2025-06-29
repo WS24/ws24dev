@@ -1,8 +1,8 @@
-# TaskFlow Pro - Web Development Services Platform
+# WS24 Dev - Web Development Services Platform
 
 ## Overview
 
-TaskFlow Pro is a full-stack web application that connects clients with web development specialists. The platform facilitates project task creation, evaluation, payment processing, and project management through a modern, responsive interface.
+WS24 Dev is a full-stack web application that connects clients with web development specialists. The platform facilitates project task creation, evaluation, payment processing, and project management through a modern, responsive interface.
 
 ## System Architecture
 
@@ -196,6 +196,12 @@ Changelog:
   * Created role editing interface with permissions and validation
   * Enhanced API endpoint with blocked role support and self-demotion protection
   * Integrated User Roles into Admin Panel navigation with Shield icon
+- June 29, 2025. Platform rebranding from TaskFlow Pro to WS24 Dev:
+  * Updated all references throughout the codebase from TaskFlow Pro to WS24 Dev
+  * Changed application title in index.html to WS24 Dev
+  * Updated navigation branding, landing page content, and documentation
+  * Modified README.md, deployment checklist, and security audit documents
+  * Maintained all functionality while completing brand identity transition
 ```
 
 ## Project Versions

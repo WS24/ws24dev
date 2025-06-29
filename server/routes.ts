@@ -1,7 +1,7 @@
 /**
- * TaskFlow Pro - API Routes Module
+ * WS24 Dev - API Routes Module
  * 
- * This module defines all API endpoints for the TaskFlow Pro platform with comprehensive
+ * This module defines all API endpoints for the WS24 Dev platform with comprehensive
  * input validation, authentication, and error handling. All routes implement proper
  * security measures including input sanitization and parameterized queries.
  * 

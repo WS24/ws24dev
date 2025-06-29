@@ -1,5 +1,5 @@
 /**
- * TaskFlow Pro - Main Application Component
+ * WS24 Dev - Main Application Component
  * 
  * Root component that configures routing, query client, and global providers.
  * Implements authentication-based routing with role-based access control.
