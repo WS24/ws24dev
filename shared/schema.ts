@@ -302,6 +302,8 @@ export const insertTaskSchema = createInsertSchema(tasks).pick({
   priority: true,
   deadline: true,
   attachments: true,
+}).extend({
+  budget: z.string().optional(),
 });
 
 export const insertEvaluationSchema = createInsertSchema(taskEvaluations).pick({

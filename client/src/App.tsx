@@ -16,6 +16,8 @@ import Announcements from "@/pages/announcements";
 import Analytics from "@/pages/analytics";
 import StripeSettings from "@/pages/stripe-settings";
 import SystemSettings from "@/pages/system-settings";
+import CreateTask from "@/pages/create-task";
+import Evaluations from "@/pages/evaluations";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -29,17 +31,19 @@ function Router() {
         <>
           <Route path="/" component={Dashboard} />
           <Route path="/tasks" component={Tasks} />
+          <Route path="/create-task" component={CreateTask} />
           <Route path="/assignments" component={Assignments} />
+          <Route path="/evaluations" component={Evaluations} />
           <Route path="/admin" component={AdminPanel} />
+          <Route path="/billing" component={Billing} />
+          <Route path="/analytics" component={Analytics} />
+          <Route path="/stripe-settings" component={StripeSettings} />
+          <Route path="/system-settings" component={SystemSettings} />
+          <Route path="/knowledge-base" component={KnowledgeBase} />
+          <Route path="/announcements" component={Announcements} />
+          <Route path="/admin-demo" component={AdminDemo} />
         </>
       )}
-      <Route path="/billing" component={Billing} />
-      <Route path="/analytics" component={Analytics} />
-      <Route path="/stripe-settings" component={StripeSettings} />
-      <Route path="/system-settings" component={SystemSettings} />
-      <Route path="/knowledge-base" component={KnowledgeBase} />
-      <Route path="/announcements" component={Announcements} />
-      <Route path="/admin-demo" component={AdminDemo} />
       <Route component={NotFound} />
     </Switch>
   );

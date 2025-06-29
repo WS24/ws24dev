@@ -314,6 +314,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Task evaluation routes
+  app.get("/api/tasks/pending-evaluation", isAuthenticated, async (req, res) => {
+    try {
+      const tasks = await storage.getPendingTasks();
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching pending tasks:", error);
+      res.status(500).json({ message: "Failed to fetch pending tasks" });
+    }
+  });
+
+  app.post("/api/tasks/:id/evaluate", isAuthenticated, async (req: any, res) => {
+    try {
+      const taskId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const evaluation = await storage.createEvaluation({
+        ...req.body,
+        taskId,
+        specialistId: userId,
+      });
+      res.json(evaluation);
+    } catch (error) {
+      console.error("Error creating evaluation:", error);
+      res.status(500).json({ message: "Failed to create evaluation" });
+    }
+  });
+
+  app.get("/api/evaluations/my-evaluations", isAuthenticated, async (req, res) => {
+    try {
+      const evaluations = await storage.getEvaluationsByTask(0); // Get all user's evaluations
+      res.json(evaluations);
+    } catch (error) {
+      console.error("Error fetching evaluations:", error);
+      res.status(500).json({ message: "Failed to fetch evaluations" });
+    }
+  });
+
   // System settings routes
   app.get("/api/system-settings", isAuthenticated, async (req, res) => {
     try {

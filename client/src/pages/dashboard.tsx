@@ -8,10 +8,12 @@ import { StatsCard } from "@/components/cards/stats-card";
 import { TaskCard } from "@/components/cards/task-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CreateTaskModal } from "@/components/modals/create-task-modal";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Plus, CreditCard, Headphones, Clock, CheckCircle, AlertCircle, DollarSign } from "lucide-react";
+import { Plus, CreditCard, Headphones, Clock, CheckCircle, AlertCircle, DollarSign, BarChart3, Calculator, Users, Globe, Code } from "lucide-react";
 import { useState } from "react";
+import { Link } from "wouter";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -33,13 +35,21 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery<{
+    activeTasks: string;
+    completedTasks: string;
+    pendingTasks: string;
+    assignedTasks?: string;
+    pendingEvaluations?: string;
+    totalSpent?: string;
+    totalEarned?: string;
+  }>({
     queryKey: ["/api/stats"],
     retry: false,
     enabled: !!user,
   });
 
-  const { data: tasks, isLoading: tasksLoading } = useQuery({
+  const { data: tasks, isLoading: tasksLoading } = useQuery<any[]>({
     queryKey: ["/api/tasks"],
     retry: false,
     enabled: !!user,
@@ -56,7 +66,7 @@ export default function Dashboard() {
     );
   }
 
-  const recentTasks = tasks?.slice(0, 3) || [];
+  const recentTasks = (tasks || []).slice(0, 3);
 
   const getStatsCards = () => {
     if (user.role === "specialist") {
@@ -65,7 +75,7 @@ export default function Dashboard() {
           title: "Assigned Tasks",
           value: stats?.assignedTasks || 0,
           icon: Clock,
-          color: "blue",
+          color: "blue" as const,
         },
         {
           title: "Completed",
@@ -77,7 +87,7 @@ export default function Dashboard() {
           title: "Pending Evaluations",
           value: stats?.pendingEvaluations || 0,
           icon: AlertCircle,
-          color: "yellow",
+          color: "yellow" as const,
         },
         {
           title: "Total Earned",
@@ -141,7 +151,7 @@ export default function Dashboard() {
                     title={stat.title}
                     value={stat.value}
                     icon={stat.icon}
-                    color={stat.color}
+                    color={stat.color as any}
                     loading={statsLoading}
                   />
                 ))}
