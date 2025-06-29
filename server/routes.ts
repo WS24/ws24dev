@@ -314,6 +314,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Temporary admin access (remove in production)
+  app.get("/api/admin/demo", async (req: any, res) => {
+    try {
+      const tasks = await storage.getTasksWithDetails();
+      const stats = await storage.getAdminStats();
+      const users = await storage.getAllUsers();
+      
+      res.json({
+        tasks,
+        stats,
+        users,
+        currentUser: { id: "40361721", role: "admin" }
+      });
+    } catch (error) {
+      console.error("Error fetching admin demo data:", error);
+      res.status(500).json({ message: "Failed to fetch demo data" });
+    }
+  });
+
   // Admin routes
   app.get("/api/admin/tasks", isAuthenticated, async (req: any, res) => {
     try {

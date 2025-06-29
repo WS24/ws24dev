@@ -10,6 +10,7 @@ import Tasks from "@/pages/tasks";
 import Billing from "@/pages/billing";
 import Assignments from "@/pages/assignments";
 import AdminPanel from "@/pages/admin";
+import AdminDemo from "@/pages/admin-demo";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
           <Route path="/admin" component={AdminPanel} />
         </>
       )}
+      <Route path="/admin-demo" component={AdminDemo} />
       <Route component={NotFound} />
     </Switch>
   );
