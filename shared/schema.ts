@@ -34,7 +34,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").notNull().default("client"), // 'client' or 'specialist'
+  role: varchar("role").notNull().default("client"), // 'client', 'specialist', or 'admin'
   specialization: text("specialization"), // For specialists
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

@@ -8,7 +8,10 @@ import {
   Plus, 
   CreditCard, 
   ClipboardList, 
-  Calculator 
+  Calculator,
+  Settings,
+  Users,
+  Shield
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -127,6 +130,40 @@ export function Sidebar() {
                   isActive={isActive("/evaluations")}
                 >
                   Evaluations
+                </SidebarLink>
+              </div>
+            </>
+          )}
+          
+          {user.role === "admin" && (
+            <>
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">
+                  Admin Panel
+                </p>
+                
+                <SidebarLink 
+                  href="/admin" 
+                  icon={Shield}
+                  isActive={isActive("/admin")}
+                >
+                  Admin Panel
+                </SidebarLink>
+                
+                <SidebarLink 
+                  href="/admin/users" 
+                  icon={Users}
+                  isActive={isActive("/admin/users")}
+                >
+                  Users
+                </SidebarLink>
+                
+                <SidebarLink 
+                  href="/admin/settings" 
+                  icon={Settings}
+                  isActive={isActive("/admin/settings")}
+                >
+                  Settings
                 </SidebarLink>
               </div>
             </>

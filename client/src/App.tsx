@@ -9,6 +9,7 @@ import Dashboard from "@/pages/dashboard";
 import Tasks from "@/pages/tasks";
 import Billing from "@/pages/billing";
 import Assignments from "@/pages/assignments";
+import AdminPanel from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
           <Route path="/tasks" component={Tasks} />
           <Route path="/billing" component={Billing} />
           <Route path="/assignments" component={Assignments} />
+          <Route path="/admin" component={AdminPanel} />
         </>
       )}
       <Route component={NotFound} />

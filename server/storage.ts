@@ -59,6 +59,21 @@ export interface IStorage {
     pendingEvaluations: number;
     totalEarned: string;
   }>;
+  
+  // Admin operations
+  getAllTasks(): Promise<Task[]>;
+  getAllUsers(): Promise<User[]>;
+  updateUserRole(userId: string, role: string): Promise<void>;
+  getTasksWithDetails(): Promise<any[]>;
+  getAdminStats(): Promise<{
+    totalTasks: number;
+    totalUsers: number;
+    totalSpecialists: number;
+    totalClients: number;
+    activeTasks: number;
+    completedTasks: number;
+    totalRevenue: string;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -286,6 +301,95 @@ export class DatabaseStorage implements IStorage {
       .where(eq(tasks.specialistId, specialistId));
 
     return stats || { assignedTasks: 0, completedTasks: 0, pendingEvaluations: 0, totalEarned: "0" };
+  }
+
+  // Admin operations
+  async getAllTasks(): Promise<Task[]> {
+    return await db
+      .select()
+      .from(tasks)
+      .orderBy(desc(tasks.createdAt));
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .orderBy(desc(users.createdAt));
+  }
+
+  async updateUserRole(userId: string, role: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ role: role as any, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+  }
+
+  async getTasksWithDetails(): Promise<any[]> {
+    const tasksWithDetails = await db
+      .select({
+        id: tasks.id,
+        title: tasks.title,
+        description: tasks.description,
+        category: tasks.category,
+        priority: tasks.priority,
+        status: tasks.status,
+        estimatedHours: tasks.estimatedHours,
+        hourlyRate: tasks.hourlyRate,
+        totalCost: tasks.totalCost,
+        deadline: tasks.deadline,
+        createdAt: tasks.createdAt,
+        updatedAt: tasks.updatedAt,
+        completedAt: tasks.completedAt,
+        clientId: tasks.clientId,
+        specialistId: tasks.specialistId,
+        clientEmail: users.email,
+        clientFirstName: users.firstName,
+        clientLastName: users.lastName,
+        clientProfileImageUrl: users.profileImageUrl,
+      })
+      .from(tasks)
+      .leftJoin(users, eq(tasks.clientId, users.id))
+      .orderBy(desc(tasks.createdAt));
+
+    return tasksWithDetails;
+  }
+
+  async getAdminStats(): Promise<{
+    totalTasks: number;
+    totalUsers: number;
+    totalSpecialists: number;
+    totalClients: number;
+    activeTasks: number;
+    completedTasks: number;
+    totalRevenue: string;
+  }> {
+    const [taskStats] = await db
+      .select({
+        totalTasks: sql<number>`count(*)`,
+        activeTasks: sql<number>`count(case when status in ('created', 'evaluating', 'evaluated', 'paid', 'in_progress') then 1 end)`,
+        completedTasks: sql<number>`count(case when status = 'completed' then 1 end)`,
+        totalRevenue: sql<string>`coalesce(sum(case when status = 'completed' then total_cost else 0 end), 0)`,
+      })
+      .from(tasks);
+
+    const [userStats] = await db
+      .select({
+        totalUsers: sql<number>`count(*)`,
+        totalSpecialists: sql<number>`count(case when role = 'specialist' then 1 end)`,
+        totalClients: sql<number>`count(case when role = 'client' then 1 end)`,
+      })
+      .from(users);
+
+    return {
+      totalTasks: taskStats?.totalTasks || 0,
+      totalUsers: userStats?.totalUsers || 0,
+      totalSpecialists: userStats?.totalSpecialists || 0,
+      totalClients: userStats?.totalClients || 0,
+      activeTasks: taskStats?.activeTasks || 0,
+      completedTasks: taskStats?.completedTasks || 0,
+      totalRevenue: taskStats?.totalRevenue || "0",
+    };
   }
 }
 
