@@ -1,91 +1,84 @@
-import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navigation } from "@/components/layout/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { CreditCard, Clock, CheckCircle, DollarSign, FileText, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { 
+  CreditCard, 
+  Search, 
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle
+} from "lucide-react";
 
 export default function Billing() {
-  const { toast } = useToast();
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedYear, setSelectedYear] = useState("2018");
+  const [recordsPerPage, setRecordsPerPage] = useState("100");
 
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
-  const { data: tasks, isLoading: tasksLoading } = useQuery({
-    queryKey: ["/api/tasks"],
+  const { data: transactions, isLoading } = useQuery({
+    queryKey: ["/api/billing/transactions", selectedYear],
     retry: false,
-    enabled: !!user,
+    enabled: false, // Disable API calls for demo
   });
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["/api/stats"],
-    retry: false,
-    enabled: !!user,
-  });
-
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading billing information...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Filter tasks that have been evaluated or completed (involve billing)
-  const billingTasks = (tasks || []).filter((task: any) => 
-    task.status === "evaluated" || 
-    task.status === "paid" || 
-    task.status === "in_progress" || 
-    task.status === "completed"
-  );
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "evaluated":
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending Payment</Badge>;
-      case "paid":
-        return <Badge className="bg-green-100 text-green-800">Paid</Badge>;
-      case "in_progress":
-        return <Badge className="bg-blue-100 text-blue-800">In Progress</Badge>;
-      case "completed":
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
+  const getStatusBadge = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'completed':
+      case 'refund':
+        return <Badge className="bg-green-100 text-green-800 text-xs">Completed</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800 text-xs">Pending</Badge>;
+      case 'cancelled':
+        return <Badge className="bg-red-100 text-red-800 text-xs">Cancelled</Badge>;
+      case 'transfer':
+        return <Badge className="bg-blue-100 text-blue-800 text-xs">Transfer</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge variant="outline" className="text-xs">{type}</Badge>;
     }
   };
 
-  const formatCurrency = (amount: string | number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(Number(amount) || 0);
-  };
+  // Sample data matching your screenshot structure
+  const billingData = [
+    { id: 51, year: 2018, month: 7, day: 31, order: 0, info: "Balance top-up", type: "Completed", income: "14848.00", expense: "", user: "Anton" },
+    { id: 52, year: 2018, month: 8, day: 2, order: 59, info: "Payment for order No 59", type: "Completed", income: "", expense: "2200.00", user: "Anton" },
+    { id: 53, year: 2018, month: 8, day: 2, order: 59, info: "Payment for order No 59", type: "Completed", income: "2200.00", expense: "", user: "SystemAdmin" },
+    { id: 68, year: 2018, month: 8, day: 3, order: 59, info: "Transfer of funds after completion of order No 59", type: "Transfer", income: "1100.00", expense: "", user: "SystemAdmin" },
+    { id: 69, year: 2018, month: 8, day: 3, order: 59, info: "Completion of funds after completion of order No 59", type: "Completed", income: "1100.00", expense: "", user: "Programmer" },
+    { id: 73, year: 2018, month: 8, day: 3, order: 61, info: "Order No61 for 08.18", type: "Completed", income: "7600.00", expense: "", user: "Kozha" },
+    { id: 75, year: 2018, month: 8, day: 3, order: 61, info: "Payment for order No 61", type: "Completed", income: "", expense: "7600.00", user: "Kozha" },
+    { id: 76, year: 2018, month: 8, day: 3, order: 61, info: "Payment for order No 61", type: "Completed", income: "7600.00", expense: "", user: "SystemAdmin" },
+    { id: 85, year: 2018, month: 8, day: 8, order: 0, info: "Order No92 for 08.18", type: "Completed", income: "1600.00", expense: "", user: "Kozha" },
+    { id: 86, year: 2018, month: 8, day: 8, order: 63, info: "Payment for order No 63", type: "Completed", income: "", expense: "1600.00", user: "Kozha" },
+    { id: 87, year: 2018, month: 8, day: 8, order: 63, info: "Payment for order No 63", type: "Completed", income: "1600.00", expense: "", user: "SystemAdmin" },
+    { id: 88, year: 2018, month: 8, day: 9, order: 0, info: "Bank card top-up TINPOFF BANK 5536914000000xxx", type: "Completed", income: "5.00", expense: "", user: "" },
+    { id: 89, year: 2018, month: 8, day: 10, order: 0, info: "IT invoice E.G. received for 09.18", type: "Completed", income: "12000.00", expense: "", user: "Kirill" },
+    { id: 90, year: 2018, month: 8, day: 10, order: 64, info: "Payment for order No 64", type: "Completed", income: "", expense: "12000.00", user: "Kirill" },
+    { id: 91, year: 2018, month: 8, day: 10, order: 64, info: "Payment for order No 64", type: "Completed", income: "12000.00", expense: "", user: "SystemAdmin" },
+    { id: 92, year: 2018, month: 8, day: 11, order: 0, info: "Bank card top-up TINPOFF BANK 5536914000000xxx", type: "Completed", income: "2.50", expense: "", user: "" },
+    { id: 95, year: 2018, month: 8, day: 11, order: 0, info: "Bank card top-up TINPOFF BANK 5536914000000xxx", type: "Completed", income: "3.00", expense: "", user: "" },
+    { id: 96, year: 2018, month: 8, day: 11, order: 0, info: "Bank card top-up 'YANDEX MONEY' NBCO LLC 5106013000000xxx", type: "Completed", income: "20.00", expense: "", user: "adminds" },
+    { id: 101, year: 2018, month: 8, day: 11, order: 0, info: "Bank card replenishment JSC CB MindBank 4024979000000xxx", type: "Completed", income: "30.00", expense: "", user: "adminds" },
+  ];
 
-  const totalSpent = stats?.totalSpent || "0";
-  const pendingAmount = billingTasks
-    .filter((task: any) => task.status === "evaluated")
-    .reduce((sum: number, task: any) => sum + Number(task.totalCost || 0), 0);
+  const filteredData = billingData.filter(item => 
+    item.info.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.user.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -96,168 +89,212 @@ export default function Billing() {
         <div className="flex-1 overflow-hidden">
           <div className="h-full overflow-y-auto">
             <div className="p-6">
-              {/* Page Header */}
+              {/* Header with breadcrumb */}
               <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Billing & Payments</h1>
-                <p className="text-gray-600 mt-1">
-                  Track your project costs, payments, and billing history.
-                </p>
+                <div className="flex items-center text-sm text-gray-600 mb-2">
+                  <span>💰</span>
+                  <span className="ml-2 font-semibold text-gray-900">Billing / Finance Dashboard</span>
+                </div>
               </div>
 
-              {/* Billing Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Card>
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <Card className="bg-gradient-to-r from-blue-400 to-blue-500 text-white">
                   <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-green-100 rounded-lg">
-                        <DollarSign className="w-6 h-6 text-green-600" />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-blue-100 text-sm">Total in Account</p>
+                        <p className="text-2xl font-bold">0.00</p>
                       </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Total Spent</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {statsLoading ? "..." : formatCurrency(totalSpent)}
-                        </p>
-                      </div>
+                      <DollarSign className="w-8 h-8 text-blue-200" />
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gradient-to-r from-green-400 to-green-500 text-white">
                   <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-yellow-100 rounded-lg">
-                        <Clock className="w-6 h-6 text-yellow-600" />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-green-100 text-sm">Income in Orders</p>
+                        <p className="text-2xl font-bold">0.00</p>
                       </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Pending Payment</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {tasksLoading ? "..." : formatCurrency(pendingAmount)}
-                        </p>
-                      </div>
+                      <TrendingUp className="w-8 h-8 text-green-200" />
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
                   <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <div className="p-3 bg-blue-100 rounded-lg">
-                        <FileText className="w-6 h-6 text-blue-600" />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-yellow-100 text-sm">Expenses in Orders</p>
+                        <p className="text-2xl font-bold">0.00</p>
                       </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Total Invoices</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {tasksLoading ? "..." : billingTasks.length}
-                        </p>
+                      <AlertTriangle className="w-8 h-8 text-yellow-200" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-r from-red-400 to-red-500 text-white">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-red-100 text-sm">Expenses in Orders</p>
+                        <p className="text-2xl font-bold">0.00</p>
                       </div>
+                      <CheckCircle className="w-8 h-8 text-red-200" />
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Billing History */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Billing History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {tasksLoading ? (
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse">
-                          <div className="h-16 bg-gray-200 rounded-lg"></div>
-                        </div>
-                      ))}
+              {/* Filters and Controls */}
+              <Card className="mb-6">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-600">Show</span>
+                        <Select value={recordsPerPage} onValueChange={setRecordsPerPage}>
+                          <SelectTrigger className="w-20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                            <SelectItem value="100">100</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <span className="text-sm text-gray-600">records</span>
+                      </div>
                     </div>
-                  ) : billingTasks.length === 0 ? (
-                    <div className="text-center py-12">
-                      <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No billing history</h3>
-                      <p className="text-gray-500">
-                        Your billing information will appear here once you have tasks with evaluations.
-                      </p>
+                    
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600">Search:</span>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Input
+                          placeholder="Search transactions..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10 w-64"
+                        />
+                      </div>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {billingTasks.map((task: any) => (
-                        <div
-                          key={task.id}
-                          className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <h3 className="font-medium text-gray-900">{task.title}</h3>
-                              {getStatusBadge(task.status)}
-                            </div>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <span>
-                                <Clock className="w-4 h-4 inline mr-1" />
-                                {task.estimatedHours ? `${task.estimatedHours} hours` : "TBD"}
-                              </span>
-                              <span>
-                                <DollarSign className="w-4 h-4 inline mr-1" />
-                                {task.hourlyRate ? `${formatCurrency(task.hourlyRate)}/hr` : "TBD"}
-                              </span>
-                              <span>Created: {new Date(task.createdAt).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-                          <div className="text-right ml-6">
-                            <p className="text-lg font-semibold text-gray-900">
-                              {task.totalCost ? formatCurrency(task.totalCost) : "Pending"}
-                            </p>
-                            {task.status === "evaluated" && (
-                              <Button size="sm" className="mt-2 bg-primary hover:bg-blue-700">
-                                Pay Now
-                              </Button>
-                            )}
-                            {task.status === "completed" && task.completedAt && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                Completed: {new Date(task.completedAt).toLocaleDateString()}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
 
-              {/* Payment Methods (placeholder for future enhancement) */}
-              {billingTasks.length > 0 && (
-                <Card className="mt-6">
-                  <CardHeader>
-                    <CardTitle>Payment Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-blue-100 rounded">
-                          <CreditCard className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">Default Payment Method</p>
-                          <p className="text-sm text-gray-500">•••• •••• •••• 4242</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Update
-                      </Button>
-                    </div>
-                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                      <div className="flex items-start space-x-3">
-                        <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium text-blue-900">Secure Payments</p>
-                          <p className="text-sm text-blue-700">
-                            All payments are processed securely. Your payment information is encrypted and protected.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              {/* Transactions Table */}
+              <Card>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gray-50">
+                          <TableHead className="w-16">ID</TableHead>
+                          <TableHead className="w-20">Year</TableHead>
+                          <TableHead className="w-20">Month</TableHead>
+                          <TableHead className="w-20">Day</TableHead>
+                          <TableHead className="w-20">Order</TableHead>
+                          <TableHead className="min-w-60">Payment Information</TableHead>
+                          <TableHead className="w-32">Type</TableHead>
+                          <TableHead className="w-32 text-right">Income</TableHead>
+                          <TableHead className="w-32 text-right">Expense</TableHead>
+                          <TableHead className="w-32">User</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {isLoading ? (
+                          Array.from({ length: 10 }).map((_, i) => (
+                            <TableRow key={i}>
+                              <TableCell className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded"></div>
+                              </TableCell>
+                              <TableCell className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded"></div>
+                              </TableCell>
+                              <TableCell className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded"></div>
+                              </TableCell>
+                              <TableCell className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded"></div>
+                              </TableCell>
+                              <TableCell className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded"></div>
+                              </TableCell>
+                              <TableCell className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded w-full"></div>
+                              </TableCell>
+                              <TableCell className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded"></div>
+                              </TableCell>
+                              <TableCell className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded"></div>
+                              </TableCell>
+                              <TableCell className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded"></div>
+                              </TableCell>
+                              <TableCell className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded"></div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : filteredData.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={10} className="text-center py-8">
+                              <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                No transactions found
+                              </h3>
+                              <p className="text-gray-600">
+                                No billing records match your search criteria.
+                              </p>
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          filteredData.map((transaction) => (
+                            <TableRow key={transaction.id} className="hover:bg-gray-50">
+                              <TableCell className="font-medium">{transaction.id}</TableCell>
+                              <TableCell>{transaction.year}</TableCell>
+                              <TableCell>{transaction.month}</TableCell>
+                              <TableCell>{transaction.day}</TableCell>
+                              <TableCell>{transaction.order || "-"}</TableCell>
+                              <TableCell className="max-w-sm">
+                                <div className="truncate" title={transaction.info}>
+                                  {transaction.info}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {getStatusBadge(transaction.type)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {transaction.income && (
+                                  <span className="text-green-600 font-medium">
+                                    {transaction.income}
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {transaction.expense && (
+                                  <span className="text-red-600 font-medium">
+                                    -{transaction.expense}
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <span className="text-blue-600 hover:underline cursor-pointer">
+                                  {transaction.user || "-"}
+                                </span>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>

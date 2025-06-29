@@ -12,6 +12,7 @@ import {
   customFields,
   userCustomFields,
   ticketFiles,
+  transactions,
   type User,
   type UpsertUser,
   type Task,
@@ -34,6 +35,8 @@ import {
   type CustomField,
   type UserCustomField,
   type TicketFile,
+  type Transaction,
+  type InsertTransaction,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, or, sql } from "drizzle-orm";
@@ -102,6 +105,15 @@ export interface IStorage {
   getAnnouncements(): Promise<Announcement[]>;
   updateAnnouncement(id: number, updates: Partial<Announcement>): Promise<void>;
   deleteAnnouncement(id: number): Promise<void>;
+  
+  // Billing operations
+  getTransactions(userId?: string, year?: number): Promise<Transaction[]>;
+  getBillingStats(userId?: string): Promise<{
+    totalInAccount: string;
+    incomeInOrders: string;
+    expensesInOrders: string;
+    monthlyRevenue: string;
+  }>;
   
   // Knowledge Base
   createKnowledgeCategory(category: InsertKnowledgeCategory): Promise<KnowledgeCategory>;
@@ -596,6 +608,53 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(userCustomFields)
       .where(eq(userCustomFields.userId, userId));
+  }
+
+  // Billing operations
+  async getTransactions(userId?: string, year?: number): Promise<Transaction[]> {
+    const conditions = [];
+    
+    if (userId) {
+      conditions.push(eq(transactions.userId, userId));
+    }
+    
+    if (year) {
+      conditions.push(eq(transactions.year, year));
+    }
+    
+    const query = conditions.length > 0 
+      ? db.select().from(transactions).where(and(...conditions))
+      : db.select().from(transactions);
+    
+    return await query.orderBy(desc(transactions.createdAt));
+  }
+
+  async getBillingStats(userId?: string): Promise<{
+    totalInAccount: string;
+    incomeInOrders: string;
+    expensesInOrders: string;
+    monthlyRevenue: string;
+  }> {
+    const conditions = userId ? [eq(transactions.userId, userId)] : [];
+    
+    const baseQuery = conditions.length > 0 
+      ? db.select().from(transactions).where(and(...conditions))
+      : db.select().from(transactions);
+    
+    const [results] = await db.select({
+      totalIncome: sql<string>`coalesce(sum(case when type = 'payment' then amount else 0 end), 0)`,
+      totalExpenses: sql<string>`coalesce(sum(case when type = 'debit' then amount else 0 end), 0)`
+    }).from(transactions);
+    
+    const totalIncome = Number(results?.totalIncome || 0);
+    const totalExpenses = Number(results?.totalExpenses || 0);
+    
+    return {
+      totalInAccount: (totalIncome - totalExpenses).toFixed(2),
+      incomeInOrders: totalIncome.toFixed(2),
+      expensesInOrders: totalExpenses.toFixed(2),
+      monthlyRevenue: totalIncome.toFixed(2),
+    };
   }
 }
 

@@ -58,9 +58,9 @@ export default function Announcements() {
                 <div className="flex items-center space-x-3">
                   <Megaphone className="w-8 h-8 text-primary" />
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Объявления</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">Announcements</h1>
                     <p className="text-gray-600 mt-1">
-                      Последние новости и обновления сервиса
+                      Latest news and service updates
                     </p>
                   </div>
                 </div>

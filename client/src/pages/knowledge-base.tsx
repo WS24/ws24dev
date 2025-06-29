@@ -59,9 +59,9 @@ export default function KnowledgeBase() {
             <div className="p-6">
               {/* Header */}
               <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">База знаний</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Knowledge Base</h1>
                 <p className="text-gray-600 mt-1">
-                  Документация и руководства по веб-разработке
+                  Documentation and guides for web development
                 </p>
               </div>
 
@@ -72,7 +72,7 @@ export default function KnowledgeBase() {
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
                         <BookOpen className="w-5 h-5" />
-                        <span>Категории</span>
+                        <span>Categories</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>

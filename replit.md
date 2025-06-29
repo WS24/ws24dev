@@ -107,6 +107,13 @@ Changelog:
   * Extended storage layer with full CRUD operations for new entities
   * Added frontend components for Knowledge Base and Announcements
   * Updated navigation with Resources section
+- June 29, 2025. English-only implementation with billing dashboard:
+  * Translated all Russian content to English across the platform
+  * Created comprehensive billing/finance dashboard matching admin panel screenshot
+  * Added transactions table with financial data tracking
+  * Implemented billing statistics with income/expense analytics
+  * Added API endpoints for billing operations and knowledge base
+  * Optimized UI structure and functionality for better UX and extensibility
 ```
 
 ## User Preferences

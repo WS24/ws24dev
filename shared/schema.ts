@@ -238,6 +238,25 @@ export const ticketFiles = pgTable("ticket_files", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Financial transactions for billing dashboard
+export const transactions = pgTable("transactions", {
+  id: serial("id").primaryKey(),
+  taskId: integer("task_id").references(() => tasks.id),
+  userId: varchar("user_id").references(() => users.id),
+  type: varchar("type", { length: 50 }).notNull(), // 'payment', 'refund', 'credit', 'debit'
+  status: varchar("status", { length: 50 }).notNull(), // 'pending', 'completed', 'cancelled', 'refunded'
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("USD"),
+  description: text("description"),
+  paymentMethod: varchar("payment_method", { length: 100 }),
+  transactionId: varchar("transaction_id", { length: 255 }),
+  year: integer("year").notNull(),
+  month: integer("month").notNull(),
+  day: integer("day").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations for new entities
 export const ticketCategoriesRelations = relations(ticketCategories, ({ many, one }) => ({
   tickets: many(tasks),
@@ -268,6 +287,11 @@ export const userCustomFieldsRelations = relations(userCustomFields, ({ one }) =
 export const ticketFilesRelations = relations(ticketFiles, ({ one }) => ({
   ticket: one(tasks, { fields: [ticketFiles.ticketId], references: [tasks.id] }),
   user: one(users, { fields: [ticketFiles.uploadedBy], references: [users.id] }),
+}));
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  task: one(tasks, { fields: [transactions.taskId], references: [tasks.id] }),
+  user: one(users, { fields: [transactions.userId], references: [users.id] }),
 }));
 
 // Insert schemas
@@ -344,3 +368,5 @@ export type InsertKnowledgeCategory = z.infer<typeof insertKnowledgeCategorySche
 export type CustomField = typeof customFields.$inferSelect;
 export type UserCustomField = typeof userCustomFields.$inferSelect;
 export type TicketFile = typeof ticketFiles.$inferSelect;
+export type Transaction = typeof transactions.$inferSelect;
+export type InsertTransaction = typeof transactions.$inferInsert;

@@ -26,13 +26,13 @@ function Router() {
         <>
           <Route path="/" component={Dashboard} />
           <Route path="/tasks" component={Tasks} />
-          <Route path="/billing" component={Billing} />
           <Route path="/assignments" component={Assignments} />
           <Route path="/admin" component={AdminPanel} />
-          <Route path="/knowledge-base" component={KnowledgeBase} />
-          <Route path="/announcements" component={Announcements} />
         </>
       )}
+      <Route path="/billing" component={Billing} />
+      <Route path="/knowledge-base" component={KnowledgeBase} />
+      <Route path="/announcements" component={Announcements} />
       <Route path="/admin-demo" component={AdminDemo} />
       <Route component={NotFound} />
     </Switch>

@@ -536,6 +536,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Billing routes
+  app.get('/api/billing/transactions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const year = req.query.year ? parseInt(req.query.year) : undefined;
+      const transactions = await storage.getTransactions(userId, year);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  app.get('/api/billing/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const stats = await storage.getBillingStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching billing stats:", error);
+      res.status(500).json({ message: "Failed to fetch billing stats" });
+    }
+  });
+
+  // Knowledge Base routes
+  app.get('/api/knowledge/categories', async (req, res) => {
+    try {
+      const categories = await storage.getKnowledgeCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching knowledge categories:", error);
+      res.status(500).json({ message: "Failed to fetch categories" });
+    }
+  });
+
+  app.get('/api/knowledge/articles', async (req, res) => {
+    try {
+      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+      const articles = await storage.getKnowledgeArticles(categoryId);
+      res.json(articles);
+    } catch (error) {
+      console.error("Error fetching knowledge articles:", error);
+      res.status(500).json({ message: "Failed to fetch articles" });
+    }
+  });
+
+  // Announcements routes
+  app.get('/api/announcements', async (req, res) => {
+    try {
+      const announcements = await storage.getAnnouncements();
+      res.json(announcements);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+      res.status(500).json({ message: "Failed to fetch announcements" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
