@@ -593,6 +593,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics routes
+  app.get('/api/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const dateRange = req.query.dateRange as string || '30';
+      const reportType = req.query.reportType as string || 'overview';
+      
+      // Calculate date range
+      const daysBack = parseInt(dateRange);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysBack);
+      
+      const analytics = await storage.getAnalyticsData(startDate, reportType);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  app.get('/api/analytics/tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const dateRange = req.query.dateRange as string || '30';
+      const daysBack = parseInt(dateRange);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysBack);
+      
+      const taskMetrics = await storage.getTaskAnalytics(startDate);
+      res.json(taskMetrics);
+    } catch (error) {
+      console.error("Error fetching task analytics:", error);
+      res.status(500).json({ message: "Failed to fetch task analytics" });
+    }
+  });
+
+  app.get('/api/analytics/revenue', isAuthenticated, async (req: any, res) => {
+    try {
+      const dateRange = req.query.dateRange as string || '30';
+      const daysBack = parseInt(dateRange);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysBack);
+      
+      const revenueMetrics = await storage.getRevenueAnalytics(startDate);
+      res.json(revenueMetrics);
+    } catch (error) {
+      console.error("Error fetching revenue analytics:", error);
+      res.status(500).json({ message: "Failed to fetch revenue analytics" });
+    }
+  });
+
+  app.get('/api/analytics/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const dateRange = req.query.dateRange as string || '30';
+      const daysBack = parseInt(dateRange);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - daysBack);
+      
+      const userMetrics = await storage.getUserAnalytics(startDate);
+      res.json(userMetrics);
+    } catch (error) {
+      console.error("Error fetching user analytics:", error);
+      res.status(500).json({ message: "Failed to fetch user analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -14,7 +14,8 @@ import {
   Shield,
   BookOpen,
   Megaphone,
-  DollarSign
+  DollarSign,
+  BarChart3
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -102,10 +103,18 @@ export function Sidebar() {
               
               <SidebarLink 
                 href="/billing" 
-                icon={CreditCard}
+                icon={DollarSign}
                 isActive={isActive("/billing")}
               >
                 Billing
+              </SidebarLink>
+              
+              <SidebarLink 
+                href="/analytics" 
+                icon={BarChart3}
+                isActive={isActive("/analytics")}
+              >
+                Analytics
               </SidebarLink>
             </>
           )}
