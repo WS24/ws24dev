@@ -1152,6 +1152,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client endpoints
+  app.get('/api/client/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "client") {
+        return res.status(403).json({ message: "Client access required" });
+      }
+
+      const stats = await storage.getClientStats(userId);
+      const balance = user.balance || "0.00";
+      
+      res.json({
+        ...stats,
+        accountBalance: balance,
+      });
+    } catch (error) {
+      console.error("Error fetching client stats:", error);
+      res.status(500).json({ message: "Failed to fetch client stats" });
+    }
+  });
+
+  app.get('/api/transactions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactions = await storage.getTransactions(userId);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Specialist endpoints
+  app.get('/api/specialist/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "specialist") {
+        return res.status(403).json({ message: "Specialist access required" });
+      }
+
+      const stats = await storage.getSpecialistStats(userId);
+      
+      // Get specializations from user profile
+      const specializations = user.specializations ? user.specializations.split(',').map(s => s.trim()) : [];
+      
+      res.json({
+        ...stats,
+        averageRating: 4.5, // Placeholder for future rating system
+        specializations,
+      });
+    } catch (error) {
+      console.error("Error fetching specialist stats:", error);
+      res.status(500).json({ message: "Failed to fetch specialist stats" });
+    }
+  });
+
+  app.get('/api/specialist/tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "specialist") {
+        return res.status(403).json({ message: "Specialist access required" });
+      }
+
+      const tasks = await storage.getTasksBySpecialist(userId);
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching specialist tasks:", error);
+      res.status(500).json({ message: "Failed to fetch specialist tasks" });
+    }
+  });
+
+  app.get('/api/specialist/evaluations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "specialist") {
+        return res.status(403).json({ message: "Specialist access required" });
+      }
+
+      const evaluations = await storage.getEvaluationsBySpecialist(userId);
+      res.json(evaluations);
+    } catch (error) {
+      console.error("Error fetching specialist evaluations:", error);
+      res.status(500).json({ message: "Failed to fetch specialist evaluations" });
+    }
+  });
+
+  app.put('/api/tasks/:id/complete', isAuthenticated, [
+    param('id').isNumeric().withMessage('Task ID must be numeric'),
+    handleValidationErrors,
+  ], async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      const taskId = parseInt(req.params.id);
+      
+      if (!user || user.role !== "specialist") {
+        return res.status(403).json({ message: "Specialist access required" });
+      }
+
+      const task = await storage.getTask(taskId);
+      if (!task || task.specialistId !== userId) {
+        return res.status(404).json({ message: "Task not found or unauthorized" });
+      }
+
+      await storage.updateTaskStatus(taskId, "completed");
+      res.json({ message: "Task marked as completed" });
+    } catch (error) {
+      console.error("Error completing task:", error);
+      res.status(500).json({ message: "Failed to complete task" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

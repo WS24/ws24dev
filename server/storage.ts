@@ -74,6 +74,7 @@ export interface IStorage {
   // Evaluation operations
   createEvaluation(evaluation: InsertEvaluation & { taskId: number; specialistId: string }): Promise<TaskEvaluation>;
   getEvaluationsByTask(taskId: number): Promise<TaskEvaluation[]>;
+  getEvaluationsBySpecialist(specialistId: string): Promise<TaskEvaluation[]>;
   acceptEvaluation(taskId: number, evaluationId: number): Promise<void>;
   
   // Payment operations
@@ -312,6 +313,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(taskEvaluations)
       .where(eq(taskEvaluations.taskId, taskId))
+      .orderBy(desc(taskEvaluations.createdAt));
+  }
+
+  async getEvaluationsBySpecialist(specialistId: string): Promise<TaskEvaluation[]> {
+    return await db
+      .select()
+      .from(taskEvaluations)
+      .where(eq(taskEvaluations.specialistId, specialistId))
       .orderBy(desc(taskEvaluations.createdAt));
   }
 

@@ -212,6 +212,17 @@ Changelog:
   * Integrated admin dashboard stats showing total users, tasks, revenue, and platform metrics
   * Enhanced storage interface with administrator-specific operations
   * Added comprehensive UI with tabs for balance management, task assignments, settings, and audit logs
+- June 30, 2025. Client and Specialist capabilities implementation (Steps 2-3):
+  * Created dedicated Client Dashboard with comprehensive service request management
+  * Built Specialist Dashboard with task evaluation, pricing, and earnings tracking
+  * Added client-specific features: account balance display, transaction history, task progress tracking
+  * Implemented specialist features: pending evaluations, active task management, completion workflow
+  * Created API endpoints for client stats, transactions, and specialist operations
+  * Added role-based dashboard routing and navigation in the application
+  * Integrated specialization management for specialists with multiple expertise areas
+  * Implemented 50% commission calculation for completed specialist tasks
+  * Enhanced storage interface with getEvaluationsBySpecialist method
+  * Added comprehensive stats tracking for both client and specialist roles
 ```
 
 ## Project Versions

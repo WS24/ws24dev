@@ -17,6 +17,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
+import ClientDashboard from "@/pages/client-dashboard";
+import SpecialistDashboard from "@/pages/specialist-dashboard";
 import Tasks from "@/pages/tasks";
 import Billing from "@/pages/billing";
 import Assignments from "@/pages/assignments";
@@ -57,6 +59,8 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
+          <Route path="/client-dashboard" component={ClientDashboard} />
+          <Route path="/specialist-dashboard" component={SpecialistDashboard} />
           <Route path="/tasks" component={Tasks} />
           <Route path="/create-task" component={CreateTask} />
           <Route path="/assignments" component={Assignments} />
