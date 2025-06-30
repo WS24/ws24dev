@@ -577,6 +577,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/admin/users", isAuthenticated, [
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
+    body('firstName').notEmpty().withMessage('First name is required'),
+    body('lastName').notEmpty().withMessage('Last name is required'),
+    body('role').isIn(['client', 'specialist', 'admin']).withMessage('Invalid role'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    handleValidationErrors,
+  ], async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { email, username, firstName, lastName, role, password } = req.body;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+
+      // Create user with a unique ID
+      const newUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const newUser = await storage.upsertUser({
+        id: newUserId,
+        email,
+        username,
+        firstName,
+        lastName,
+        role,
+        balance: "0.00",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      res.json(newUser);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
   app.get("/api/admin/stats", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -1269,6 +1316,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error completing task:", error);
       res.status(500).json({ message: "Failed to complete task" });
+    }
+  });
+
+  // Notification routes
+  app.get("/api/notifications", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notifications = await storage.getNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      await storage.markNotificationAsRead(notificationId);
+      res.json({ message: "Notification marked as read" });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.post("/api/notifications/read-all", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.markAllNotificationsAsRead(userId);
+      res.json({ message: "All notifications marked as read" });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  // Activity logs endpoint for administrators
+  app.get("/api/admin/activity-logs", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const logs = await storage.getActivityLogs();
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching activity logs:", error);
+      res.status(500).json({ message: "Failed to fetch activity logs" });
     }
   });
 

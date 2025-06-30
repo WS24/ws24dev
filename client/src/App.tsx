@@ -37,6 +37,7 @@ import AdminUsers from "@/pages/admin-users";
 import UserRoles from "@/pages/user-roles";
 import AdminDashboard from "@/pages/admin-dashboard";
 import TaskView from "@/pages/task-view";
+import Notifications from "@/pages/notifications";
 import NotFound from "@/pages/not-found";
 
 /**
@@ -80,6 +81,7 @@ function Router() {
           <Route path="/admin-demo" component={AdminDemo} />
           <Route path="/profile" component={Profile} />
           <Route path="/tasks/:id" component={TaskView} />
+          <Route path="/notifications" component={Notifications} />
         </>
       )}
       <Route component={NotFound} />

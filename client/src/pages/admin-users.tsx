@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CreateUserModal } from "@/components/modals/create-user-modal";
 import { Users, Search, Filter, UserPlus, MoreHorizontal } from "lucide-react";
 import type { User } from "@shared/schema";
 
 export default function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
@@ -55,7 +57,7 @@ export default function AdminUsersPage() {
                     <Users className="w-5 h-5" />
                     <span>All Users ({users.length})</span>
                   </div>
-                  <Button>
+                  <Button onClick={() => setIsCreateModalOpen(true)}>
                     <UserPlus className="w-4 h-4 mr-2" />
                     Add User
                   </Button>
@@ -163,6 +165,11 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </div>
+      
+      <CreateUserModal 
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 }

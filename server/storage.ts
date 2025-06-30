@@ -60,6 +60,7 @@ import { eq, and, desc, or, sql, gte } from "drizzle-orm";
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   
   // Task operations
@@ -190,12 +191,43 @@ export interface IStorage {
     pendingPayments: number;
     activeAssignments: number;
   }>;
+  
+  // Notification operations
+  createNotification(notification: {
+    userId: string;
+    type: string;
+    title: string;
+    message: string;
+    relatedId?: number;
+    relatedType?: string;
+  }): Promise<any>;
+  getNotifications(userId: string): Promise<any[]>;
+  markNotificationAsRead(notificationId: number): Promise<void>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+  
+  // Activity logging operations
+  logActivity(activity: {
+    userId: string;
+    action: string;
+    entityType?: string;
+    entityId?: number;
+    oldValues?: any;
+    newValues?: any;
+    ipAddress?: string;
+    userAgent?: string;
+  }): Promise<void>;
+  getActivityLogs(userId?: string, limit?: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
   // User operations (mandatory for Replit Auth)
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
     return user;
   }
 
@@ -1060,6 +1092,86 @@ export class DatabaseStorage implements IStorage {
       pendingPayments: pendingPaymentStats?.pendingPayments || 0,
       activeAssignments: activeAssignmentStats?.activeAssignments || 0,
     };
+  }
+
+  // Notification operations
+  async createNotification(notification: {
+    userId: string;
+    type: string;
+    title: string;
+    message: string;
+    relatedId?: number;
+    relatedType?: string;
+  }): Promise<any> {
+    const [result] = await db.execute(sql`
+      INSERT INTO notifications (user_id, type, title, message, related_id, related_type)
+      VALUES (${notification.userId}, ${notification.type}, ${notification.title}, 
+              ${notification.message}, ${notification.relatedId}, ${notification.relatedType})
+      RETURNING *
+    `);
+    return result;
+  }
+
+  async getNotifications(userId: string): Promise<any[]> {
+    const results = await db.execute(sql`
+      SELECT * FROM notifications 
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC
+      LIMIT 100
+    `);
+    return results;
+  }
+
+  async markNotificationAsRead(notificationId: number): Promise<void> {
+    await db.execute(sql`
+      UPDATE notifications 
+      SET is_read = true
+      WHERE id = ${notificationId}
+    `);
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db.execute(sql`
+      UPDATE notifications 
+      SET is_read = true
+      WHERE user_id = ${userId} AND is_read = false
+    `);
+  }
+
+  // Activity logging operations
+  async logActivity(activity: {
+    userId: string;
+    action: string;
+    entityType?: string;
+    entityId?: number;
+    oldValues?: any;
+    newValues?: any;
+    ipAddress?: string;
+    userAgent?: string;
+  }): Promise<void> {
+    await db.execute(sql`
+      INSERT INTO activity_logs (user_id, action, entity_type, entity_id, old_values, new_values, ip_address, user_agent)
+      VALUES (${activity.userId}, ${activity.action}, ${activity.entityType}, ${activity.entityId},
+              ${JSON.stringify(activity.oldValues)}::jsonb, ${JSON.stringify(activity.newValues)}::jsonb,
+              ${activity.ipAddress}, ${activity.userAgent})
+    `);
+  }
+
+  async getActivityLogs(userId?: string, limit: number = 100): Promise<any[]> {
+    if (userId) {
+      return await db.execute(sql`
+        SELECT * FROM activity_logs 
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `);
+    } else {
+      return await db.execute(sql`
+        SELECT * FROM activity_logs 
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `);
+    }
   }
 }
 
