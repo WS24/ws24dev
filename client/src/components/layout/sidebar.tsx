@@ -15,7 +15,8 @@ import {
   BookOpen,
   Megaphone,
   DollarSign,
-  BarChart3
+  BarChart3,
+  Headphones
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 
@@ -96,6 +97,14 @@ export function Sidebar() {
             isActive={isActive("/tasks")}
           >
             My Tasks
+          </SidebarLink>
+          
+          <SidebarLink 
+            href="/helpdesk" 
+            icon={Headphones}
+            isActive={isActive("/helpdesk")}
+          >
+            Helpdesk Dashboard
           </SidebarLink>
           
           {user.role === "client" && (

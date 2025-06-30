@@ -1371,6 +1371,251 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * Helpdesk Dashboard Stats
+   * 
+   * @route GET /api/helpdesk/dashboard-stats
+   * @access Private - Requires authentication
+   */
+  app.get("/api/helpdesk/dashboard-stats", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const stats = await storage.getHelpdeskDashboardStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching helpdesk stats:", error);
+      res.status(500).json({ message: "Failed to fetch helpdesk statistics" });
+    }
+  });
+
+  /**
+   * Recent Helpdesk Activity
+   * 
+   * @route GET /api/helpdesk/recent-activity
+   * @access Private - Requires authentication
+   */
+  app.get("/api/helpdesk/recent-activity", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const activity = await storage.getRecentHelpdeskActivity(10);
+      res.json(activity);
+    } catch (error) {
+      console.error("Error fetching recent activity:", error);
+      res.status(500).json({ message: "Failed to fetch recent activity" });
+    }
+  });
+
+  /**
+   * Get Ticket Details
+   * 
+   * @route GET /api/tickets/:id
+   * @access Private - Requires authentication
+   */
+  app.get("/api/tickets/:id", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const ticket = await storage.getTicketDetails(ticketId);
+      
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+      
+      // Check access permissions
+      if (req.user.claims.role !== "admin" && 
+          ticket.clientId !== userId && 
+          ticket.specialistId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      res.json(ticket);
+    } catch (error) {
+      console.error("Error fetching ticket:", error);
+      res.status(500).json({ message: "Failed to fetch ticket details" });
+    }
+  });
+
+  /**
+   * Get Ticket Messages
+   * 
+   * @route GET /api/tickets/:id/messages
+   * @access Private - Requires authentication
+   */
+  app.get("/api/tickets/:id/messages", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const userRole = req.user.claims.role;
+      
+      const messages = await storage.getTicketMessages(ticketId, userId, userRole);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  /**
+   * Send Ticket Message
+   * 
+   * @route POST /api/tickets/:id/messages
+   * @access Private - Requires authentication
+   */
+  app.post("/api/tickets/:id/messages", 
+    isAuthenticated,
+    body("message").trim().notEmpty().withMessage("Message is required"),
+    body("isInternal").optional().isBoolean(),
+    handleValidationErrors,
+    async (req: any, res: Response) => {
+      try {
+        const ticketId = parseInt(req.params.id);
+        const userId = req.user.claims.sub;
+        const { message, isInternal } = req.body;
+        
+        const newMessage = await storage.createTicketMessage({
+          ticketId,
+          userId,
+          message,
+          isInternal: isInternal || false
+        });
+        
+        // Log activity
+        await storage.logActivity({
+          userId,
+          action: isInternal ? "Added internal note" : "Sent message",
+          entityType: "ticket",
+          entityId: ticketId
+        });
+        
+        res.json(newMessage);
+      } catch (error) {
+        console.error("Error sending message:", error);
+        res.status(500).json({ message: "Failed to send message" });
+      }
+    }
+  );
+
+  /**
+   * Get Ticket Change Log
+   * 
+   * @route GET /api/tickets/:id/changelog
+   * @access Private - Requires authentication
+   */
+  app.get("/api/tickets/:id/changelog", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const changeLog = await storage.getTicketChangeLog(ticketId);
+      res.json(changeLog);
+    } catch (error) {
+      console.error("Error fetching change log:", error);
+      res.status(500).json({ message: "Failed to fetch change log" });
+    }
+  });
+
+  /**
+   * Update Ticket Settings
+   * 
+   * @route PATCH /api/tickets/:id
+   * @access Private - Requires authentication (Admin or Assigned Specialist)
+   */
+  app.patch("/api/tickets/:id", 
+    isAuthenticated,
+    body("status").optional().isIn(["Created", "In Progress", "Evaluation", "Completed", "Rejected"]),
+    body("priority").optional().isIn(["low", "medium", "high"]),
+    body("estimatedDelivery").optional().isISO8601(),
+    body("quotedCost").optional().isNumeric(),
+    body("adminApproval").optional().isBoolean(),
+    handleValidationErrors,
+    async (req: any, res: Response) => {
+      try {
+        const ticketId = parseInt(req.params.id);
+        const userId = req.user.claims.sub;
+        const userRole = req.user.claims.role;
+        
+        const ticket = await storage.getTask(ticketId);
+        if (!ticket) {
+          return res.status(404).json({ message: "Ticket not found" });
+        }
+        
+        // Check permissions
+        if (userRole !== "admin" && ticket.specialistId !== userId) {
+          return res.status(403).json({ message: "Access denied" });
+        }
+        
+        const updates = req.body;
+        const oldValues = { ...ticket };
+        
+        await storage.updateTicketSettings(ticketId, updates);
+        
+        // Log changes
+        await storage.logActivity({
+          userId,
+          action: "Updated ticket settings",
+          entityType: "ticket",
+          entityId: ticketId,
+          oldValues,
+          newValues: updates
+        });
+        
+        res.json({ message: "Ticket updated successfully" });
+      } catch (error) {
+        console.error("Error updating ticket:", error);
+        res.status(500).json({ message: "Failed to update ticket" });
+      }
+    }
+  );
+
+  /**
+   * Get Ticket Attachments
+   * 
+   * @route GET /api/tickets/:id/attachments
+   * @access Private - Requires authentication
+   */
+  app.get("/api/tickets/:id/attachments", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const attachments = await storage.getTicketAttachments(ticketId);
+      res.json(attachments);
+    } catch (error) {
+      console.error("Error fetching attachments:", error);
+      res.status(500).json({ message: "Failed to fetch attachments" });
+    }
+  });
+
+  /**
+   * Upload Ticket Attachment
+   * 
+   * @route POST /api/tickets/:id/attachments
+   * @access Private - Requires authentication
+   */
+  app.post("/api/tickets/:id/attachments", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // In a real implementation, you would handle file upload here
+      // For now, we'll just create a placeholder
+      const attachment = await storage.createTicketAttachment({
+        ticketId,
+        userId,
+        name: "uploaded-file.pdf",
+        size: "2.5 MB",
+        url: "/files/placeholder.pdf"
+      });
+      
+      await storage.logActivity({
+        userId,
+        action: "Uploaded attachment",
+        entityType: "ticket",
+        entityId: ticketId
+      });
+      
+      res.json(attachment);
+    } catch (error) {
+      console.error("Error uploading attachment:", error);
+      res.status(500).json({ message: "Failed to upload attachment" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

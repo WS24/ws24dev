@@ -54,7 +54,7 @@ import {
   type InsertTaskAssignment,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, or, sql, gte } from "drizzle-orm";
+import { eq, and, desc, or, sql, gte, ne, lt, isNotNull } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -217,6 +217,37 @@ export interface IStorage {
     userAgent?: string;
   }): Promise<void>;
   getActivityLogs(userId?: string, limit?: number): Promise<any[]>;
+  
+  // Helpdesk operations
+  getHelpdeskDashboardStats(): Promise<{
+    totalTickets: number;
+    activeTickets: number;
+    overdueTickets: number;
+    totalUsers: number;
+    activeSpecialists: number;
+    totalRevenue: string;
+    revenueThisMonth: string;
+    newTicketsThisWeek: number;
+  }>;
+  getRecentHelpdeskActivity(limit: number): Promise<any[]>;
+  getTicketDetails(ticketId: number): Promise<any>;
+  getTicketMessages(ticketId: number, userId: string, userRole: string): Promise<any[]>;
+  createTicketMessage(message: {
+    ticketId: number;
+    userId: string;
+    message: string;
+    isInternal: boolean;
+  }): Promise<any>;
+  getTicketChangeLog(ticketId: number): Promise<any[]>;
+  updateTicketSettings(ticketId: number, updates: any): Promise<void>;
+  getTicketAttachments(ticketId: number): Promise<any[]>;
+  createTicketAttachment(attachment: {
+    ticketId: number;
+    userId: string;
+    name: string;
+    size: string;
+    url: string;
+  }): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1172,6 +1203,246 @@ export class DatabaseStorage implements IStorage {
         LIMIT ${limit}
       `);
     }
+  }
+
+  async getHelpdeskDashboardStats(): Promise<{
+    totalTickets: number;
+    activeTickets: number;
+    overdueTickets: number;
+    totalUsers: number;
+    activeSpecialists: number;
+    totalRevenue: string;
+    revenueThisMonth: string;
+    newTicketsThisWeek: number;
+  }> {
+    const [totalTicketsResult] = await db.select({ count: sql`count(*)` }).from(tasks);
+    const totalTickets = Number(totalTicketsResult.count);
+
+    const [activeTicketsResult] = await db.select({ count: sql`count(*)` })
+      .from(tasks)
+      .where(and(
+        ne(tasks.status, "Completed"),
+        ne(tasks.status, "Rejected")
+      ));
+    const activeTickets = Number(activeTicketsResult.count);
+
+    const now = new Date();
+    const [overdueResult] = await db.select({ count: sql`count(*)` })
+      .from(tasks)
+      .where(and(
+        ne(tasks.status, "Completed"),
+        ne(tasks.status, "Rejected"),
+        isNotNull(tasks.deadline),
+        lt(tasks.deadline, now)
+      ));
+    const overdueTickets = Number(overdueResult.count);
+
+    const [totalUsersResult] = await db.select({ count: sql`count(*)` }).from(users);
+    const totalUsers = Number(totalUsersResult.count);
+
+    const [specialistsResult] = await db.select({ count: sql`count(*)` })
+      .from(users)
+      .where(eq(users.role, "specialist"));
+    const activeSpecialists = Number(specialistsResult.count);
+
+    const [revenueResult] = await db.select({ total: sql`COALESCE(SUM(CAST(amount AS DECIMAL)), 0)` })
+      .from(payments)
+      .where(eq(payments.status, "completed"));
+    const totalRevenue = revenueResult.total?.toString() || "0";
+
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const [monthlyRevenueResult] = await db.select({ total: sql`COALESCE(SUM(CAST(amount AS DECIMAL)), 0)` })
+      .from(payments)
+      .where(and(
+        eq(payments.status, "completed"),
+        gte(payments.createdAt, firstDayOfMonth)
+      ));
+    const revenueThisMonth = monthlyRevenueResult.total?.toString() || "0";
+
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const [newTicketsResult] = await db.select({ count: sql`count(*)` })
+      .from(tasks)
+      .where(gte(tasks.createdAt, oneWeekAgo));
+    const newTicketsThisWeek = Number(newTicketsResult.count);
+
+    return {
+      totalTickets,
+      activeTickets,
+      overdueTickets,
+      totalUsers,
+      activeSpecialists,
+      totalRevenue,
+      revenueThisMonth,
+      newTicketsThisWeek
+    };
+  }
+
+  async getRecentHelpdeskActivity(limit: number): Promise<any[]> {
+    const recentTasks = await db.select({
+      description: sql`'New ticket created: ' || ${tasks.title}`,
+      createdAt: tasks.createdAt
+    })
+    .from(tasks)
+    .orderBy(desc(tasks.createdAt))
+    .limit(limit / 2);
+
+    const recentMessages = await db.select({
+      description: sql`'New message on ticket #' || ${taskUpdates.taskId}`,
+      createdAt: taskUpdates.createdAt
+    })
+    .from(taskUpdates)
+    .orderBy(desc(taskUpdates.createdAt))
+    .limit(limit / 2);
+
+    const combined = [...recentTasks, ...recentMessages]
+      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
+      .slice(0, limit);
+
+    return combined;
+  }
+
+  async getTicketDetails(ticketId: number): Promise<any> {
+    const [ticket] = await db.select({
+      id: tasks.id,
+      title: tasks.title,
+      description: tasks.description,
+      status: tasks.status,
+      priority: tasks.priority,
+      category: tasks.category,
+      clientId: tasks.clientId,
+      specialistId: tasks.specialistId,
+      estimatedDelivery: tasks.estimatedDelivery,
+      estimatedHours: tasks.estimatedHours,
+      budget: tasks.budget,
+      createdAt: tasks.createdAt,
+      completedAt: tasks.completedAt,
+      clientName: sql`(SELECT username FROM ${users} WHERE id = ${tasks.clientId})`,
+      specialistName: sql`(SELECT username FROM ${users} WHERE id = ${tasks.specialistId})`,
+      quotedCost: sql`(SELECT estimated_cost FROM ${taskEvaluations} WHERE task_id = ${tasks.id} AND accepted = true LIMIT 1)`,
+      rating: sql`(SELECT rating FROM ${taskEvaluations} WHERE task_id = ${tasks.id} LIMIT 1)`,
+      adminApproval: sql`CASE WHEN EXISTS (SELECT 1 FROM ${taskAssignments} WHERE task_id = ${tasks.id} AND status = 'approved') THEN true ELSE false END`
+    })
+    .from(tasks)
+    .where(eq(tasks.id, ticketId));
+
+    return ticket;
+  }
+
+  async getTicketMessages(ticketId: number, userId: string, userRole: string): Promise<any[]> {
+    let query = db.select({
+      id: taskUpdates.id,
+      message: taskUpdates.update,
+      userId: taskUpdates.userId,
+      userName: sql`(SELECT username FROM ${users} WHERE id = ${taskUpdates.userId})`,
+      createdAt: taskUpdates.createdAt,
+      isInternal: sql`false`
+    })
+    .from(taskUpdates)
+    .where(eq(taskUpdates.taskId, ticketId));
+
+    const messages = await query.orderBy(taskUpdates.createdAt);
+    return messages;
+  }
+
+  async createTicketMessage(message: {
+    ticketId: number;
+    userId: string;
+    message: string;
+    isInternal: boolean;
+  }): Promise<any> {
+    const messageText = message.isInternal ? `[Internal] ${message.message}` : message.message;
+    
+    const [newMessage] = await db.insert(taskUpdates)
+      .values({
+        taskId: message.ticketId,
+        userId: message.userId,
+        update: messageText
+      })
+      .returning();
+
+    return {
+      ...newMessage,
+      userName: await this.getUser(message.userId).then(u => u?.username),
+      isInternal: message.isInternal
+    };
+  }
+
+  async getTicketChangeLog(ticketId: number): Promise<any[]> {
+    const logs = await db.select({
+      description: activityLogs.action,
+      userName: sql`(SELECT username FROM ${users} WHERE id = ${activityLogs.userId})`,
+      createdAt: activityLogs.createdAt
+    })
+    .from(activityLogs)
+    .where(and(
+      eq(activityLogs.entityType, "ticket"),
+      eq(activityLogs.entityId, ticketId)
+    ))
+    .orderBy(desc(activityLogs.createdAt));
+
+    return logs;
+  }
+
+  async updateTicketSettings(ticketId: number, updates: any): Promise<void> {
+    const updateData: any = {};
+    
+    if (updates.status) updateData.status = updates.status;
+    if (updates.priority) updateData.priority = updates.priority;
+    if (updates.estimatedDelivery) updateData.estimatedDelivery = new Date(updates.estimatedDelivery);
+    if (updates.quotedCost) {
+      // Update the accepted evaluation with new cost
+      await db.update(taskEvaluations)
+        .set({ estimatedCost: updates.quotedCost })
+        .where(and(
+          eq(taskEvaluations.taskId, ticketId),
+          eq(taskEvaluations.accepted, true)
+        ));
+    }
+    
+    if (Object.keys(updateData).length > 0) {
+      await db.update(tasks)
+        .set(updateData)
+        .where(eq(tasks.id, ticketId));
+    }
+
+    // Handle admin approval
+    if (updates.adminApproval !== undefined) {
+      if (updates.adminApproval) {
+        await db.insert(taskAssignments)
+          .values({
+            taskId: ticketId,
+            assignedBy: "system",
+            assignedTo: "system",
+            status: "approved"
+          })
+          .onConflictDoUpdate({
+            target: [taskAssignments.taskId],
+            set: { status: "approved" }
+          });
+      }
+    }
+  }
+
+  async getTicketAttachments(ticketId: number): Promise<any[]> {
+    // Since we don't have a dedicated attachments table, return empty array
+    // In a real implementation, you would query the attachments table
+    return [];
+  }
+
+  async createTicketAttachment(attachment: {
+    ticketId: number;
+    userId: string;
+    name: string;
+    size: string;
+    url: string;
+  }): Promise<any> {
+    // In a real implementation, you would insert into attachments table
+    // For now, return a mock response
+    return {
+      id: Date.now(),
+      ...attachment,
+      createdAt: new Date()
+    };
   }
 }
 

@@ -39,6 +39,8 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import TaskView from "@/pages/task-view";
 import Notifications from "@/pages/notifications";
 import NotFound from "@/pages/not-found";
+import HelpdeskDashboard from "@/pages/helpdesk-dashboard";
+import TicketDetail from "@/pages/ticket-detail";
 
 /**
  * Application router with authentication-based route protection
@@ -82,6 +84,8 @@ function Router() {
           <Route path="/profile" component={Profile} />
           <Route path="/tasks/:id" component={TaskView} />
           <Route path="/notifications" component={Notifications} />
+          <Route path="/helpdesk" component={HelpdeskDashboard} />
+          <Route path="/tickets/:id" component={TicketDetail} />
         </>
       )}
       <Route component={NotFound} />
