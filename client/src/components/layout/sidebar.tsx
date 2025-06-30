@@ -16,9 +16,14 @@ import {
   Megaphone,
   DollarSign,
   BarChart3,
-  Headphones
+  Headphones,
+  Menu,
+  X
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
+import { useState } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { Button } from "@/components/ui/button";
 
 interface SidebarLinkProps {
   href: string;
@@ -57,6 +62,8 @@ function SidebarLink({ href, icon: Icon, children, badge, isActive }: SidebarLin
 export function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const { data: stats } = useQuery<{
     activeTasks: string;
@@ -79,7 +86,32 @@ export function Sidebar() {
   };
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+    <>
+      {/* Mobile menu button */}
+      {isMobile && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50 lg:hidden"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
+      )}
+
+      {/* Overlay for mobile */}
+      {isMobile && isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={cn(
+        "fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+        isMobile && !isOpen && "-translate-x-full"
+      )}>
       <div className="p-4">
         <div className="space-y-1">
           <SidebarLink 
@@ -287,5 +319,6 @@ export function Sidebar() {
         </div>
       </div>
     </div>
+    </>
   );
 }
