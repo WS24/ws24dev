@@ -1616,6 +1616,162 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * Billing and Payment Routes
+   */
+  app.get("/api/billing/stats", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const balance = await storage.getUserBalance(userId);
+      
+      // Get total spent this month
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const transactions = await storage.getTransactionHistory(userId);
+      
+      const totalSpent = transactions
+        .filter((t: any) => t.fromUserId === userId && t.type === 'payment' && new Date(t.createdAt!) >= startOfMonth)
+        .reduce((sum: number, t: any) => sum + parseFloat(t.amount), 0);
+      
+      // Get pending invoices
+      const invoices = await storage.getUserInvoices(userId);
+      const pendingInvoices = invoices.filter((i: any) => i.status === 'pending');
+      const pendingAmount = pendingInvoices.reduce((sum: number, i: any) => sum + parseFloat(i.total), 0);
+      
+      res.json({
+        balance,
+        totalSpent: totalSpent.toFixed(2),
+        pendingInvoices: pendingInvoices.length,
+        pendingAmount: pendingAmount.toFixed(2)
+      });
+    } catch (error) {
+      console.error("Error fetching billing stats:", error);
+      res.status(500).json({ message: "Failed to fetch billing stats" });
+    }
+  });
+
+  app.get("/api/billing/transactions", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactions = await storage.getTransactionHistory(userId, 50);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  app.get("/api/billing/invoices", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const invoices = await storage.getUserInvoices(userId);
+      res.json(invoices);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      res.status(500).json({ message: "Failed to fetch invoices" });
+    }
+  });
+
+  app.post("/api/billing/topup", 
+    isAuthenticated,
+    [
+      body("amount").isFloat({ min: 1 }).withMessage("Amount must be at least $1"),
+    ],
+    handleValidationErrors,
+    async (req: any, res: Response) => {
+      try {
+        const userId = req.user.claims.sub;
+        const { amount } = req.body;
+        
+        // Update user balance
+        await storage.updateUserBalance(userId, amount, 'add');
+        
+        // Create transaction record
+        await storage.createTransaction({
+          transactionId: `TOPUP${Date.now()}`,
+          type: 'topup',
+          amount: amount.toFixed(2),
+          userId: userId,
+          description: `Balance top-up`,
+          status: 'completed',
+          year: new Date().getFullYear(),
+          month: new Date().getMonth() + 1,
+          day: new Date().getDate()
+        });
+        
+        res.json({ message: "Balance topped up successfully" });
+      } catch (error) {
+        console.error("Error processing top-up:", error);
+        res.status(500).json({ message: "Failed to process top-up" });
+      }
+    }
+  );
+
+  app.post("/api/billing/invoices",
+    isAuthenticated,
+    [
+      body("amount").isFloat({ min: 0 }).withMessage("Invalid amount"),
+      body("description").optional().isString(),
+      body("dueDate").optional().isISO8601(),
+      body("companyName").optional().isString(),
+      body("companyAddress").optional().isString(),
+      body("companyTaxId").optional().isString(),
+    ],
+    handleValidationErrors,
+    async (req: any, res: Response) => {
+      try {
+        const userId = req.user.claims.sub;
+        const user = await storage.getUser(userId);
+        
+        if (user?.role !== 'admin') {
+          return res.status(403).json({ message: "Only admins can create manual invoices" });
+        }
+
+        const { amount, description, dueDate, companyName, companyAddress, companyTaxId } = req.body;
+        
+        const invoice = await storage.createInvoice({
+          invoiceNumber: `INV${Date.now()}`,
+          userId,
+          amount: amount.toFixed(2),
+          tax: "0",
+          total: amount.toFixed(2),
+          status: 'pending',
+          dueDate: dueDate ? new Date(dueDate) : undefined,
+          companyName,
+          companyAddress,
+          companyTaxId,
+          notes: description
+        });
+        
+        res.json(invoice);
+      } catch (error) {
+        console.error("Error creating invoice:", error);
+        res.status(500).json({ message: "Failed to create invoice" });
+      }
+    }
+  );
+
+  app.post("/api/billing/process-payment/:taskId",
+    isAuthenticated,
+    async (req: any, res: Response) => {
+      try {
+        const userId = req.user.claims.sub;
+        const taskId = parseInt(req.params.taskId);
+        const { amount } = req.body;
+        
+        const result = await storage.processTaskPayment(taskId, userId, amount);
+        
+        res.json({
+          message: "Payment processed successfully",
+          ...result
+        });
+      } catch (error: any) {
+        console.error("Error processing payment:", error);
+        res.status(400).json({ message: error.message || "Failed to process payment" });
+      }
+    }
+  );
+
   const httpServer = createServer(app);
   return httpServer;
 }

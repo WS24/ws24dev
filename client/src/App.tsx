@@ -41,6 +41,7 @@ import Notifications from "@/pages/notifications";
 import NotFound from "@/pages/not-found";
 import HelpdeskDashboard from "@/pages/helpdesk-dashboard";
 import TicketDetail from "@/pages/ticket-detail";
+import BillingPayments from "@/pages/billing-payments";
 
 /**
  * Application router with authentication-based route protection
@@ -74,6 +75,7 @@ function Router() {
           <Route path="/admin/user-roles" component={UserRoles} />
           <Route path="/admin/settings" component={SystemSettings} />
           <Route path="/billing" component={Billing} />
+          <Route path="/billing-payments" component={BillingPayments} />
           <Route path="/analytics" component={Analytics} />
           <Route path="/stripe-settings" component={StripeSettings} />
           <Route path="/system-settings" component={SystemSettings} />

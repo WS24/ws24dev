@@ -134,6 +134,14 @@ export function Sidebar() {
             </SidebarLink>
             
             <SidebarLink 
+              href="/billing-payments" 
+              icon={CreditCard}
+              isActive={isActive("/billing-payments")}
+            >
+              Billing & Payments
+            </SidebarLink>
+            
+            <SidebarLink 
               href="/analytics" 
               icon={BarChart3}
               isActive={isActive("/analytics")}

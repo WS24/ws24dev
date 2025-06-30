@@ -248,6 +248,22 @@ export interface IStorage {
     size: string;
     url: string;
   }): Promise<any>;
+
+  // Billing and Payment operations
+  getUserBalance(userId: string): Promise<string>;
+  updateUserBalance(userId: string, amount: number, operation: 'add' | 'subtract'): Promise<void>;
+  createPayment(payment: Partial<Payment>): Promise<Payment>;
+  updatePaymentStatus(paymentId: number, status: string): Promise<void>;
+  getPaymentById(paymentId: number): Promise<Payment | undefined>;
+  getUserPayments(userId: string): Promise<Payment[]>;
+  getTransactionHistory(userId: string, limit?: number): Promise<Transaction[]>;
+  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  createInvoice(invoice: InsertInvoice): Promise<Invoice>;
+  getInvoiceById(invoiceId: number): Promise<Invoice | undefined>;
+  getUserInvoices(userId: string): Promise<Invoice[]>;
+  updateInvoiceStatus(invoiceId: number, status: string): Promise<void>;
+  processTaskPayment(taskId: number, clientId: string, amount: number): Promise<{ paymentId: number; transactionId: string }>;
+  processSpecialistPayout(taskId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1443,6 +1459,236 @@ export class DatabaseStorage implements IStorage {
       ...attachment,
       createdAt: new Date()
     };
+  }
+
+  // Billing and Payment operations
+  async getUserBalance(userId: string): Promise<string> {
+    const user = await this.getUser(userId);
+    return user?.balance || '0.00';
+  }
+
+  async updateUserBalance(userId: string, amount: number, operation: 'add' | 'subtract'): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error('User not found');
+    
+    const currentBalance = parseFloat(user.balance || '0');
+    const newBalance = operation === 'add' 
+      ? currentBalance + amount 
+      : currentBalance - amount;
+    
+    if (newBalance < 0) throw new Error('Insufficient balance');
+    
+    await db
+      .update(users)
+      .set({ balance: newBalance.toFixed(2) })
+      .where(eq(users.id, userId));
+  }
+
+  async createPayment(payment: Partial<Payment>): Promise<Payment> {
+    const [newPayment] = await db
+      .insert(payments)
+      .values(payment)
+      .returning();
+    return newPayment;
+  }
+
+  async updatePaymentStatus(paymentId: number, status: string): Promise<void> {
+    await db
+      .update(payments)
+      .set({ 
+        status,
+        paidAt: status === 'completed' ? new Date() : null
+      })
+      .where(eq(payments.id, paymentId));
+  }
+
+  async getPaymentById(paymentId: number): Promise<Payment | undefined> {
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.id, paymentId));
+    return payment;
+  }
+
+  async getUserPayments(userId: string): Promise<Payment[]> {
+    return await db
+      .select()
+      .from(payments)
+      .where(or(
+        eq(payments.fromUserId, userId),
+        eq(payments.toUserId, userId)
+      ))
+      .orderBy(desc(payments.createdAt));
+  }
+
+  async getTransactionHistory(userId: string, limit?: number): Promise<Transaction[]> {
+    const query = db
+      .select()
+      .from(transactions)
+      .where(or(
+        eq(transactions.fromUserId, userId),
+        eq(transactions.toUserId, userId)
+      ))
+      .orderBy(desc(transactions.createdAt));
+    
+    if (limit) {
+      return await query.limit(limit);
+    }
+    return await query;
+  }
+
+  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+    const [newTransaction] = await db
+      .insert(transactions)
+      .values(transaction)
+      .returning();
+    return newTransaction;
+  }
+
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
+    const [newInvoice] = await db
+      .insert(invoices)
+      .values(invoice)
+      .returning();
+    return newInvoice;
+  }
+
+  async getInvoiceById(invoiceId: number): Promise<Invoice | undefined> {
+    const [invoice] = await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.id, invoiceId));
+    return invoice;
+  }
+
+  async getUserInvoices(userId: string): Promise<Invoice[]> {
+    return await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.userId, userId))
+      .orderBy(desc(invoices.createdAt));
+  }
+
+  async updateInvoiceStatus(invoiceId: number, status: string): Promise<void> {
+    await db
+      .update(invoices)
+      .set({ 
+        status,
+        paidDate: status === 'paid' ? new Date() : null,
+        updatedAt: new Date()
+      })
+      .where(eq(invoices.id, invoiceId));
+  }
+
+  async processTaskPayment(taskId: number, clientId: string, amount: number): Promise<{ paymentId: number; transactionId: string }> {
+    // Get platform settings for markup
+    const markupSetting = await db
+      .select()
+      .from(platformSettings)
+      .where(eq(platformSettings.key, 'payment_markup_percentage'));
+    
+    const markupPercentage = markupSetting[0]?.value ? parseFloat(markupSetting[0].value) : 100;
+    const markupAmount = amount * (markupPercentage / 100);
+    const totalAmount = amount + markupAmount;
+    
+    // Check client balance
+    const clientBalance = parseFloat(await this.getUserBalance(clientId));
+    if (clientBalance < totalAmount) {
+      throw new Error('Insufficient balance');
+    }
+    
+    // Create payment record
+    const payment = await this.createPayment({
+      taskId,
+      amount: totalAmount.toFixed(2),
+      status: 'completed',
+      paymentType: 'task',
+      fromUserId: clientId,
+      markupAmount: markupAmount.toFixed(2),
+      specialistAmount: amount.toFixed(2),
+      paymentMethod: 'balance',
+      paidAt: new Date()
+    });
+    
+    // Deduct from client balance
+    await this.updateUserBalance(clientId, totalAmount, 'subtract');
+    
+    // Create transaction record
+    const transactionId = `TXN${Date.now()}`;
+    await this.createTransaction({
+      transactionId,
+      type: 'payment',
+      amount: totalAmount.toFixed(2),
+      fromUserId: clientId,
+      toUserId: 'platform',
+      description: `Payment for task #${taskId}`,
+      status: 'completed',
+      metadata: JSON.stringify({
+        taskId,
+        markupAmount: markupAmount.toFixed(2),
+        specialistAmount: amount.toFixed(2)
+      })
+    });
+    
+    // Update task status
+    await db
+      .update(tasks)
+      .set({ status: 'paid' })
+      .where(eq(tasks.id, taskId));
+    
+    return { paymentId: payment.id, transactionId };
+  }
+
+  async processSpecialistPayout(taskId: number): Promise<void> {
+    // Get task and payment details
+    const [task] = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.id, taskId));
+    
+    if (!task || task.status !== 'completed') {
+      throw new Error('Task must be completed before payout');
+    }
+    
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(and(
+        eq(payments.taskId, taskId),
+        eq(payments.status, 'completed')
+      ));
+    
+    if (!payment) {
+      throw new Error('No payment found for this task');
+    }
+    
+    const specialistAmount = parseFloat(payment.specialistAmount || '0');
+    const commissionAmount = specialistAmount * 0.5; // 50% commission
+    
+    // Add to specialist balance
+    await this.updateUserBalance(task.specialistId!, commissionAmount, 'add');
+    
+    // Create payout transaction
+    await this.createTransaction({
+      transactionId: `PAYOUT${Date.now()}`,
+      type: 'payout',
+      amount: commissionAmount.toFixed(2),
+      fromUserId: 'platform',
+      toUserId: task.specialistId!,
+      description: `Commission payout for task #${taskId} (50%)`,
+      status: 'completed',
+      metadata: JSON.stringify({
+        taskId,
+        originalAmount: specialistAmount.toFixed(2),
+        commissionRate: '50%'
+      })
+    });
+    
+    // Update task to mark payout complete
+    await db
+      .update(tasks)
+      .set({ status: 'paid_out' })
+      .where(eq(tasks.id, taskId));
   }
 }
 

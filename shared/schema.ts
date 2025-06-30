@@ -82,11 +82,18 @@ export const taskEvaluations = pgTable("task_evaluations", {
 
 export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
-  taskId: integer("task_id").notNull(),
+  taskId: integer("task_id"),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  status: varchar("status", { length: 50 }).notNull().default("pending"), // 'pending', 'paid', 'failed'
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // 'pending', 'completed', 'failed'
   paymentMethod: varchar("payment_method", { length: 50 }),
   transactionId: varchar("transaction_id"),
+  paymentType: varchar("payment_type", { length: 50 }).default("task"), // 'task', 'topup', 'withdrawal', 'manual_invoice'
+  fromUserId: varchar("from_user_id"),
+  toUserId: varchar("to_user_id"),
+  markupAmount: decimal("markup_amount", { precision: 10, scale: 2 }),
+  specialistAmount: decimal("specialist_amount", { precision: 10, scale: 2 }),
+  invoiceId: varchar("invoice_id"),
+  reason: text("reason"),
   createdAt: timestamp("created_at").defaultNow(),
   paidAt: timestamp("paid_at"),
 });
@@ -98,6 +105,26 @@ export const taskUpdates = pgTable("task_updates", {
   content: text("content").notNull(),
   type: varchar("type", { length: 50 }).notNull().default("update"), // 'update', 'comment', 'status_change'
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  invoiceNumber: varchar("invoice_number", { length: 50 }).notNull().unique(),
+  userId: varchar("user_id").notNull(),
+  paymentId: integer("payment_id"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  tax: decimal("tax", { precision: 10, scale: 2 }).default("0"),
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // 'pending', 'paid', 'cancelled'
+  dueDate: timestamp("due_date"),
+  paidDate: timestamp("paid_date"),
+  companyName: varchar("company_name", { length: 255 }),
+  companyAddress: text("company_address"),
+  companyTaxId: varchar("company_tax_id", { length: 100 }),
+  notes: text("notes"),
+  pdfUrl: varchar("pdf_url", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Relations
@@ -573,3 +600,22 @@ export const insertTicketSettingsSchema = createInsertSchema(ticketSettings).pic
 
 export type TicketSettings = typeof ticketSettings.$inferSelect;
 export type InsertTicketSettings = z.infer<typeof insertTicketSettingsSchema>;
+
+// Invoice types
+export const insertInvoiceSchema = createInsertSchema(invoices).pick({
+  invoiceNumber: true,
+  userId: true,
+  paymentId: true,
+  amount: true,
+  tax: true,
+  total: true,
+  status: true,
+  dueDate: true,
+  companyName: true,
+  companyAddress: true,
+  companyTaxId: true,
+  notes: true,
+});
+
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
