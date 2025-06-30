@@ -218,6 +218,14 @@ export function Sidebar() {
                 </p>
                 
                 <SidebarLink 
+                  href="/admin/dashboard" 
+                  icon={Shield}
+                  isActive={isActive("/admin/dashboard")}
+                >
+                  Admin Dashboard
+                </SidebarLink>
+                
+                <SidebarLink 
                   href="/admin" 
                   icon={Shield}
                   isActive={isActive("/admin")}

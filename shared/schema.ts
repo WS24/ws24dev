@@ -382,6 +382,84 @@ export type TicketFile = typeof ticketFiles.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = typeof transactions.$inferInsert;
 
+// Balance adjustment table for audit logging
+export const balanceAdjustments = pgTable("balance_adjustments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  adminId: varchar("admin_id").notNull().references(() => users.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  previousBalance: decimal("previous_balance", { precision: 10, scale: 2 }).notNull(),
+  newBalance: decimal("new_balance", { precision: 10, scale: 2 }).notNull(),
+  reason: text("reason").notNull(),
+  type: varchar("type").notNull(), // 'credit' or 'debit'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Platform settings table for markup rates and other admin configurations
+export const platformSettings = pgTable("platform_settings", {
+  id: serial("id").primaryKey(),
+  key: varchar("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedBy: varchar("updated_by").references(() => users.id),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Task assignment table for admin task assignment tracking
+export const taskAssignments = pgTable("task_assignments", {
+  id: serial("id").primaryKey(),
+  taskId: integer("task_id").notNull().references(() => tasks.id),
+  specialistId: varchar("specialist_id").notNull().references(() => users.id),
+  assignedBy: varchar("assigned_by").notNull().references(() => users.id),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  status: varchar("status").notNull().default("active"), // 'active', 'completed', 'reassigned'
+  notes: text("notes"),
+});
+
+// Relations for new tables
+export const balanceAdjustmentRelations = relations(balanceAdjustments, ({ one }) => ({
+  user: one(users, { fields: [balanceAdjustments.userId], references: [users.id] }),
+  admin: one(users, { fields: [balanceAdjustments.adminId], references: [users.id] }),
+}));
+
+export const platformSettingsRelations = relations(platformSettings, ({ one }) => ({
+  updatedByUser: one(users, { fields: [platformSettings.updatedBy], references: [users.id] }),
+}));
+
+export const taskAssignmentRelations = relations(taskAssignments, ({ one }) => ({
+  task: one(tasks, { fields: [taskAssignments.taskId], references: [tasks.id] }),
+  specialist: one(users, { fields: [taskAssignments.specialistId], references: [users.id] }),
+  assignedByUser: one(users, { fields: [taskAssignments.assignedBy], references: [users.id] }),
+}));
+
+// Insert schemas for new tables
+export const insertBalanceAdjustmentSchema = createInsertSchema(balanceAdjustments).pick({
+  userId: true,
+  amount: true,
+  reason: true,
+  type: true,
+});
+
+export const insertPlatformSettingsSchema = createInsertSchema(platformSettings).pick({
+  key: true,
+  value: true,
+  description: true,
+});
+
+export const insertTaskAssignmentSchema = createInsertSchema(taskAssignments).pick({
+  taskId: true,
+  specialistId: true,
+  notes: true,
+});
+
+// Export types
+export type BalanceAdjustment = typeof balanceAdjustments.$inferSelect;
+export type InsertBalanceAdjustment = z.infer<typeof insertBalanceAdjustmentSchema>;
+export type PlatformSettings = typeof platformSettings.$inferSelect;
+export type InsertPlatformSettings = z.infer<typeof insertPlatformSettingsSchema>;
+export type TaskAssignment = typeof taskAssignments.$inferSelect;
+export type InsertTaskAssignment = z.infer<typeof insertTaskAssignmentSchema>;
+
 // System Settings table
 export const systemSettings = pgTable("system_settings", {
   id: serial("id").primaryKey(),

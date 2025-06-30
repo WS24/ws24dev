@@ -15,6 +15,9 @@ import {
   transactions,
   systemSettings,
   ticketSettings,
+  balanceAdjustments,
+  platformSettings,
+  taskAssignments,
   type User,
   type UpsertUser,
   type Task,
@@ -43,6 +46,12 @@ import {
   type InsertSystemSettings,
   type TicketSettings,
   type InsertTicketSettings,
+  type BalanceAdjustment,
+  type InsertBalanceAdjustment,
+  type PlatformSettings,
+  type InsertPlatformSettings,
+  type TaskAssignment,
+  type InsertTaskAssignment,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, or, sql, gte } from "drizzle-orm";
@@ -159,6 +168,27 @@ export interface IStorage {
   // Ticket Settings operations
   getTicketSettings(): Promise<TicketSettings | undefined>;
   updateTicketSettings(settings: Partial<InsertTicketSettings>): Promise<TicketSettings>;
+  
+  // Administrator operations
+  adjustUserBalance(adminId: string, userId: string, amount: string, reason: string, type: 'credit' | 'debit'): Promise<BalanceAdjustment>;
+  getBalanceAdjustments(userId?: string): Promise<BalanceAdjustment[]>;
+  assignTaskToSpecialist(adminId: string, taskId: number, specialistId: string, notes?: string): Promise<TaskAssignment>;
+  getTaskAssignments(taskId?: number): Promise<TaskAssignment[]>;
+  updatePlatformSetting(key: string, value: string, description?: string, updatedBy?: string): Promise<PlatformSettings>;
+  getPlatformSettings(): Promise<PlatformSettings[]>;
+  getPlatformSetting(key: string): Promise<PlatformSettings | undefined>;
+  getAdminDashboardStats(): Promise<{
+    totalTasks: number;
+    activeTasks: number;
+    completedTasks: number;
+    totalUsers: number;
+    totalSpecialists: number;
+    totalClients: number;
+    totalRevenue: string;
+    platformMarkupRate: string;
+    pendingPayments: number;
+    activeAssignments: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -848,6 +878,179 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return settings;
     }
+  }
+
+  // Administrator operations
+  async adjustUserBalance(adminId: string, userId: string, amount: string, reason: string, type: 'credit' | 'debit'): Promise<BalanceAdjustment> {
+    // Get current user balance
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const currentBalance = parseFloat(user.balance || '0');
+    const adjustmentAmount = parseFloat(amount);
+    const newBalance = type === 'credit' 
+      ? currentBalance + adjustmentAmount 
+      : currentBalance - adjustmentAmount;
+    
+    // Create balance adjustment record
+    const [adjustment] = await db.insert(balanceAdjustments).values({
+      userId,
+      adminId,
+      amount: amount,
+      previousBalance: currentBalance.toFixed(2),
+      newBalance: newBalance.toFixed(2),
+      reason,
+      type,
+    }).returning();
+    
+    // Update user balance
+    await db.update(users)
+      .set({ balance: newBalance.toFixed(2) })
+      .where(eq(users.id, userId));
+    
+    return adjustment;
+  }
+
+  async getBalanceAdjustments(userId?: string): Promise<BalanceAdjustment[]> {
+    if (userId) {
+      return await db.select()
+        .from(balanceAdjustments)
+        .where(eq(balanceAdjustments.userId, userId))
+        .orderBy(desc(balanceAdjustments.createdAt));
+    }
+    return await db.select()
+      .from(balanceAdjustments)
+      .orderBy(desc(balanceAdjustments.createdAt));
+  }
+
+  async assignTaskToSpecialist(adminId: string, taskId: number, specialistId: string, notes?: string): Promise<TaskAssignment> {
+    // Update any existing active assignments to reassigned
+    await db.update(taskAssignments)
+      .set({ status: 'reassigned' })
+      .where(and(
+        eq(taskAssignments.taskId, taskId),
+        eq(taskAssignments.status, 'active')
+      ));
+    
+    // Create new assignment
+    const [assignment] = await db.insert(taskAssignments).values({
+      taskId,
+      specialistId,
+      assignedBy: adminId,
+      notes,
+      status: 'active',
+    }).returning();
+    
+    // Update task with specialist
+    await db.update(tasks)
+      .set({ specialistId })
+      .where(eq(tasks.id, taskId));
+    
+    return assignment;
+  }
+
+  async getTaskAssignments(taskId?: number): Promise<TaskAssignment[]> {
+    if (taskId) {
+      return await db.select()
+        .from(taskAssignments)
+        .where(eq(taskAssignments.taskId, taskId))
+        .orderBy(desc(taskAssignments.assignedAt));
+    }
+    return await db.select()
+      .from(taskAssignments)
+      .orderBy(desc(taskAssignments.assignedAt));
+  }
+
+  async updatePlatformSetting(key: string, value: string, description?: string, updatedBy?: string): Promise<PlatformSettings> {
+    const existing = await this.getPlatformSetting(key);
+    
+    if (existing) {
+      const [setting] = await db.update(platformSettings)
+        .set({
+          value,
+          description: description || existing.description,
+          updatedBy,
+          updatedAt: new Date(),
+        })
+        .where(eq(platformSettings.key, key))
+        .returning();
+      return setting;
+    } else {
+      const [setting] = await db.insert(platformSettings).values({
+        key,
+        value,
+        description,
+        updatedBy,
+      }).returning();
+      return setting;
+    }
+  }
+
+  async getPlatformSettings(): Promise<PlatformSettings[]> {
+    return await db.select().from(platformSettings);
+  }
+
+  async getPlatformSetting(key: string): Promise<PlatformSettings | undefined> {
+    const [setting] = await db.select()
+      .from(platformSettings)
+      .where(eq(platformSettings.key, key));
+    return setting;
+  }
+
+  async getAdminDashboardStats(): Promise<{
+    totalTasks: number;
+    activeTasks: number;
+    completedTasks: number;
+    totalUsers: number;
+    totalSpecialists: number;
+    totalClients: number;
+    totalRevenue: string;
+    platformMarkupRate: string;
+    pendingPayments: number;
+    activeAssignments: number;
+  }> {
+    const [taskStats] = await db.select({
+      totalTasks: sql<number>`count(*)`,
+      activeTasks: sql<number>`count(case when status in ('created', 'evaluating', 'evaluated', 'paid', 'in_progress') then 1 end)`,
+      completedTasks: sql<number>`count(case when status = 'completed' then 1 end)`,
+    }).from(tasks);
+
+    const [userStats] = await db.select({
+      totalUsers: sql<number>`count(*)`,
+      totalSpecialists: sql<number>`count(case when role = 'specialist' then 1 end)`,
+      totalClients: sql<number>`count(case when role = 'client' then 1 end)`,
+    }).from(users);
+
+    const [revenueStats] = await db.select({
+      totalRevenue: sql<string>`coalesce(sum(amount), 0)`,
+    }).from(payments).where(eq(payments.status, 'paid'));
+
+    const [pendingPaymentStats] = await db.select({
+      pendingPayments: sql<number>`count(*)`,
+    }).from(payments).where(eq(payments.status, 'pending'));
+
+    const [activeAssignmentStats] = await db.select({
+      activeAssignments: sql<number>`count(*)`,
+    }).from(taskAssignments).where(eq(taskAssignments.status, 'active'));
+
+    // Get platform markup rate
+    const markupSetting = await this.getPlatformSetting('platform_markup_rate');
+    const platformMarkupRate = markupSetting?.value || '50';
+
+    return {
+      totalTasks: taskStats?.totalTasks || 0,
+      activeTasks: taskStats?.activeTasks || 0,
+      completedTasks: taskStats?.completedTasks || 0,
+      totalUsers: userStats?.totalUsers || 0,
+      totalSpecialists: userStats?.totalSpecialists || 0,
+      totalClients: userStats?.totalClients || 0,
+      totalRevenue: revenueStats?.totalRevenue || '0.00',
+      platformMarkupRate,
+      pendingPayments: pendingPaymentStats?.pendingPayments || 0,
+      activeAssignments: activeAssignmentStats?.activeAssignments || 0,
+    };
   }
 }
 

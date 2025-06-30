@@ -1032,6 +1032,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Administrator endpoints
+  app.get('/api/admin/dashboard-stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const stats = await storage.getAdminDashboardStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin dashboard stats:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    }
+  });
+
+  app.post('/api/admin/adjust-balance', isAuthenticated, [
+    body('userId').notEmpty().withMessage('User ID is required'),
+    body('amount').isNumeric().withMessage('Amount must be numeric'),
+    body('reason').notEmpty().withMessage('Reason is required'),
+    body('type').isIn(['credit', 'debit']).withMessage('Type must be credit or debit'),
+    handleValidationErrors,
+  ], async (req: any, res) => {
+    try {
+      const adminId = req.user.claims.sub;
+      const admin = await storage.getUser(adminId);
+      
+      if (!admin || admin.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId, amount, reason, type } = req.body;
+      const adjustment = await storage.adjustUserBalance(adminId, userId, amount, reason, type);
+      res.json(adjustment);
+    } catch (error) {
+      console.error("Error adjusting balance:", error);
+      res.status(500).json({ message: "Failed to adjust balance" });
+    }
+  });
+
+  app.get('/api/admin/balance-adjustments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const adjustments = await storage.getBalanceAdjustments();
+      res.json(adjustments);
+    } catch (error) {
+      console.error("Error fetching balance adjustments:", error);
+      res.status(500).json({ message: "Failed to fetch balance adjustments" });
+    }
+  });
+
+  app.post('/api/admin/assign-task', isAuthenticated, [
+    body('taskId').isNumeric().withMessage('Task ID must be numeric'),
+    body('specialistId').notEmpty().withMessage('Specialist ID is required'),
+    handleValidationErrors,
+  ], async (req: any, res) => {
+    try {
+      const adminId = req.user.claims.sub;
+      const admin = await storage.getUser(adminId);
+      
+      if (!admin || admin.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { taskId, specialistId, notes } = req.body;
+      const assignment = await storage.assignTaskToSpecialist(adminId, taskId, specialistId, notes);
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error assigning task:", error);
+      res.status(500).json({ message: "Failed to assign task" });
+    }
+  });
+
+  app.get('/api/admin/platform-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const settings = await storage.getPlatformSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching platform settings:", error);
+      res.status(500).json({ message: "Failed to fetch platform settings" });
+    }
+  });
+
+  app.put('/api/admin/platform-settings/:key', isAuthenticated, [
+    body('value').notEmpty().withMessage('Value is required'),
+    handleValidationErrors,
+  ], async (req: any, res) => {
+    try {
+      const adminId = req.user.claims.sub;
+      const admin = await storage.getUser(adminId);
+      
+      if (!admin || admin.role !== "admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { key } = req.params;
+      const { value } = req.body;
+      const setting = await storage.updatePlatformSetting(key, value, undefined, adminId);
+      res.json(setting);
+    } catch (error) {
+      console.error("Error updating platform setting:", error);
+      res.status(500).json({ message: "Failed to update platform setting" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

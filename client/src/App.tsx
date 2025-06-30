@@ -33,6 +33,7 @@ import Evaluations from "@/pages/evaluations";
 import Profile from "@/pages/profile";
 import AdminUsers from "@/pages/admin-users";
 import UserRoles from "@/pages/user-roles";
+import AdminDashboard from "@/pages/admin-dashboard";
 import TaskView from "@/pages/task-view";
 import NotFound from "@/pages/not-found";
 
@@ -61,6 +62,7 @@ function Router() {
           <Route path="/assignments" component={Assignments} />
           <Route path="/evaluations" component={Evaluations} />
           <Route path="/admin" component={AdminPanel} />
+          <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/users" component={AdminUsers} />
           <Route path="/admin/user-roles" component={UserRoles} />
           <Route path="/admin/settings" component={SystemSettings} />
