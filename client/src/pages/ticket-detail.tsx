@@ -30,7 +30,6 @@ import {
   Star,
   Flag
 } from "lucide-react";
-
 export default function TicketDetail() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -38,23 +37,18 @@ export default function TicketDetail() {
   const [message, setMessage] = useState("");
   const [internalNote, setInternalNote] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
   const { data: ticket, isLoading } = useQuery({
     queryKey: [`/api/tickets/${id}`],
   });
-
   const { data: messages } = useQuery({
     queryKey: [`/api/tickets/${id}/messages`],
   });
-
   const { data: changeLog } = useQuery({
     queryKey: [`/api/tickets/${id}/changelog`],
   });
-
   const { data: attachments } = useQuery({
     queryKey: [`/api/tickets/${id}/attachments`],
   });
-
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: { message: string; isInternal: boolean }) => {
       await apiRequest("POST", `/api/tickets/${id}/messages`, messageData);
@@ -66,7 +60,6 @@ export default function TicketDetail() {
       toast({ title: "Message sent successfully" });
     },
   });
-
   const updateTicketMutation = useMutation({
     mutationFn: async (updates: any) => {
       await apiRequest("PATCH", `/api/tickets/${id}`, updates);
@@ -77,7 +70,6 @@ export default function TicketDetail() {
       toast({ title: "Ticket updated successfully" });
     },
   });
-
   const uploadFileMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
@@ -90,25 +82,21 @@ export default function TicketDetail() {
       toast({ title: "File uploaded successfully" });
     },
   });
-
   const handleSendMessage = () => {
     if (message.trim()) {
       sendMessageMutation.mutate({ message, isInternal: false });
     }
   };
-
   const handleSendInternalNote = () => {
     if (internalNote.trim()) {
       sendMessageMutation.mutate({ message: internalNote, isInternal: true });
     }
   };
-
   const handleFileUpload = () => {
     if (selectedFile) {
       uploadFileMutation.mutate(selectedFile);
     }
   };
-
   const getStatusColor = (status: string) => {
     const colors = {
       Created: "bg-blue-500",
@@ -119,7 +107,6 @@ export default function TicketDetail() {
     };
     return colors[status as keyof typeof colors] || "bg-gray-500";
   };
-
   const getPriorityColor = (priority: string) => {
     const colors = {
       low: "text-green-600",
@@ -128,7 +115,6 @@ export default function TicketDetail() {
     };
     return colors[priority as keyof typeof colors] || "text-gray-600";
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -136,7 +122,6 @@ export default function TicketDetail() {
       </div>
     );
   }
-
   if (!ticket) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -148,9 +133,7 @@ export default function TicketDetail() {
       </div>
     );
   }
-
   const isOverdue = ticket.deadline && new Date(ticket.deadline) < new Date();
-
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -181,7 +164,6 @@ export default function TicketDetail() {
           </div>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
@@ -204,7 +186,6 @@ export default function TicketDetail() {
                 Settings
               </TabsTrigger>
             </TabsList>
-
             <TabsContent value="chat" className="mt-4">
               <Card>
                 <CardHeader>
@@ -244,7 +225,6 @@ export default function TicketDetail() {
                       </div>
                     ))}
                   </div>
-
                   <div className="space-y-4">
                     <div>
                       <Label>Send Message</Label>
@@ -261,7 +241,6 @@ export default function TicketDetail() {
                         </Button>
                       </div>
                     </div>
-
                     {(user?.role === "admin" || user?.role === "specialist") && (
                       <div>
                         <Label>Internal Note</Label>
@@ -287,7 +266,6 @@ export default function TicketDetail() {
                 </CardContent>
               </Card>
             </TabsContent>
-
             <TabsContent value="files" className="mt-4">
               <Card>
                 <CardHeader>
@@ -312,7 +290,6 @@ export default function TicketDetail() {
                         </Button>
                       </div>
                     </div>
-
                     <div className="space-y-2">
                       {attachments?.map((file: any) => (
                         <div key={file.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -338,7 +315,6 @@ export default function TicketDetail() {
                 </CardContent>
               </Card>
             </TabsContent>
-
             <TabsContent value="history" className="mt-4">
               <Card>
                 <CardHeader>
@@ -366,7 +342,6 @@ export default function TicketDetail() {
                 </CardContent>
               </Card>
             </TabsContent>
-
             <TabsContent value="settings" className="mt-4">
               {(user?.role === "admin" || user?.id === ticket.specialistId) && (
                 <Card>
@@ -394,7 +369,6 @@ export default function TicketDetail() {
                             </SelectContent>
                           </Select>
                         </div>
-
                         <div>
                           <Label>Priority</Label>
                           <Select
@@ -412,7 +386,6 @@ export default function TicketDetail() {
                           </Select>
                         </div>
                       </div>
-
                       <div>
                         <Label>Deadline</Label>
                         <Input
@@ -421,7 +394,6 @@ export default function TicketDetail() {
                           onChange={(e) => updateTicketMutation.mutate({ deadline: e.target.value })}
                         />
                       </div>
-
                       <div>
                         <Label>Quoted Cost</Label>
                         <Input
@@ -431,7 +403,6 @@ export default function TicketDetail() {
                           placeholder="Enter amount"
                         />
                       </div>
-
                       {user?.role === "admin" && (
                         <div className="flex items-center gap-2">
                           <input
@@ -450,7 +421,6 @@ export default function TicketDetail() {
             </TabsContent>
           </Tabs>
         </div>
-
         {/* Sidebar */}
         <div className="space-y-6">
           <Card>
@@ -462,27 +432,22 @@ export default function TicketDetail() {
                 <p className="text-sm text-muted-foreground">Client</p>
                 <p className="font-medium">{ticket.clientName}</p>
               </div>
-
               <div>
                 <p className="text-sm text-muted-foreground">Assigned Specialist</p>
                 <p className="font-medium">{ticket.specialistName || "Not assigned"}</p>
               </div>
-
               <div>
                 <p className="text-sm text-muted-foreground">Category</p>
                 <p className="font-medium">{ticket.category}</p>
               </div>
-
               <div>
                 <p className="text-sm text-muted-foreground">Estimated Hours</p>
                 <p className="font-medium">{ticket.estimatedHours || "Not set"}</p>
               </div>
-
               <div>
                 <p className="text-sm text-muted-foreground">Budget</p>
                 <p className="font-medium">${ticket.budget || "0"}</p>
               </div>
-
               {ticket.status === "Completed" && ticket.rating && (
                 <div>
                   <p className="text-sm text-muted-foreground">Rating</p>
@@ -500,7 +465,6 @@ export default function TicketDetail() {
               )}
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader>
               <CardTitle>Description</CardTitle>

@@ -4,8 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Shield, Users, Search, Edit, Save, X, UserCheck, UserX, Crown, Briefcase } from "lucide-react";
-
 interface UserRole {
   id: string;
   email: string;
@@ -25,7 +22,6 @@ interface UserRole {
   createdAt: string;
   updatedAt: string;
 }
-
 export default function UserRoles() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -33,7 +29,6 @@ export default function UserRoles() {
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>("");
   const queryClient = useQueryClient();
-
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -48,7 +43,6 @@ export default function UserRoles() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
-
   // Check admin access
   useEffect(() => {
     if (user && user.role !== "admin") {
@@ -60,14 +54,12 @@ export default function UserRoles() {
       window.location.href = "/";
     }
   }, [user, toast]);
-
   // Fetch users
   const { data: users, isLoading: usersLoading } = useQuery<UserRole[]>({
     queryKey: ["/api/admin/users"],
     retry: false,
     enabled: !!user && user.role === "admin",
   });
-
   // Update user role mutation
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
@@ -101,7 +93,6 @@ export default function UserRoles() {
       });
     },
   });
-
   if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -112,7 +103,6 @@ export default function UserRoles() {
       </div>
     );
   }
-
   const getRoleIcon = (role: string) => {
     switch (role) {
       case "admin":
@@ -127,7 +117,6 @@ export default function UserRoles() {
         return <Users className="w-4 h-4" />;
     }
   };
-
   const getRoleBadge = (role: string) => {
     const baseClasses = "flex items-center space-x-1";
     switch (role) {
@@ -168,18 +157,15 @@ export default function UserRoles() {
         );
     }
   };
-
   const filteredUsers = users ? users.filter(u => 
     u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
   ) : [];
-
   const handleEditRole = (userId: string, currentRole: string) => {
     setEditingUser(userId);
     setSelectedRole(currentRole);
   };
-
   const handleSaveRole = (userId: string) => {
     if (selectedRole && selectedRole !== users?.find(u => u.id === userId)?.role) {
       updateRoleMutation.mutate({ userId, role: selectedRole });
@@ -187,17 +173,12 @@ export default function UserRoles() {
       setEditingUser(null);
     }
   };
-
   const handleCancelEdit = () => {
     setEditingUser(null);
     setSelectedRole("");
   };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="flex">
-        <Sidebar />
         <div className="flex-1 p-6">
           <div className="max-w-6xl mx-auto space-y-6">
             {/* Header */}
@@ -210,7 +191,6 @@ export default function UserRoles() {
                 </div>
               </div>
             </div>
-
             {/* Role Information */}
             <Card>
               <CardHeader>
@@ -264,7 +244,6 @@ export default function UserRoles() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Users Management */}
             <Card>
               <CardHeader>
@@ -375,7 +354,6 @@ export default function UserRoles() {
                 )}
               </CardContent>
             </Card>
-
             {/* Workflow Information */}
             <Card>
               <CardHeader>
@@ -394,7 +372,6 @@ export default function UserRoles() {
                       Admin assigns client tasks to specialists for evaluation
                     </p>
                   </div>
-                  
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <div className="flex items-center space-x-2 mb-2">
                       <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -406,7 +383,6 @@ export default function UserRoles() {
                       Specialist provides cost estimate and timeline
                     </p>
                   </div>
-                  
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <div className="flex items-center space-x-2 mb-2">
                       <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -418,7 +394,6 @@ export default function UserRoles() {
                       After payment, specialist executes task using comments
                     </p>
                   </div>
-                  
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <div className="flex items-center space-x-2 mb-2">
                       <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
@@ -436,6 +411,5 @@ export default function UserRoles() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

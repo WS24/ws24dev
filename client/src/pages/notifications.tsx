@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +8,6 @@ import { Bell, BellOff, Check, Clock, MessageSquare, DollarSign, CheckCircle, Al
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-
 interface Notification {
   id: number;
   userId: string;
@@ -22,15 +19,12 @@ interface Notification {
   relatedId?: number;
   relatedType?: string;
 }
-
 export default function NotificationsPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
-
   const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
   });
-
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: number) => {
       return apiRequest("PATCH", `/api/notifications/${notificationId}/read`);
@@ -39,7 +33,6 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
     },
   });
-
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("POST", "/api/notifications/read-all");
@@ -52,15 +45,12 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
     },
   });
-
   const filteredNotifications = notifications.filter(notification => {
     if (activeTab === "all") return true;
     if (activeTab === "unread") return !notification.isRead;
     return notification.type === activeTab;
   });
-
   const unreadCount = notifications.filter(n => !n.isRead).length;
-
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "task_created":
@@ -77,23 +67,17 @@ export default function NotificationsPage() {
         return <Bell className="w-5 h-5 text-gray-500" />;
     }
   };
-
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
       markAsReadMutation.mutate(notification.id);
     }
-    
     // Navigate to related content if applicable
     if (notification.relatedType === "task" && notification.relatedId) {
       window.location.href = `/tasks/${notification.relatedId}`;
     }
   };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="flex">
-        <Sidebar />
         <div className="flex-1 p-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
@@ -109,7 +93,6 @@ export default function NotificationsPage() {
                 </Button>
               )}
             </div>
-
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -131,7 +114,6 @@ export default function NotificationsPage() {
                     <TabsTrigger value="evaluation_submitted">Evaluations</TabsTrigger>
                     <TabsTrigger value="payment_received">Payments</TabsTrigger>
                   </TabsList>
-
                   <TabsContent value={activeTab} className="mt-6">
                     {isLoading ? (
                       <div className="flex items-center justify-center py-12">
@@ -192,6 +174,5 @@ export default function NotificationsPage() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

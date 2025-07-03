@@ -18,6 +18,7 @@ import {
   balanceAdjustments,
   platformSettings,
   taskAssignments,
+  invoices,
   type User,
   type UpsertUser,
   type Task,
@@ -52,6 +53,8 @@ import {
   type InsertPlatformSettings,
   type TaskAssignment,
   type InsertTaskAssignment,
+  type Invoice,
+  type InsertInvoice,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, or, sql, gte, ne, lt, isNotNull } from "drizzle-orm";
@@ -1692,4 +1695,693 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Create storage instance with fallback to mock storage if DB is unavailable
+let storageInstance: IStorage | null = null;
+
+export const storage: IStorage = {
+  async getUser(id: string): Promise<User | undefined> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getUser(id);
+  },
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getUserByUsername(username);
+  },
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.upsertUser(userData);
+  },
+
+  // Task operations
+  async createTask(taskData: InsertTask & { clientId: string }): Promise<Task> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createTask(taskData);
+  },
+  async getTask(id: number): Promise<Task | undefined> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTask(id);
+  },
+  async getTasksByClient(clientId: string): Promise<Task[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTasksByClient(clientId);
+  },
+  async getTasksBySpecialist(specialistId: string): Promise<Task[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTasksBySpecialist(specialistId);
+  },
+  async getPendingTasks(): Promise<Task[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getPendingTasks();
+  },
+  async updateTaskStatus(id: number, status: string, specialistId?: string): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateTaskStatus(id, status, specialistId);
+  },
+  async updateTask(id: number, updates: Partial<Task>): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateTask(id, updates);
+  },
+
+  // Evaluation operations
+  async createEvaluation(evaluation: InsertEvaluation & { taskId: number; specialistId: string }): Promise<TaskEvaluation> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createEvaluation(evaluation);
+  },
+  async getEvaluationsByTask(taskId: number): Promise<TaskEvaluation[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getEvaluationsByTask(taskId);
+  },
+  async getEvaluationsBySpecialist(specialistId: string): Promise<TaskEvaluation[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getEvaluationsBySpecialist(specialistId);
+  },
+  async acceptEvaluation(taskId: number, evaluationId: number): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.acceptEvaluation(taskId, evaluationId);
+  },
+
+  // Payment operations
+  async createPayment(payment: { taskId: number; amount: string }): Promise<Payment> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createPayment(payment);
+  },
+  async updatePaymentStatus(id: number, status: string, transactionId?: string): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updatePaymentStatus(id, status, transactionId);
+  },
+  async getPaymentsByTask(taskId: number): Promise<Payment[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getPaymentsByTask(taskId);
+  },
+
+  // Update operations
+  async createTaskUpdate(update: InsertUpdate & { taskId: number; userId: string }): Promise<TaskUpdate> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createTaskUpdate(update);
+  },
+  async getTaskUpdates(taskId: number): Promise<TaskUpdate[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTaskUpdates(taskId);
+  },
+
+  // User profile operations
+  async updateUserProfile(userId: string, profileData: Partial<User>): Promise<User> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateUserProfile(userId, profileData);
+  },
+
+  // Stats operations
+  async getClientStats(clientId: string): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getClientStats(clientId);
+  },
+  async getSpecialistStats(specialistId: string): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getSpecialistStats(specialistId);
+  },
+
+  // Admin operations
+  async getAllTasks(): Promise<Task[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getAllTasks();
+  },
+  async getAllUsers(): Promise<User[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getAllUsers();
+  },
+  async updateUserRole(userId: string, role: string): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateUserRole(userId, role);
+  },
+  async getTasksWithDetails(): Promise<any[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTasksWithDetails();
+  },
+  async getAdminStats(): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getAdminStats();
+  },
+
+  // Announcements
+  async createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createAnnouncement(announcement);
+  },
+  async getAnnouncements(): Promise<Announcement[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getAnnouncements();
+  },
+  async updateAnnouncement(id: number, updates: Partial<Announcement>): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateAnnouncement(id, updates);
+  },
+  async deleteAnnouncement(id: number): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.deleteAnnouncement(id);
+  },
+
+  // Billing operations
+  async getTransactions(userId?: string, year?: number): Promise<Transaction[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTransactions(userId, year);
+  },
+  async getBillingStats(userId?: string): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getBillingStats(userId);
+  },
+
+  // Knowledge Base
+  async createKnowledgeCategory(category: InsertKnowledgeCategory): Promise<KnowledgeCategory> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createKnowledgeCategory(category);
+  },
+  async getKnowledgeCategories(): Promise<KnowledgeCategory[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getKnowledgeCategories();
+  },
+  async createKnowledgeArticle(article: InsertKnowledgeArticle): Promise<KnowledgeArticle> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createKnowledgeArticle(article);
+  },
+  async getKnowledgeArticles(categoryId?: number): Promise<KnowledgeArticle[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getKnowledgeArticles(categoryId);
+  },
+  async getKnowledgeArticle(id: number): Promise<KnowledgeArticle | undefined> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getKnowledgeArticle(id);
+  },
+  async updateKnowledgeArticle(id: number, updates: Partial<KnowledgeArticle>): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateKnowledgeArticle(id, updates);
+  },
+  async incrementArticleViews(id: number): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.incrementArticleViews(id);
+  },
+
+  // Ticket Categories
+  async createTicketCategory(category: InsertTicketCategory): Promise<TicketCategory> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createTicketCategory(category);
+  },
+  async getTicketCategories(): Promise<TicketCategory[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTicketCategories();
+  },
+  async updateTicketCategory(id: number, updates: Partial<TicketCategory>): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateTicketCategory(id, updates);
+  },
+
+  // Ticket Replies
+  async createTicketReply(reply: InsertTicketReply & { userId: string }): Promise<TicketReply> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createTicketReply(reply);
+  },
+  async getTicketReplies(ticketId: number): Promise<TicketReply[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTicketReplies(ticketId);
+  },
+
+  // Custom Fields
+  async getCustomFields(): Promise<CustomField[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getCustomFields();
+  },
+  async getUserCustomFields(userId: string): Promise<UserCustomField[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getUserCustomFields(userId);
+  },
+
+  // Analytics operations
+  async getAnalyticsData(startDate: Date, reportType: string): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getAnalyticsData(startDate, reportType);
+  },
+  async getTaskAnalytics(startDate: Date): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTaskAnalytics(startDate);
+  },
+  async getRevenueAnalytics(startDate: Date): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getRevenueAnalytics(startDate);
+  },
+  async getUserAnalytics(startDate: Date): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getUserAnalytics(startDate);
+  },
+
+  // System Settings operations
+  async getSystemSettings(): Promise<SystemSettings | undefined> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getSystemSettings();
+  },
+  async updateSystemSettings(settings: Partial<InsertSystemSettings>): Promise<SystemSettings> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateSystemSettings(settings);
+  },
+
+  // Ticket Settings operations
+  async getTicketSettings(): Promise<TicketSettings | undefined> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTicketSettings();
+  },
+  async updateTicketSettings(settings: Partial<InsertTicketSettings>): Promise<TicketSettings> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateTicketSettings(settings);
+  },
+
+  // Administrator operations
+  async adjustUserBalance(adminId: string, userId: string, amount: string, reason: string, type: 'credit' | 'debit'): Promise<BalanceAdjustment> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.adjustUserBalance(adminId, userId, amount, reason, type);
+  },
+  async getBalanceAdjustments(userId?: string): Promise<BalanceAdjustment[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getBalanceAdjustments(userId);
+  },
+  async assignTaskToSpecialist(adminId: string, taskId: number, specialistId: string, notes?: string): Promise<TaskAssignment> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.assignTaskToSpecialist(adminId, taskId, specialistId, notes);
+  },
+  async getTaskAssignments(taskId?: number): Promise<TaskAssignment[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTaskAssignments(taskId);
+  },
+  async updatePlatformSetting(key: string, value: string, description?: string, updatedBy?: string): Promise<PlatformSettings> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updatePlatformSetting(key, value, description, updatedBy);
+  },
+  async getPlatformSettings(): Promise<PlatformSettings[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getPlatformSettings();
+  },
+  async getPlatformSetting(key: string): Promise<PlatformSettings | undefined> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getPlatformSetting(key);
+  },
+  async getAdminDashboardStats(): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getAdminDashboardStats();
+  },
+
+  // Notification operations
+  async createNotification(notification: any): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createNotification(notification);
+  },
+  async getNotifications(userId: string): Promise<any[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getNotifications(userId);
+  },
+  async markNotificationAsRead(notificationId: number): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.markNotificationAsRead(notificationId);
+  },
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.markAllNotificationsAsRead(userId);
+  },
+
+  // Activity logging operations
+  async logActivity(activity: any): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.logActivity(activity);
+  },
+  async getActivityLogs(userId?: string, limit?: number): Promise<any[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getActivityLogs(userId, limit);
+  },
+
+  // Helpdesk operations
+  async getHelpdeskDashboardStats(): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getHelpdeskDashboardStats();
+  },
+  async getRecentHelpdeskActivity(limit: number): Promise<any[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getRecentHelpdeskActivity(limit);
+  },
+  async getTicketDetails(ticketId: number): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTicketDetails(ticketId);
+  },
+  async getTicketMessages(ticketId: number, userId: string, userRole: string): Promise<any[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTicketMessages(ticketId, userId, userRole);
+  },
+  async createTicketMessage(message: any): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createTicketMessage(message);
+  },
+  async getTicketChangeLog(ticketId: number): Promise<any[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTicketChangeLog(ticketId);
+  },
+  async updateTicketSettings(ticketId: number, updates: any): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateTicketSettings(ticketId, updates);
+  },
+  async getTicketAttachments(ticketId: number): Promise<any[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTicketAttachments(ticketId);
+  },
+  async createTicketAttachment(attachment: any): Promise<any> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createTicketAttachment(attachment);
+  },
+
+  // Billing and Payment operations
+  async getUserBalance(userId: string): Promise<string> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getUserBalance(userId);
+  },
+  async updateUserBalance(userId: string, amount: number, operation: 'add' | 'subtract'): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateUserBalance(userId, amount, operation);
+  },
+  async getPaymentById(paymentId: number): Promise<Payment | undefined> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getPaymentById(paymentId);
+  },
+  async getUserPayments(userId: string): Promise<Payment[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getUserPayments(userId);
+  },
+  async getTransactionHistory(userId: string, limit?: number): Promise<Transaction[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getTransactionHistory(userId, limit);
+  },
+  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createTransaction(transaction);
+  },
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.createInvoice(invoice);
+  },
+  async getInvoiceById(invoiceId: number): Promise<Invoice | undefined> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getInvoiceById(invoiceId);
+  },
+  async getUserInvoices(userId: string): Promise<Invoice[]> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.getUserInvoices(userId);
+  },
+  async updateInvoiceStatus(invoiceId: number, status: string): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.updateInvoiceStatus(invoiceId, status);
+  },
+  async processTaskPayment(taskId: number, clientId: string, amount: number): Promise<{ paymentId: number; transactionId: string }> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.processTaskPayment(taskId, clientId, amount);
+  },
+  async processSpecialistPayout(taskId: number): Promise<void> {
+    if (!storageInstance) await initializeStorage();
+    return storageInstance!.processSpecialistPayout(taskId);
+  }
+};
+
+// Mock storage for development when database is unavailable
+class MockStorage implements IStorage {
+  private users = new Map();
+  private tasks = new Map();
+  private nextId = 1;
+  private announcements = [];
+  private knowledgeCategories = [];
+  private knowledgeArticles = [];
+  private settings = new Map();
+
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find((u: any) => u.username === username);
+  }
+
+  async upsertUser(user: UpsertUser): Promise<User> {
+    const existingUser = this.users.get(user.id);
+    const newUser = {
+      ...existingUser,
+      ...user,
+      createdAt: existingUser?.createdAt || new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(user.id, newUser);
+    return newUser as User;
+  }
+
+  async createTask(task: any): Promise<Task> {
+    const newTask = { ...task, id: this.nextId++, status: "created", createdAt: new Date(), updatedAt: new Date() };
+    this.tasks.set(newTask.id, newTask);
+    return newTask as Task;
+  }
+
+  async getTask(id: number): Promise<Task | undefined> {
+    return this.tasks.get(id);
+  }
+
+  async getTasksByClient(clientId: string): Promise<Task[]> {
+    return Array.from(this.tasks.values()).filter((t: any) => t.clientId === clientId);
+  }
+
+  async getTasksBySpecialist(specialistId: string): Promise<Task[]> {
+    return Array.from(this.tasks.values()).filter((t: any) => t.specialistId === specialistId);
+  }
+
+  async getPendingTasks(): Promise<Task[]> { return []; }
+  async updateTaskStatus(): Promise<void> {}
+  async updateTask(): Promise<void> {}
+  async createEvaluation(): Promise<any> { return {}; }
+  async getEvaluationsByTask(): Promise<any[]> { return []; }
+  async getEvaluationsBySpecialist(): Promise<any[]> { return []; }
+  async acceptEvaluation(): Promise<void> {}
+  async createPayment(): Promise<any> { return {}; }
+  async updatePaymentStatus(): Promise<void> {}
+  async getPaymentsByTask(): Promise<any[]> { return []; }
+  async createTaskUpdate(): Promise<any> { return {}; }
+  async getTaskUpdates(): Promise<any[]> { return []; }
+  async updateUserProfile(userId: string, profileData: Partial<User>): Promise<User> { 
+    const user = this.users.get(userId) || {} as User;
+    const updatedUser = { ...user, ...profileData, updatedAt: new Date() };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+  
+  async getClientStats(): Promise<any> {
+    return { activeTasks: 0, completedTasks: 0, pendingTasks: 0, totalSpent: "0.00" };
+  }
+
+  async getSpecialistStats(): Promise<any> {
+    return { assignedTasks: 0, completedTasks: 0, pendingEvaluations: 0, totalEarned: "0.00" };
+  }
+
+  async getAllTasks(): Promise<Task[]> { return Array.from(this.tasks.values()); }
+  async getAllUsers(): Promise<User[]> { return Array.from(this.users.values()); }
+  async updateUserRole(userId: string, role: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.role = role;
+      this.users.set(userId, user);
+    }
+  }
+  async getTasksWithDetails(): Promise<any[]> { return Array.from(this.tasks.values()); }
+  async getAdminStats(): Promise<any> {
+    return { totalTasks: 0, totalUsers: this.users.size, totalSpecialists: 0, totalClients: 1, activeTasks: 0, completedTasks: 0, totalRevenue: "0.00" };
+  }
+
+  // Announcements
+  async createAnnouncement(announcement: any): Promise<any> {
+    const newAnnouncement = { ...announcement, id: this.nextId++, createdAt: new Date() };
+    this.announcements.push(newAnnouncement);
+    return newAnnouncement;
+  }
+  async getAnnouncements(): Promise<any[]> { return this.announcements; }
+  async updateAnnouncement(): Promise<void> {}
+  async deleteAnnouncement(): Promise<void> {}
+
+  // Billing
+  async getTransactions(): Promise<any[]> { return []; }
+  async getBillingStats(): Promise<any> { 
+    return { totalInAccount: "0.00", incomeInOrders: "0.00", expensesInOrders: "0.00", monthlyRevenue: "0.00" }; 
+  }
+
+  // Knowledge Base
+  async createKnowledgeCategory(category: any): Promise<any> {
+    const newCategory = { ...category, id: this.nextId++, createdAt: new Date() };
+    this.knowledgeCategories.push(newCategory);
+    return newCategory;
+  }
+  async getKnowledgeCategories(): Promise<any[]> { return this.knowledgeCategories; }
+  async createKnowledgeArticle(article: any): Promise<any> {
+    const newArticle = { ...article, id: this.nextId++, createdAt: new Date(), views: 0 };
+    this.knowledgeArticles.push(newArticle);
+    return newArticle;
+  }
+  async getKnowledgeArticles(): Promise<any[]> { return this.knowledgeArticles; }
+  async getKnowledgeArticle(id: number): Promise<any> {
+    return this.knowledgeArticles.find(a => a.id === id);
+  }
+  async updateKnowledgeArticle(): Promise<void> {}
+  async incrementArticleViews(): Promise<void> {}
+
+  // Ticket Categories
+  async createTicketCategory(): Promise<any> { return {}; }
+  async getTicketCategories(): Promise<any[]> { return []; }
+  async updateTicketCategory(): Promise<void> {}
+
+  // Ticket Replies
+  async createTicketReply(): Promise<any> { return {}; }
+  async getTicketReplies(): Promise<any[]> { return []; }
+
+  // Custom Fields
+  async getCustomFields(): Promise<any[]> { return []; }
+  async getUserCustomFields(): Promise<any[]> { return []; }
+
+  // Analytics
+  async getAnalyticsData(): Promise<any> { 
+    return { newTasks: 0, completedTasks: 0, activeTasks: 0, activeClients: 0, avgCompletionDays: 0 }; 
+  }
+  async getTaskAnalytics(): Promise<any> { 
+    return { monthlyData: [], statusDistribution: [] }; 
+  }
+  async getRevenueAnalytics(): Promise<any> { 
+    return { monthlyRevenue: [], totalRevenue: "0.00", totalCosts: "0.00", paymentCount: 0 }; 
+  }
+  async getUserAnalytics(): Promise<any> { 
+    return { dailyActivity: [], totalUsers: this.users.size, clients: 1, specialists: 0, newUsers: 0 }; 
+  }
+
+  // System Settings
+  async getSystemSettings(): Promise<any> {
+    return this.settings.get('system') || {
+      siteName: "WS24 Dev",
+      siteDescription: "Professional Web Development Services",
+      siteEmail: "ticket@ws24.pro",
+      siteTheme: "Titan",
+      logoType: "text",
+      defaultUserRole: "client",
+      disableRegistration: false,
+      allowAvatarUpload: true,
+      passwordBruteForceProtection: true,
+      emailAccountActivation: false
+    };
+  }
+  async updateSystemSettings(settings: any): Promise<any> {
+    const currentSettings = await this.getSystemSettings();
+    const updatedSettings = { ...currentSettings, ...settings, updatedAt: new Date() };
+    this.settings.set('system', updatedSettings);
+    return updatedSettings;
+  }
+
+  // Ticket Settings
+  async getTicketSettings(): Promise<any> {
+    return this.settings.get('tickets') || {
+      allowFileUpload: true,
+      allowGuestTickets: false,
+      allowTicketEdit: true,
+      requireLogin: false,
+      allowTicketRating: true,
+      preventRepliesAfterClose: true,
+      staffReplyAction: "nothing",
+      clientReplyAction: "nothing",
+      imapProtocol: "imap",
+      imapHost: "imap.timeweb.ru:993",
+      imapSsl: true,
+      imapSkipCertValidation: false,
+      imapEmail: "ticket@ws24.pro",
+      ticketTitle: "Support Ticket",
+      defaultCategory: "general",
+      defaultStatus: "new",
+      imapTicketString: "## Номер заявки:",
+      imapReplyString: "##- Введите свой ответ над этой строкой -##"
+    };
+  }
+  async updateTicketSettings(settings: any): Promise<any> {
+    const currentSettings = await this.getTicketSettings();
+    const updatedSettings = { ...currentSettings, ...settings, updatedAt: new Date() };
+    this.settings.set('tickets', updatedSettings);
+    return updatedSettings;
+  }
+
+  // Administrator operations
+  async adjustUserBalance(): Promise<any> { return {}; }
+  async getBalanceAdjustments(): Promise<any[]> { return []; }
+  async assignTaskToSpecialist(): Promise<any> { return {}; }
+  async getTaskAssignments(): Promise<any[]> { return []; }
+  async updatePlatformSetting(key: string, value: string): Promise<any> {
+    const setting = { key, value, updatedAt: new Date() };
+    this.settings.set(key, setting);
+    return setting;
+  }
+  async getPlatformSettings(): Promise<any[]> { return Array.from(this.settings.values()); }
+  async getPlatformSetting(key: string): Promise<any> { return this.settings.get(key); }
+  async getAdminDashboardStats(): Promise<any> {
+    return {
+      totalTasks: 0, activeTasks: 0, completedTasks: 0, totalUsers: this.users.size,
+      totalSpecialists: 0, totalClients: 1, totalRevenue: "0.00",
+      platformMarkupRate: "10", pendingPayments: 0, activeAssignments: 0
+    };
+  }
+
+  // Notification operations
+  async createNotification(): Promise<any> { return {}; }
+  async getNotifications(): Promise<any[]> { return []; }
+  async markNotificationAsRead(): Promise<void> {}
+  async markAllNotificationsAsRead(): Promise<void> {}
+
+  // Activity logging
+  async logActivity(): Promise<void> {}
+  async getActivityLogs(): Promise<any[]> { return []; }
+
+  // Helpdesk operations
+  async getHelpdeskDashboardStats(): Promise<any> {
+    return { 
+      totalTickets: 0, activeTickets: 0, overdueTickets: 0, totalUsers: this.users.size,
+      activeSpecialists: 0, totalRevenue: "0.00", revenueThisMonth: "0.00", newTicketsThisWeek: 0
+    };
+  }
+  async getRecentHelpdeskActivity(): Promise<any[]> { return []; }
+  async getTicketDetails(): Promise<any> { return undefined; }
+  async getTicketMessages(): Promise<any[]> { return []; }
+  async createTicketMessage(): Promise<any> { return {}; }
+  async getTicketChangeLog(): Promise<any[]> { return []; }
+  async updateTicketSettings(): Promise<void> {}
+  async getTicketAttachments(): Promise<any[]> { return []; }
+  async createTicketAttachment(): Promise<any> { return {}; }
+
+  // Billing and Payment operations
+  async getUserBalance(): Promise<string> { return "1000.00"; }
+  async updateUserBalance(): Promise<void> {}
+  async getPaymentById(): Promise<any> { return undefined; }
+  async getUserPayments(): Promise<any[]> { return []; }
+  async getTransactionHistory(): Promise<any[]> { return []; }
+  async createTransaction(): Promise<any> { return {}; }
+  async createInvoice(): Promise<any> { return {}; }
+  async getInvoiceById(): Promise<any> { return undefined; }
+  async getUserInvoices(): Promise<any[]> { return []; }
+  async updateInvoiceStatus(): Promise<void> {}
+  async processTaskPayment(): Promise<any> { return { paymentId: 1, transactionId: "TXN123" }; }
+  async processSpecialistPayout(): Promise<void> {}
+}
+
+// Initialize storage with fallback to mock storage
+async function initializeStorage() {
+  if (storageInstance) return;
+  
+  try {
+    // Try to initialize database storage
+    const dbStorage = new DatabaseStorage();
+    // Test the connection by trying to get a user
+    await dbStorage.getUser("test");
+    storageInstance = dbStorage;
+    console.log("Using database storage");
+  } catch (error) {
+    console.log("Database not available, using mock storage for development:", error.message);
+    storageInstance = new MockStorage() as any;
+  }
+}

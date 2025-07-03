@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { TaskCard } from "@/components/cards/task-card";
 import { CreateTaskModal } from "@/components/modals/create-task-modal";
 import { Button } from "@/components/ui/button";
@@ -12,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Plus, Search, Filter } from "lucide-react";
-
 export default function Tasks() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -20,7 +17,6 @@ export default function Tasks() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
-
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -35,13 +31,11 @@ export default function Tasks() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
-
   const { data: tasks, isLoading: tasksLoading, refetch } = useQuery({
     queryKey: ["/api/tasks"],
     retry: false,
     enabled: !!user,
   });
-
   if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -52,17 +46,14 @@ export default function Tasks() {
       </div>
     );
   }
-
   // Filter tasks based on search and filters
   const filteredTasks = (tasks || []).filter((task: any) => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          task.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
-    
     return matchesSearch && matchesStatus && matchesPriority;
   });
-
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case "completed": return "bg-green-100 text-green-800";
@@ -73,7 +64,6 @@ export default function Tasks() {
       default: return "bg-gray-100 text-gray-800";
     }
   };
-
   const getPriorityBadgeColor = (priority: string) => {
     switch (priority) {
       case "high": return "bg-red-100 text-red-800";
@@ -82,16 +72,8 @@ export default function Tasks() {
       default: return "bg-gray-100 text-gray-800";
     }
   };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="flex pt-16">
-        <Sidebar />
-        
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <div className="p-6">
+    <div>
               {/* Page Header */}
               <div className="mb-8 flex items-center justify-between">
                 <div>
@@ -108,7 +90,6 @@ export default function Tasks() {
                   Create Task
                 </Button>
               </div>
-
               {/* Filters and Search */}
               <Card className="mb-6">
                 <CardContent className="p-6">
@@ -150,7 +131,6 @@ export default function Tasks() {
                   </div>
                 </CardContent>
               </Card>
-
               {/* Tasks List */}
               {tasksLoading ? (
                 <div className="space-y-6">
@@ -199,11 +179,6 @@ export default function Tasks() {
                   ))}
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Create Task Modal */}
       <CreateTaskModal 
         isOpen={isCreateModalOpen} 

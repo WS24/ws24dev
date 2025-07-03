@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { Navigation } from "@/components/layout/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +12,6 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { User, DollarSign, Shield, Lock, Bell } from "lucide-react";
-
 // Profile Menu Component
 const ProfileMenu = ({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) => (
   <div className="border-b border-gray-200 mb-6">
@@ -44,13 +42,11 @@ const ProfileMenu = ({ activeTab, onTabChange }: { activeTab: string; onTabChang
     </nav>
   </div>
 );
-
 export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("profile");
-
   const [formData, setFormData] = useState({
     email: user?.email || "",
     username: user?.firstName || "",
@@ -60,10 +56,9 @@ export default function Profile() {
     bio: "",
     balance: "0.00"
   });
-
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const response = await apiRequest("PUT", "/api/profile", data);
+      const response = await apiRequest("PUT", "/api/users/profile", data);
       return response.json();
     },
     onSuccess: () => {
@@ -81,16 +76,13 @@ export default function Profile() {
       });
     },
   });
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateProfileMutation.mutate(formData);
   };
-
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -98,11 +90,7 @@ export default function Profile() {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
       <div className="flex">
         <div className="flex-1 p-8">
           <div className="max-w-4xl mx-auto">
@@ -110,9 +98,7 @@ export default function Profile() {
               <h1 className="text-3xl font-bold">User Profile</h1>
               <p className="text-muted-foreground">Manage your personal information and account settings</p>
             </div>
-
             <ProfileMenu activeTab={activeTab} onTabChange={setActiveTab} />
-
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Profile Tab */}
               {activeTab === "profile" && (
@@ -179,7 +165,6 @@ export default function Profile() {
                         </Select>
                       </div>
                     </div>
-
                     <div className="space-y-2">
                       <Label htmlFor="bio">About Me</Label>
                       <Textarea
@@ -193,7 +178,6 @@ export default function Profile() {
                   </CardContent>
                 </Card>
               )}
-
               {/* Account Tab */}
               {activeTab === "account" && (
                 <Card>
@@ -220,7 +204,6 @@ export default function Profile() {
                           <Badge variant="secondary">$</Badge>
                         </div>
                       </div>
-                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Payment Method</Label>
@@ -235,7 +218,6 @@ export default function Profile() {
                             </SelectContent>
                           </Select>
                         </div>
-                        
                         <div className="space-y-2">
                           <Label>Currency</Label>
                           <Select>
@@ -254,7 +236,6 @@ export default function Profile() {
                   </CardContent>
                 </Card>
               )}
-
               {/* Security Tab */}
               {activeTab === "security" && (
                 <Card>
@@ -276,7 +257,6 @@ export default function Profile() {
                         placeholder="Enter current password"
                       />
                     </div>
-                    
                     <div className="space-y-2">
                       <Label htmlFor="newPassword">New Password</Label>
                       <Input
@@ -285,7 +265,6 @@ export default function Profile() {
                         placeholder="Enter new password"
                       />
                     </div>
-                    
                     <div className="space-y-2">
                       <Label htmlFor="confirmPassword">Confirm New Password</Label>
                       <Input
@@ -294,7 +273,6 @@ export default function Profile() {
                         placeholder="Confirm new password"
                       />
                     </div>
-                    
                     <div className="flex items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <Label className="text-base">Two-Factor Authentication</Label>
@@ -307,7 +285,6 @@ export default function Profile() {
                   </CardContent>
                 </Card>
               )}
-
               {/* Notifications Tab */}
               {activeTab === "notifications" && (
                 <Card>
@@ -330,7 +307,6 @@ export default function Profile() {
                       </div>
                       <Switch defaultChecked />
                     </div>
-                    
                     <div className="flex items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <Label className="text-base">Task Updates</Label>
@@ -340,7 +316,6 @@ export default function Profile() {
                       </div>
                       <Switch defaultChecked />
                     </div>
-                    
                     <div className="flex items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <Label className="text-base">Marketing Communications</Label>
@@ -350,7 +325,6 @@ export default function Profile() {
                       </div>
                       <Switch />
                     </div>
-                    
                     <div className="flex items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <Label className="text-base">System Maintenance</Label>
@@ -363,7 +337,6 @@ export default function Profile() {
                   </CardContent>
                 </Card>
               )}
-
               {/* Privacy Tab */}
               {activeTab === "privacy" && (
                 <Card>
@@ -386,7 +359,6 @@ export default function Profile() {
                       </div>
                       <Switch defaultChecked />
                     </div>
-                    
                     <div className="flex items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <Label className="text-base">Activity Status</Label>
@@ -396,7 +368,6 @@ export default function Profile() {
                       </div>
                       <Switch />
                     </div>
-                    
                     <div className="flex items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <Label className="text-base">Data Analytics</Label>
@@ -406,7 +377,6 @@ export default function Profile() {
                       </div>
                       <Switch />
                     </div>
-                    
                     <div className="space-y-2">
                       <Label>Data Export</Label>
                       <div className="text-sm text-gray-600 mb-2">
@@ -419,7 +389,6 @@ export default function Profile() {
                   </CardContent>
                 </Card>
               )}
-
               <div className="flex justify-end gap-4">
                 <Button type="button" variant="outline">
                   Cancel
@@ -432,6 +401,5 @@ export default function Profile() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

@@ -28,7 +28,6 @@ import {
   XCircle
 } from "lucide-react";
 import { format } from "date-fns";
-
 export default function BillingPayments() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -43,25 +42,21 @@ export default function BillingPayments() {
     companyAddress: "",
     companyTaxId: ""
   });
-
   // Fetch user balance and stats
   const { data: billingStats, isLoading: loadingStats } = useQuery({
     queryKey: ["/api/billing/stats"],
     retry: false
   });
-
   // Fetch transaction history
   const { data: transactions = [], isLoading: loadingTransactions } = useQuery({
     queryKey: ["/api/billing/transactions"],
     retry: false
   });
-
   // Fetch invoices
   const { data: invoices = [], isLoading: loadingInvoices } = useQuery({
     queryKey: ["/api/billing/invoices"],
     retry: false
   });
-
   // Top up balance mutation
   const topUpMutation = useMutation({
     mutationFn: async (amount: number) => {
@@ -96,7 +91,6 @@ export default function BillingPayments() {
       });
     }
   });
-
   // Create manual invoice mutation
   const createInvoiceMutation = useMutation({
     mutationFn: async (data: typeof invoiceData) => {
@@ -137,7 +131,6 @@ export default function BillingPayments() {
       });
     }
   });
-
   const formatCurrency = (amount: string | number) => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
     return new Intl.NumberFormat('en-US', {
@@ -145,7 +138,6 @@ export default function BillingPayments() {
       currency: 'USD'
     }).format(num);
   };
-
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'topup':
@@ -160,7 +152,6 @@ export default function BillingPayments() {
         return <DollarSign className="h-4 w-4" />;
     }
   };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
@@ -177,7 +168,6 @@ export default function BillingPayments() {
         return <Badge>{status}</Badge>;
     }
   };
-
   if (loadingStats) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -185,14 +175,12 @@ export default function BillingPayments() {
       </div>
     );
   }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Billing & Payments</h1>
         <p className="text-muted-foreground">Manage your balance, transactions, and invoices</p>
       </div>
-
       {/* Balance Overview */}
       <div className="grid gap-4 md:grid-cols-3 mb-8">
         <Card>
@@ -205,7 +193,6 @@ export default function BillingPayments() {
             <p className="text-xs text-muted-foreground">Available for services</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
@@ -216,7 +203,6 @@ export default function BillingPayments() {
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Invoices</CardTitle>
@@ -230,7 +216,6 @@ export default function BillingPayments() {
           </CardContent>
         </Card>
       </div>
-
       {/* Quick Actions */}
       <div className="flex gap-4 mb-8">
         <Button onClick={() => setShowTopUpDialog(true)}>
@@ -244,14 +229,12 @@ export default function BillingPayments() {
           </Button>
         )}
       </div>
-
       {/* Tabs for Transactions and Invoices */}
       <Tabs defaultValue="transactions" className="space-y-4">
         <TabsList>
           <TabsTrigger value="transactions">Transaction History</TabsTrigger>
           <TabsTrigger value="invoices">Invoices</TabsTrigger>
         </TabsList>
-
         {/* Transactions Tab */}
         <TabsContent value="transactions">
           <Card>
@@ -305,7 +288,6 @@ export default function BillingPayments() {
             </CardContent>
           </Card>
         </TabsContent>
-
         {/* Invoices Tab */}
         <TabsContent value="invoices">
           <Card>
@@ -359,7 +341,6 @@ export default function BillingPayments() {
           </Card>
         </TabsContent>
       </Tabs>
-
       {/* Top Up Dialog */}
       <Dialog open={showTopUpDialog} onOpenChange={setShowTopUpDialog}>
         <DialogContent>
@@ -407,7 +388,6 @@ export default function BillingPayments() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       {/* Create Invoice Dialog (Admin Only) */}
       <Dialog open={showInvoiceDialog} onOpenChange={setShowInvoiceDialog}>
         <DialogContent className="max-w-2xl">

@@ -24,6 +24,22 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  
+  // Development mode: use memory store
+  if (process.env.NODE_ENV === "development") {
+    return session({
+      secret: process.env.SESSION_SECRET!,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: false, // Allow non-HTTPS in development
+        maxAge: sessionTtl,
+      },
+    });
+  }
+  
+  // Production mode: use PostgreSQL store
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
@@ -72,6 +88,59 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Development mode: simple mock authentication
+  if (process.env.NODE_ENV === "development") {
+    // Mock passport strategy for development
+    passport.serializeUser((user: Express.User, cb) => cb(null, user));
+    passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+
+    app.get("/api/login", async (req, res) => {
+      // Create a mock user session for development
+      const mockUser = {
+        claims: {
+          sub: "40361721",
+          email: "ws24adwords@gmail.com",
+          first_name: "Test",
+          last_name: "User"
+        },
+        expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+      };
+      
+      // Try to upsert the user to the database
+      try {
+        await upsertUser({
+          id: mockUser.claims.sub,
+          email: mockUser.claims.email,
+          firstName: mockUser.claims.first_name,
+          lastName: mockUser.claims.last_name,
+        });
+      } catch (error) {
+        console.log("Database not available, continuing with mock auth:", error.message);
+      }
+      
+      req.login(mockUser, (err) => {
+        if (err) {
+          console.error("Login error:", err);
+          return res.status(500).json({ message: "Login failed" });
+        }
+        res.redirect("/");
+      });
+    });
+
+    app.get("/api/callback", (req, res) => {
+      res.redirect("/");
+    });
+
+    app.get("/api/logout", (req, res) => {
+      req.logout(() => {
+        res.redirect("/");
+      });
+    });
+    
+    return;
+  }
+
+  // Production mode: use Replit Auth
   const config = await getOidcConfig();
 
   const verify: VerifyFunction = async (
@@ -88,7 +157,7 @@ export async function setupAuth(app: Express) {
     .REPLIT_DOMAINS!.split(",")) {
     const strategy = new Strategy(
       {
-        name: `replitauth:${domain}`,
+        name: `replitauth:${domain.split(':')[0]}`, // Use hostname without port
         config,
         scope: "openid email profile offline_access",
         callbackURL: `https://${domain}/api/callback`,

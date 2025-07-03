@@ -9,7 +9,6 @@ import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import type { Task, Transaction } from "@shared/schema";
-
 interface ClientStats {
   activeTasks: number;
   completedTasks: number;
@@ -17,25 +16,20 @@ interface ClientStats {
   totalSpent: string;
   accountBalance: string;
 }
-
 export default function ClientDashboard() {
   const { user } = useAuth();
-
   const { data: stats, isLoading: statsLoading } = useQuery<ClientStats>({
     queryKey: ["/api/client/stats"],
     enabled: !!user,
   });
-
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
     enabled: !!user,
   });
-
   const { data: transactions = [], isLoading: transactionsLoading } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
     enabled: !!user,
   });
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "completed":
@@ -48,7 +42,6 @@ export default function ClientDashboard() {
         return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
-
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
       created: "secondary",
@@ -64,7 +57,6 @@ export default function ClientDashboard() {
       </Badge>
     );
   };
-
   if (statsLoading || tasksLoading || transactionsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -72,7 +64,6 @@ export default function ClientDashboard() {
       </div>
     );
   }
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between mb-6">
@@ -87,7 +78,6 @@ export default function ClientDashboard() {
           </Button>
         </Link>
       </div>
-
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
@@ -131,7 +121,6 @@ export default function ClientDashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Main Content Tabs */}
       <Tabs defaultValue="tasks" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
@@ -148,7 +137,6 @@ export default function ClientDashboard() {
             Messages
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="tasks" className="space-y-4">
           <Card>
             <CardHeader>
@@ -222,7 +210,6 @@ export default function ClientDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="transactions" className="space-y-4">
           <Card>
             <CardHeader>
@@ -274,7 +261,6 @@ export default function ClientDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="messages" className="space-y-4">
           <Card>
             <CardHeader>

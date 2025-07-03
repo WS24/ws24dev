@@ -14,7 +14,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { insertTaskSchema, type InsertTask } from "@shared/schema";
 import { Plus, FileCode, Globe, Smartphone, Database, Settings, Zap } from "lucide-react";
 import { z } from "zod";
-
 const createTaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -22,9 +21,7 @@ const createTaskSchema = z.object({
   priority: z.string().default("medium"),
   budget: z.string().optional(),
 });
-
 type CreateTaskData = z.infer<typeof createTaskSchema>;
-
 const taskCategories = [
   { value: "web-development", label: "Web Development", icon: Globe, color: "bg-blue-500" },
   { value: "mobile-app", label: "Mobile App", icon: Smartphone, color: "bg-green-500" },
@@ -33,19 +30,16 @@ const taskCategories = [
   { value: "optimization", label: "Performance", icon: Zap, color: "bg-yellow-500" },
   { value: "custom-development", label: "Custom Development", icon: FileCode, color: "bg-indigo-500" },
 ];
-
 const priorityLevels = [
   { value: "low", label: "Low Priority", color: "bg-gray-100 text-gray-800" },
   { value: "medium", label: "Medium Priority", color: "bg-blue-100 text-blue-800" },
   { value: "high", label: "High Priority", color: "bg-orange-100 text-orange-800" },
   { value: "urgent", label: "Urgent", color: "bg-red-100 text-red-800" },
 ];
-
 export default function CreateTask() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-
   const form = useForm<CreateTaskData>({
     resolver: zodResolver(createTaskSchema),
     defaultValues: {
@@ -56,7 +50,6 @@ export default function CreateTask() {
       budget: "",
     },
   });
-
   const createTaskMutation = useMutation({
     mutationFn: async (data: CreateTaskData) => {
       await apiRequest("POST", "/api/tasks", data);
@@ -77,13 +70,10 @@ export default function CreateTask() {
       });
     },
   });
-
   const onSubmit = (data: CreateTaskData) => {
     createTaskMutation.mutate(data);
   };
-
   const selectedCategoryData = taskCategories.find(cat => cat.value === form.watch("category"));
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -93,7 +83,6 @@ export default function CreateTask() {
           <p className="text-gray-600">Submit your web development project for specialist evaluation</p>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Form */}
         <div className="lg:col-span-2">
@@ -126,7 +115,6 @@ export default function CreateTask() {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="category"
@@ -159,7 +147,6 @@ export default function CreateTask() {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="priority"
@@ -189,7 +176,6 @@ export default function CreateTask() {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="budget"
@@ -209,7 +195,6 @@ export default function CreateTask() {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="description"
@@ -230,7 +215,6 @@ export default function CreateTask() {
                       </FormItem>
                     )}
                   />
-
                   <Button 
                     type="submit" 
                     disabled={createTaskMutation.isPending}
@@ -243,7 +227,6 @@ export default function CreateTask() {
             </CardContent>
           </Card>
         </div>
-
         {/* Sidebar Info */}
         <div className="space-y-6">
           <Card>
@@ -275,7 +258,6 @@ export default function CreateTask() {
               )}
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader>
               <CardTitle>How It Works</CardTitle>
@@ -290,7 +272,6 @@ export default function CreateTask() {
                   <p className="text-sm text-gray-600">Provide project details and requirements</p>
                 </div>
               </div>
-              
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs font-bold text-blue-600">2</span>
@@ -300,7 +281,6 @@ export default function CreateTask() {
                   <p className="text-sm text-gray-600">Expert evaluation with cost and timeline estimate</p>
                 </div>
               </div>
-              
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs font-bold text-blue-600">3</span>
@@ -310,7 +290,6 @@ export default function CreateTask() {
                   <p className="text-sm text-gray-600">Approve estimate and begin development</p>
                 </div>
               </div>
-              
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs font-bold text-blue-600">4</span>

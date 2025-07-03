@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { TaskCard } from "@/components/cards/task-card";
 import { EvaluateTaskModal } from "@/components/modals/evaluate-task-modal";
 import { Button } from "@/components/ui/button";
@@ -13,7 +11,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Search, Filter, Eye, Calculator, Play } from "lucide-react";
-
 export default function Assignments() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -22,7 +19,6 @@ export default function Assignments() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
-
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -37,7 +33,6 @@ export default function Assignments() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
-
   // Check if user is specialist
   useEffect(() => {
     if (user && user.role !== "specialist") {
@@ -50,19 +45,16 @@ export default function Assignments() {
       return;
     }
   }, [user, toast]);
-
   const { data: assignedTasks, isLoading: assignedLoading, refetch: refetchAssigned } = useQuery({
     queryKey: ["/api/tasks"],
     retry: false,
     enabled: !!user && user.role === "specialist",
   });
-
   const { data: pendingTasks, isLoading: pendingLoading, refetch: refetchPending } = useQuery({
     queryKey: ["/api/tasks/pending"],
     retry: false,
     enabled: !!user && user.role === "specialist",
   });
-
   if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -73,29 +65,23 @@ export default function Assignments() {
       </div>
     );
   }
-
   if (user.role !== "specialist") {
     return null;
   }
-
   // Combine assigned and pending tasks
   const allTasks = [...(assignedTasks || []), ...(pendingTasks || [])];
-
   // Filter tasks based on search and filters
   const filteredTasks = allTasks.filter((task: any) => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          task.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
-    
     return matchesSearch && matchesStatus && matchesPriority;
   });
-
   const handleEvaluateTask = (task: any) => {
     setSelectedTask(task);
     setIsEvaluateModalOpen(true);
   };
-
   const handleTakeTask = async (taskId: number) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}/status`, {
@@ -106,16 +92,13 @@ export default function Assignments() {
         credentials: "include",
         body: JSON.stringify({ status: "in_progress" }),
       });
-
       if (!response.ok) {
         throw new Error("Failed to take task");
       }
-
       toast({
         title: "Success",
         description: "Task assigned to you successfully!",
       });
-
       refetchAssigned();
       refetchPending();
     } catch (error) {
@@ -137,7 +120,6 @@ export default function Assignments() {
       });
     }
   };
-
   const getActionButtons = (task: any) => {
     if (task.status === "created") {
       return (
@@ -204,16 +186,11 @@ export default function Assignments() {
     }
     return null;
   };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="flex pt-16">
-        <Sidebar />
-        
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <div className="p-6">
+    <>
+      <div className="flex">
+        <div className="flex-1">
+          <div className="p-6">
               {/* Page Header */}
               <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">Task Assignments</h1>
@@ -221,7 +198,6 @@ export default function Assignments() {
                   Evaluate and manage client tasks assigned to you.
                 </p>
               </div>
-
               {/* Filters and Search */}
               <Card className="mb-6">
                 <CardContent className="p-6">
@@ -261,7 +237,6 @@ export default function Assignments() {
                   </div>
                 </CardContent>
               </Card>
-
               {/* Task Cards */}
               {assignedLoading || pendingLoading ? (
                 <div className="space-y-6">
@@ -343,7 +318,6 @@ export default function Assignments() {
                             {getActionButtons(task)}
                           </div>
                         </div>
-
                         {/* Attachments */}
                         {task.attachments && task.attachments.length > 0 && (
                           <div className="border-t border-gray-200 pt-4">
@@ -363,10 +337,8 @@ export default function Assignments() {
                 </div>
               )}
             </div>
-          </div>
         </div>
       </div>
-
       {/* Evaluate Task Modal */}
       <EvaluateTaskModal
         isOpen={isEvaluateModalOpen}
@@ -382,6 +354,6 @@ export default function Assignments() {
           setSelectedTask(null);
         }}
       />
-    </div>
+    </>
   );
 }

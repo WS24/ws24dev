@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import type { Task } from "@shared/schema";
-
 interface HelpdeskStats {
   totalTickets: number;
   activeTickets: number;
@@ -30,7 +29,6 @@ interface HelpdeskStats {
   revenueThisMonth: string;
   newTicketsThisWeek: number;
 }
-
 interface RecentActivity {
   id: number;
   type: string;
@@ -40,23 +38,57 @@ interface RecentActivity {
   user: string;
   status?: string;
 }
-
 export default function HelpdeskDashboard() {
   const { user } = useAuth();
   const [filter, setFilter] = useState("all");
-
-  const { data: stats } = useQuery<HelpdeskStats>({
+  const { data: stats, isLoading: statsLoading, error: statsError } = useQuery<HelpdeskStats>({
     queryKey: ["/api/helpdesk/dashboard-stats"],
+    retry: false,
+    refetchOnWindowFocus: false,
   });
-
-  const { data: tasks = [] } = useQuery<Task[]>({
+  const { data: tasks = [], isLoading: tasksLoading, error: tasksError } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
+    retry: false,
+    refetchOnWindowFocus: false,
   });
-
-  const { data: recentActivity = [] } = useQuery<RecentActivity[]>({
+  const { data: recentActivity = [], isLoading: activityLoading, error: activityError } = useQuery<RecentActivity[]>({
     queryKey: ["/api/helpdesk/recent-activity"],
+    retry: false,
+    refetchOnWindowFocus: false,
   });
-
+  // Show loading state
+  if (statsLoading || tasksLoading || activityLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+  // Show error state
+  if (statsError || tasksError || activityError) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-12">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold mb-2">Failed to load dashboard</h2>
+          <p className="text-muted-foreground mb-4">
+            {statsError?.message || tasksError?.message || activityError?.message || "An error occurred"}
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
   const statusColors = {
     Created: "bg-blue-500",
     "In Progress": "bg-yellow-500",
@@ -64,7 +96,6 @@ export default function HelpdeskDashboard() {
     Completed: "bg-green-500",
     Rejected: "bg-red-500",
   };
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Created":
@@ -81,15 +112,12 @@ export default function HelpdeskDashboard() {
         return <Ticket className="h-4 w-4" />;
     }
   };
-
   const statusCounts = tasks.reduce((acc, task) => {
     acc[task.status] = (acc[task.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
-
   const getFilteredTasks = () => {
     if (!tasks) return [];
-    
     switch (filter) {
       case "mine":
         return tasks.filter(
@@ -102,9 +130,7 @@ export default function HelpdeskDashboard() {
         return tasks;
     }
   };
-
   const filteredTasks = getFilteredTasks();
-
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -130,7 +156,6 @@ export default function HelpdeskDashboard() {
           </Button>
         </div>
       </div>
-
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -145,7 +170,6 @@ export default function HelpdeskDashboard() {
             </p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Tickets</CardTitle>
@@ -158,7 +182,6 @@ export default function HelpdeskDashboard() {
             </p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -171,7 +194,6 @@ export default function HelpdeskDashboard() {
             </p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Revenue</CardTitle>
@@ -187,7 +209,6 @@ export default function HelpdeskDashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Status Overview */}
       <Card>
         <CardHeader>
@@ -212,14 +233,12 @@ export default function HelpdeskDashboard() {
           </div>
         </CardContent>
       </Card>
-
       {/* Recent Activity & Tasks */}
       <Tabs defaultValue="activity" className="space-y-4">
         <TabsList>
           <TabsTrigger value="activity">Recent Activity</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
         </TabsList>
-
         <TabsContent value="activity" className="space-y-4">
           <Card>
             <CardHeader>
@@ -256,7 +275,6 @@ export default function HelpdeskDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="tasks" className="space-y-4">
           <Card>
             <CardHeader>

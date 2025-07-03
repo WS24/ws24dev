@@ -2,12 +2,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Users, Zap, Shield, ArrowRight } from "lucide-react";
-
 export default function Landing() {
   const handleLogin = () => {
     window.location.href = "/api/login";
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
@@ -24,7 +22,6 @@ export default function Landing() {
           </Button>
         </div>
       </header>
-
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
@@ -47,7 +44,6 @@ export default function Landing() {
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
         </div>
-
         {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
@@ -61,7 +57,6 @@ export default function Landing() {
               </p>
             </CardContent>
           </Card>
-
           <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-8 text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -73,7 +68,6 @@ export default function Landing() {
               </p>
             </CardContent>
           </Card>
-
           <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-8 text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -86,7 +80,6 @@ export default function Landing() {
             </CardContent>
           </Card>
         </div>
-
         {/* How It Works */}
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-12">How It Works</h2>
@@ -121,7 +114,6 @@ export default function Landing() {
             </div>
           </div>
         </div>
-
         {/* Benefits */}
         <Card className="border-0 shadow-lg">
           <CardContent className="p-12">
@@ -178,7 +170,6 @@ export default function Landing() {
           </CardContent>
         </Card>
       </main>
-
       {/* Footer */}
       <footer className="border-t bg-white/80 backdrop-blur-sm mt-16">
         <div className="container mx-auto px-4 py-8 text-center text-gray-600">

@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { startTransition } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,6 @@ import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Task, TaskEvaluation } from "@shared/schema";
-
 interface SpecialistStats {
   assignedTasks: number;
   completedTasks: number;
@@ -22,26 +22,21 @@ interface SpecialistStats {
   averageRating: number;
   specializations: string[];
 }
-
 export default function SpecialistDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
-
   const { data: stats, isLoading: statsLoading } = useQuery<SpecialistStats>({
     queryKey: ["/api/specialist/stats"],
     enabled: !!user,
   });
-
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ["/api/specialist/tasks"],
     enabled: !!user,
   });
-
   const { data: evaluations = [], isLoading: evaluationsLoading } = useQuery<TaskEvaluation[]>({
     queryKey: ["/api/specialist/evaluations"],
     enabled: !!user,
   });
-
   const submitEvaluationMutation = useMutation({
     mutationFn: async (data: { taskId: number; hours: number; cost: number; notes: string }) => {
       return apiRequest("POST", `/api/tasks/${data.taskId}/evaluate`, {
@@ -66,7 +61,6 @@ export default function SpecialistDashboard() {
       });
     },
   });
-
   const completeTaskMutation = useMutation({
     mutationFn: async (taskId: number) => {
       return apiRequest("PUT", `/api/tasks/${taskId}/complete`);
@@ -86,7 +80,6 @@ export default function SpecialistDashboard() {
       });
     },
   });
-
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
       created: "secondary",
@@ -102,7 +95,6 @@ export default function SpecialistDashboard() {
       </Badge>
     );
   };
-
   if (statsLoading || tasksLoading || evaluationsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -110,17 +102,14 @@ export default function SpecialistDashboard() {
       </div>
     );
   }
-
   const pendingEvaluations = tasks.filter(task => task.status === "created" && task.specialistId === user?.id);
   const activeTasks = tasks.filter(task => task.status === "in_progress" && task.specialistId === user?.id);
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Specialist Dashboard</h1>
         <p className="text-gray-600 mt-2">Manage your tasks and track earnings</p>
       </div>
-
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <Card>
@@ -180,7 +169,6 @@ export default function SpecialistDashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Main Content Tabs */}
       <Tabs defaultValue="pending" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
@@ -201,7 +189,6 @@ export default function SpecialistDashboard() {
             Earnings
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="pending" className="space-y-4">
           <Card>
             <CardHeader>
@@ -228,7 +215,6 @@ export default function SpecialistDashboard() {
                             </span>
                           </div>
                         </div>
-                        
                         <form
                           onSubmit={(e) => {
                             e.preventDefault();
@@ -289,7 +275,6 @@ export default function SpecialistDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="active" className="space-y-4">
           <Card>
             <CardHeader>
@@ -351,7 +336,6 @@ export default function SpecialistDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="completed" className="space-y-4">
           <Card>
             <CardHeader>
@@ -398,7 +382,6 @@ export default function SpecialistDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
-
         <TabsContent value="earnings" className="space-y-4">
           <Card>
             <CardHeader>
@@ -433,7 +416,6 @@ export default function SpecialistDashboard() {
                     </CardContent>
                   </Card>
                 </div>
-                
                 <div className="text-center py-8 text-gray-500">
                   <DollarSign className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                   <p>Detailed earning reports coming soon</p>

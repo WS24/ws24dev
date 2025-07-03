@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +14,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Settings, Upload, Globe, Mail, User, Shield, FileText, Image, Database } from "lucide-react";
-
 const SystemSettingsMenu = ({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) => (
   <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg mb-6">
     <Button
@@ -65,7 +63,6 @@ const SystemSettingsMenu = ({ activeTab, onTabChange }: { activeTab: string; onT
     </Button>
   </div>
 );
-
 const systemSettingsSchema = z.object({
   siteName: z.string().min(1, "Site name is required"),
   siteDescription: z.string().optional(),
@@ -87,20 +84,16 @@ const systemSettingsSchema = z.object({
   passwordBruteForceProtection: z.boolean(),
   emailAccountActivation: z.boolean(),
 });
-
 type SystemSettings = z.infer<typeof systemSettingsSchema>;
-
 export default function SystemSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [activeTab, setActiveTab] = useState("general");
-
   const { data: settings, isLoading } = useQuery<SystemSettings>({
     queryKey: ["/api/system-settings"],
     retry: false,
   });
-
   const form = useForm<SystemSettings>({
     resolver: zodResolver(systemSettingsSchema),
     defaultValues: {
@@ -125,7 +118,6 @@ export default function SystemSettings() {
       emailAccountActivation: settings?.emailAccountActivation || false,
     },
   });
-
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: SystemSettings) => {
       const formData = new FormData();
@@ -152,18 +144,15 @@ export default function SystemSettings() {
       });
     },
   });
-
   const onSubmit = (data: SystemSettings) => {
     updateSettingsMutation.mutate(data);
   };
-
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setLogoFile(file);
     }
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -171,11 +160,7 @@ export default function SystemSettings() {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
       <div className="flex">
         <div className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
@@ -186,9 +171,7 @@ export default function SystemSettings() {
                 <p className="text-gray-600">Configure your platform settings and preferences</p>
               </div>
             </div>
-
             <SystemSettingsMenu activeTab={activeTab} onTabChange={setActiveTab} />
-
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* General Settings */}
@@ -217,7 +200,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="siteDescription"
@@ -231,7 +213,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="siteTheme"
@@ -257,7 +238,6 @@ export default function SystemSettings() {
                     </CardContent>
                   </Card>
                 )}
-
                 {/* Site Configuration */}
                 {activeTab === "site" && (
                   <Card>
@@ -284,7 +264,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="logoType"
@@ -306,7 +285,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
@@ -325,7 +303,6 @@ export default function SystemSettings() {
                             </FormItem>
                           )}
                         />
-
                         <FormField
                           control={form.control}
                           name="logoHeight"
@@ -347,7 +324,6 @@ export default function SystemSettings() {
                     </CardContent>
                   </Card>
                 )}
-
                 {/* File Settings */}
                 {activeTab === "files" && (
                   <Card>
@@ -374,7 +350,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="allowedFileTypes"
@@ -388,7 +363,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="maxFileSize"
@@ -409,7 +383,6 @@ export default function SystemSettings() {
                     </CardContent>
                   </Card>
                 )}
-
                 {/* User Defaults */}
                 {activeTab === "users" && (
                   <Card>
@@ -445,7 +418,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="disableRegistration"
@@ -466,7 +438,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="allowAvatarUpload"
@@ -490,7 +461,6 @@ export default function SystemSettings() {
                     </CardContent>
                   </Card>
                 )}
-
                 {/* Security Settings */}
                 {activeTab === "security" && (
                   <Card>
@@ -524,7 +494,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="emailAccountActivation"
@@ -545,7 +514,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="recaptchaSecretKey"
@@ -559,7 +527,6 @@ export default function SystemSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="recaptchaSiteKey"
@@ -576,7 +543,6 @@ export default function SystemSettings() {
                     </CardContent>
                   </Card>
                 )}
-
                 {/* Submit Button */}
                 <div className="flex justify-end">
                   <Button 
@@ -592,6 +558,5 @@ export default function SystemSettings() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,17 +22,14 @@ import {
   AlertTriangle,
   CheckCircle
 } from "lucide-react";
-
 export default function Billing() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedYear, setSelectedYear] = useState("2018");
   const [recordsPerPage, setRecordsPerPage] = useState("100");
-
   const { data: transactions, isLoading } = useQuery<any[]>({
     queryKey: ["/api/billing/transactions", selectedYear],
     retry: false,
   });
-
   const { data: billingStats, isLoading: statsLoading } = useQuery<{
     totalInAccount: string;
     incomeInOrders: string;
@@ -44,7 +39,6 @@ export default function Billing() {
     queryKey: ["/api/billing/stats"],
     retry: false,
   });
-
   const getStatusBadge = (type: string) => {
     switch (type.toLowerCase()) {
       case 'completed':
@@ -60,7 +54,6 @@ export default function Billing() {
         return <Badge variant="outline" className="text-xs">{type}</Badge>;
     }
   };
-
   // Sample data matching your screenshot structure
   const billingData = [
     { id: 51, year: 2018, month: 7, day: 31, order: 0, info: "Balance top-up", type: "Completed", income: "14848.00", expense: "", user: "Anton" },
@@ -83,10 +76,8 @@ export default function Billing() {
     { id: 96, year: 2018, month: 8, day: 11, order: 0, info: "Bank card top-up 'YANDEX MONEY' NBCO LLC 5106013000000xxx", type: "Completed", income: "20.00", expense: "", user: "adminds" },
     { id: 101, year: 2018, month: 8, day: 11, order: 0, info: "Bank card replenishment JSC CB MindBank 4024979000000xxx", type: "Completed", income: "30.00", expense: "", user: "adminds" },
   ];
-
   // Use real transaction data from API, fallback to sample data if not available
   const transactionData = transactions || billingData;
-  
   const filteredData = transactionData.filter((item: any) => {
     const searchText = searchTerm.toLowerCase();
     return (
@@ -95,16 +86,9 @@ export default function Billing() {
       (item.type || '').toLowerCase().includes(searchText)
     );
   });
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="flex pt-16">
-        <Sidebar />
-        
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <div className="p-6">
+    <>
+      <div className="p-6">
               {/* Header with breadcrumb */}
               <div className="mb-8">
                 <div className="flex items-center text-sm text-gray-600 mb-2">
@@ -112,7 +96,6 @@ export default function Billing() {
                   <span className="ml-2 font-semibold text-gray-900">Billing / Finance Dashboard</span>
                 </div>
               </div>
-
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card className="bg-gradient-to-r from-blue-400 to-blue-500 text-white">
@@ -130,7 +113,6 @@ export default function Billing() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card className="bg-gradient-to-r from-green-400 to-green-500 text-white">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -146,7 +128,6 @@ export default function Billing() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -162,7 +143,6 @@ export default function Billing() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card className="bg-gradient-to-r from-red-400 to-red-500 text-white">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -179,7 +159,6 @@ export default function Billing() {
                   </CardContent>
                 </Card>
               </div>
-
               {/* Filters and Controls */}
               <Card className="mb-6">
                 <CardContent className="p-4">
@@ -200,7 +179,6 @@ export default function Billing() {
                         <span className="text-sm text-gray-600">records</span>
                       </div>
                     </div>
-                    
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-600">Search:</span>
                       <div className="relative">
@@ -216,7 +194,6 @@ export default function Billing() {
                   </div>
                 </CardContent>
               </Card>
-
               {/* Transactions Table */}
               <Card>
                 <CardContent className="p-0">
@@ -328,9 +305,6 @@ export default function Billing() {
                 </CardContent>
               </Card>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }

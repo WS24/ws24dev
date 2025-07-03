@@ -13,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertEvaluationSchema, type Task } from "@shared/schema";
 import { Calculator, Clock, DollarSign, CheckCircle, AlertCircle, FileText, User, Calendar } from "lucide-react";
-
 type EvaluationData = {
   estimatedHours: number;
   hourlyRate: number;
@@ -23,29 +22,24 @@ type EvaluationData = {
   complexity: string;
   techStack: string;
 };
-
 const complexityLevels = [
   { value: "simple", label: "Simple", hours: "5-15", color: "bg-green-100 text-green-800" },
   { value: "moderate", label: "Moderate", hours: "16-40", color: "bg-blue-100 text-blue-800" },
   { value: "complex", label: "Complex", hours: "41-80", color: "bg-orange-100 text-orange-800" },
   { value: "advanced", label: "Advanced", hours: "80+", color: "bg-red-100 text-red-800" },
 ];
-
 export default function Evaluations() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-
   const { data: pendingTasks, isLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks/pending-evaluation"],
     retry: false,
   });
-
   const { data: myEvaluations } = useQuery<any[]>({
     queryKey: ["/api/evaluations/my-evaluations"],
     retry: false,
   });
-
   const form = useForm<EvaluationData>({
     resolver: zodResolver(insertEvaluationSchema),
     defaultValues: {
@@ -58,7 +52,6 @@ export default function Evaluations() {
       techStack: "",
     },
   });
-
   const submitEvaluationMutation = useMutation({
     mutationFn: async (data: EvaluationData) => {
       if (!selectedTask) throw new Error("No task selected");
@@ -82,24 +75,20 @@ export default function Evaluations() {
       });
     },
   });
-
   const onSubmit = (data: EvaluationData) => {
     submitEvaluationMutation.mutate(data);
   };
-
   const handleTaskSelect = (task: Task) => {
     setSelectedTask(task);
     // Auto-calculate initial estimates based on task complexity
     const complexity = getTaskComplexity(task);
     const baseHours = getBaseHours(complexity);
     const hourlyRate = 75;
-    
     form.setValue("estimatedHours", baseHours);
     form.setValue("hourlyRate", hourlyRate);
     form.setValue("totalCost", baseHours * hourlyRate);
     form.setValue("complexity", complexity);
   };
-
   const getTaskComplexity = (task: Task): string => {
     const description = task.description.toLowerCase();
     if (description.includes("simple") || description.includes("basic")) return "simple";
@@ -107,7 +96,6 @@ export default function Evaluations() {
     if (description.includes("enterprise") || description.includes("scaling")) return "advanced";
     return "moderate";
   };
-
   const getBaseHours = (complexity: string): number => {
     switch (complexity) {
       case "simple": return 10;
@@ -117,13 +105,11 @@ export default function Evaluations() {
       default: return 25;
     }
   };
-
   const updateTotalCost = () => {
     const hours = form.watch("estimatedHours");
     const rate = form.watch("hourlyRate");
     form.setValue("totalCost", hours * rate);
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -131,7 +117,6 @@ export default function Evaluations() {
       </div>
     );
   }
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -141,13 +126,11 @@ export default function Evaluations() {
           <p className="text-gray-600">Review and evaluate client projects</p>
         </div>
       </div>
-
       <Tabs defaultValue="pending" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="pending">Pending Evaluations</TabsTrigger>
           <TabsTrigger value="submitted">My Evaluations</TabsTrigger>
         </TabsList>
-
         <TabsContent value="pending" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Task List */}
@@ -176,11 +159,9 @@ export default function Evaluations() {
                           {task.category}
                         </Badge>
                       </div>
-                      
                       <p className="text-gray-600 text-sm line-clamp-2 mb-3">
                         {task.description}
                       </p>
-                      
                       <div className="flex items-center gap-4 text-sm text-gray-500">
                         <div className="flex items-center gap-1">
                           <User className="w-4 h-4" />
@@ -200,7 +181,6 @@ export default function Evaluations() {
                 ))
               )}
             </div>
-
             {/* Evaluation Form */}
             <div>
               {selectedTask ? (
@@ -235,7 +215,6 @@ export default function Evaluations() {
                               </FormItem>
                             )}
                           />
-
                           <FormField
                             control={form.control}
                             name="hourlyRate"
@@ -257,7 +236,6 @@ export default function Evaluations() {
                             )}
                           />
                         </div>
-
                         <FormField
                           control={form.control}
                           name="totalCost"
@@ -276,7 +254,6 @@ export default function Evaluations() {
                             </FormItem>
                           )}
                         />
-
                         <FormField
                           control={form.control}
                           name="deadline"
@@ -290,7 +267,6 @@ export default function Evaluations() {
                             </FormItem>
                           )}
                         />
-
                         <FormField
                           control={form.control}
                           name="techStack"
@@ -307,7 +283,6 @@ export default function Evaluations() {
                             </FormItem>
                           )}
                         />
-
                         <FormField
                           control={form.control}
                           name="notes"
@@ -325,7 +300,6 @@ export default function Evaluations() {
                             </FormItem>
                           )}
                         />
-
                         <Button 
                           type="submit" 
                           disabled={submitEvaluationMutation.isPending}
@@ -348,7 +322,6 @@ export default function Evaluations() {
             </div>
           </div>
         </TabsContent>
-
         <TabsContent value="submitted" className="space-y-4">
           <h2 className="text-xl font-semibold">My Submitted Evaluations</h2>
           {myEvaluations?.length === 0 ? (
@@ -371,7 +344,6 @@ export default function Evaluations() {
                         {evaluation.status}
                       </Badge>
                     </div>
-                    
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
@@ -386,7 +358,6 @@ export default function Evaluations() {
                         {new Date(evaluation.createdAt).toLocaleDateString()}
                       </div>
                     </div>
-                    
                     {evaluation.notes && (
                       <p className="text-gray-600 text-sm mt-2">
                         {evaluation.notes}

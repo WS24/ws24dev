@@ -4,8 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +31,6 @@ import {
   Edit,
   Save
 } from "lucide-react";
-
 interface AdminStats {
   totalTasks: number;
   activeTasks: number;
@@ -46,7 +43,6 @@ interface AdminStats {
   pendingPayments: number;
   activeAssignments: number;
 }
-
 interface BalanceAdjustment {
   id: number;
   userId: string;
@@ -58,7 +54,6 @@ interface BalanceAdjustment {
   type: string;
   createdAt: string;
 }
-
 interface PlatformSetting {
   id: number;
   key: string;
@@ -66,23 +61,18 @@ interface PlatformSetting {
   description: string;
   updatedAt: string;
 }
-
 export default function AdminDashboard() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
-  
   const [selectedUserId, setSelectedUserId] = useState("");
   const [adjustmentAmount, setAdjustmentAmount] = useState("");
   const [adjustmentReason, setAdjustmentReason] = useState("");
   const [adjustmentType, setAdjustmentType] = useState<"credit" | "debit">("credit");
-  
   const [selectedTaskId, setSelectedTaskId] = useState("");
   const [selectedSpecialistId, setSelectedSpecialistId] = useState("");
   const [assignmentNotes, setAssignmentNotes] = useState("");
-  
   const [editingSettings, setEditingSettings] = useState<Record<string, string>>({});
-
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -97,7 +87,6 @@ export default function AdminDashboard() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
-
   // Check admin access
   useEffect(() => {
     if (user && user.role !== "admin") {
@@ -109,45 +98,38 @@ export default function AdminDashboard() {
       window.location.href = "/";
     }
   }, [user, toast]);
-
   // Fetch admin dashboard stats
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/dashboard-stats"],
     retry: false,
     enabled: !!user && user.role === "admin",
   });
-
   // Fetch all users
   const { data: users } = useQuery<any[]>({
     queryKey: ["/api/admin/users"],
     retry: false,
     enabled: !!user && user.role === "admin",
   });
-
   // Fetch all tasks
   const { data: tasks } = useQuery<any[]>({
     queryKey: ["/api/admin/tasks"],
     retry: false,
     enabled: !!user && user.role === "admin",
   });
-
   // Fetch specialists
   const specialists = users?.filter(u => u.role === "specialist") || [];
-
   // Fetch balance adjustments
   const { data: adjustments } = useQuery<BalanceAdjustment[]>({
     queryKey: ["/api/admin/balance-adjustments"],
     retry: false,
     enabled: !!user && user.role === "admin",
   });
-
   // Fetch platform settings
   const { data: settings } = useQuery<PlatformSetting[]>({
     queryKey: ["/api/admin/platform-settings"],
     retry: false,
     enabled: !!user && user.role === "admin",
   });
-
   // Balance adjustment mutation
   const adjustBalanceMutation = useMutation({
     mutationFn: async () => {
@@ -189,7 +171,6 @@ export default function AdminDashboard() {
       });
     },
   });
-
   // Task assignment mutation
   const assignTaskMutation = useMutation({
     mutationFn: async () => {
@@ -230,7 +211,6 @@ export default function AdminDashboard() {
       });
     },
   });
-
   // Platform settings mutation
   const updateSettingMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
@@ -265,7 +245,6 @@ export default function AdminDashboard() {
       });
     },
   });
-
   if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -276,7 +255,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
   const handleBalanceAdjustment = () => {
     if (!selectedUserId || !adjustmentAmount || !adjustmentReason) {
       toast({
@@ -288,7 +266,6 @@ export default function AdminDashboard() {
     }
     adjustBalanceMutation.mutate();
   };
-
   const handleTaskAssignment = () => {
     if (!selectedTaskId || !selectedSpecialistId) {
       toast({
@@ -300,20 +277,14 @@ export default function AdminDashboard() {
     }
     assignTaskMutation.mutate();
   };
-
   const handleSettingUpdate = (key: string) => {
     const value = editingSettings[key];
     if (value !== undefined) {
       updateSettingMutation.mutate({ key, value });
     }
   };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="flex">
-        <Sidebar />
-        <div className="flex-1 p-6">
+    <div>
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -325,7 +296,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
-
             {/* Stats Cards */}
             {statsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -357,7 +327,6 @@ export default function AdminDashboard() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -373,7 +342,6 @@ export default function AdminDashboard() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -388,7 +356,6 @@ export default function AdminDashboard() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -405,7 +372,6 @@ export default function AdminDashboard() {
                 </Card>
               </div>
             )}
-
             {/* Main Tabs */}
             <Tabs defaultValue="balance" className="space-y-4">
               <TabsList className="grid w-full grid-cols-4">
@@ -414,7 +380,6 @@ export default function AdminDashboard() {
                 <TabsTrigger value="settings">Platform Settings</TabsTrigger>
                 <TabsTrigger value="audit">Audit Log</TabsTrigger>
               </TabsList>
-
               {/* Balance Management Tab */}
               <TabsContent value="balance" className="space-y-4">
                 <Card>
@@ -441,7 +406,6 @@ export default function AdminDashboard() {
                           </SelectContent>
                         </Select>
                       </div>
-
                       <div className="space-y-2">
                         <Label>Adjustment Type</Label>
                         <Select value={adjustmentType} onValueChange={(value: "credit" | "debit") => setAdjustmentType(value)}>
@@ -454,7 +418,6 @@ export default function AdminDashboard() {
                           </SelectContent>
                         </Select>
                       </div>
-
                       <div className="space-y-2">
                         <Label>Amount</Label>
                         <Input
@@ -465,7 +428,6 @@ export default function AdminDashboard() {
                           onChange={(e) => setAdjustmentAmount(e.target.value)}
                         />
                       </div>
-
                       <div className="space-y-2">
                         <Label>Reason</Label>
                         <Input
@@ -475,7 +437,6 @@ export default function AdminDashboard() {
                         />
                       </div>
                     </div>
-
                     <Button
                       onClick={handleBalanceAdjustment}
                       disabled={adjustBalanceMutation.isPending}
@@ -486,7 +447,6 @@ export default function AdminDashboard() {
                     </Button>
                   </CardContent>
                 </Card>
-
                 {/* Recent Adjustments */}
                 <Card>
                   <CardHeader>
@@ -537,7 +497,6 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </TabsContent>
-
               {/* Task Assignments Tab */}
               <TabsContent value="assignments" className="space-y-4">
                 <Card>
@@ -564,7 +523,6 @@ export default function AdminDashboard() {
                           </SelectContent>
                         </Select>
                       </div>
-
                       <div className="space-y-2">
                         <Label>Select Specialist</Label>
                         <Select value={selectedSpecialistId} onValueChange={setSelectedSpecialistId}>
@@ -580,7 +538,6 @@ export default function AdminDashboard() {
                           </SelectContent>
                         </Select>
                       </div>
-
                       <div className="space-y-2 md:col-span-2">
                         <Label>Assignment Notes (Optional)</Label>
                         <Textarea
@@ -590,7 +547,6 @@ export default function AdminDashboard() {
                         />
                       </div>
                     </div>
-
                     <Button
                       onClick={handleTaskAssignment}
                       disabled={assignTaskMutation.isPending}
@@ -601,7 +557,6 @@ export default function AdminDashboard() {
                     </Button>
                   </CardContent>
                 </Card>
-
                 {/* Active Assignments */}
                 <Card>
                   <CardHeader>
@@ -644,7 +599,6 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </TabsContent>
-
               {/* Platform Settings Tab */}
               <TabsContent value="settings" className="space-y-4">
                 <Card>
@@ -710,7 +664,6 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       ))}
-
                       {(!settings || settings.length === 0) && (
                         <div className="text-center py-8 text-gray-500">
                           <Settings className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -730,7 +683,6 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </TabsContent>
-
               {/* Audit Log Tab */}
               <TabsContent value="audit" className="space-y-4">
                 <Card>
@@ -750,7 +702,6 @@ export default function AdminDashboard() {
                         </div>
                         <span className="text-sm text-gray-500">2 hours ago</span>
                       </div>
-
                       <div className="flex items-center p-4 border rounded-lg">
                         <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
                         <div className="flex-1">
@@ -759,7 +710,6 @@ export default function AdminDashboard() {
                         </div>
                         <span className="text-sm text-gray-500">5 hours ago</span>
                       </div>
-
                       <div className="flex items-center p-4 border rounded-lg">
                         <Settings className="w-5 h-5 text-blue-500 mr-3" />
                         <div className="flex-1">
@@ -774,8 +724,6 @@ export default function AdminDashboard() {
               </TabsContent>
             </Tabs>
           </div>
-        </div>
-      </div>
     </div>
   );
 }

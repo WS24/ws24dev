@@ -1,9 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, startTransition } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { StatsCard } from "@/components/cards/stats-card";
 import { TaskCard } from "@/components/cards/task-card";
 import { Button } from "@/components/ui/button";
@@ -14,12 +12,10 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { Plus, CreditCard, Headphones, Clock, CheckCircle, AlertCircle, DollarSign, BarChart3, Calculator, Users, Globe, Code } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
-
 export default function Dashboard() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -34,7 +30,6 @@ export default function Dashboard() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
-
   const { data: stats, isLoading: statsLoading } = useQuery<{
     activeTasks: string;
     completedTasks: string;
@@ -48,13 +43,11 @@ export default function Dashboard() {
     retry: false,
     enabled: !!user,
   });
-
   const { data: tasks, isLoading: tasksLoading } = useQuery<any[]>({
     queryKey: ["/api/tasks"],
     retry: false,
     enabled: !!user,
   });
-
   if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -65,9 +58,7 @@ export default function Dashboard() {
       </div>
     );
   }
-
   const createdTasks = (tasks || []).filter(task => task.status === "created").slice(0, 3);
-
   const getStatsCards = () => {
     if (user.role === "specialist") {
       return [
@@ -125,24 +116,16 @@ export default function Dashboard() {
       ];
     }
   };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="flex pt-16">
-        <Sidebar />
-        
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <div className="p-6">
-              {/* Page Header */}
+    <>
+      <div>
+        {/* Page Header */}
               <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
                 <p className="text-gray-600 mt-1">
                   Welcome back! Here's what's happening with your {user.role === "specialist" ? "assignments" : "tasks"}.
                 </p>
               </div>
-
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {getStatsCards().map((stat, index) => (
@@ -156,7 +139,6 @@ export default function Dashboard() {
                   />
                 ))}
               </div>
-
               {/* Recent Tasks and Quick Actions */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Recent Tasks */}
@@ -179,14 +161,14 @@ export default function Dashboard() {
                           <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                           <p>No created {user.role === "specialist" ? "assignments" : "tasks"} found</p>
                           {user.role === "client" && (
-                            <Button
-                              onClick={() => setIsCreateModalOpen(true)}
-                              className="mt-4"
-                              size="sm"
-                            >
-                              <Plus className="w-4 h-4 mr-2" />
-                              Create Your First Task
-                            </Button>
+                          <Button
+                            onClick={() => startTransition(() => setIsCreateModalOpen(true))}
+                            className="mt-4"
+                            size="sm"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Create Your First Task
+                          </Button>
                           )}
                         </div>
                       ) : (
@@ -208,7 +190,6 @@ export default function Dashboard() {
                     </CardContent>
                   </Card>
                 </div>
-
                 {/* Quick Actions and Notifications */}
                 <div className="space-y-6">
                   <Card>
@@ -219,7 +200,7 @@ export default function Dashboard() {
                       {user.role === "client" ? (
                         <>
                           <Button
-                            onClick={() => setIsCreateModalOpen(true)}
+                            onClick={() => startTransition(() => setIsCreateModalOpen(true))}
                             className="w-full bg-primary text-white hover:bg-blue-700"
                           >
                             <Plus className="mr-2 w-4 h-4" />
@@ -228,7 +209,7 @@ export default function Dashboard() {
                           <Button
                             variant="outline"
                             className="w-full"
-                            onClick={() => window.location.href = "/billing"}
+                            onClick={() => startTransition(() => window.location.href = "/billing")}
                           >
                             <CreditCard className="mr-2 w-4 h-4" />
                             View Billing
@@ -238,7 +219,7 @@ export default function Dashboard() {
                         <>
                           <Button
                             className="w-full bg-primary text-white hover:bg-blue-700"
-                            onClick={() => window.location.href = "/assignments"}
+                            onClick={() => startTransition(() => window.location.href = "/assignments")}
                           >
                             <Clock className="mr-2 w-4 h-4" />
                             View Assignments
@@ -246,7 +227,7 @@ export default function Dashboard() {
                           <Button
                             variant="outline"
                             className="w-full"
-                            onClick={() => window.location.href = "/assignments"}
+                            onClick={() => startTransition(() => window.location.href = "/assignments")}
                           >
                             <AlertCircle className="mr-2 w-4 h-4" />
                             Pending Evaluations
@@ -259,7 +240,6 @@ export default function Dashboard() {
                       </Button>
                     </CardContent>
                   </Card>
-
                   {/* Notifications Panel */}
                   <Card>
                     <CardHeader>
@@ -290,16 +270,13 @@ export default function Dashboard() {
                   </Card>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+        
+        {/* Create Task Modal */}
+        <CreateTaskModal 
+          isOpen={isCreateModalOpen} 
+          onClose={() => setIsCreateModalOpen(false)} 
+        />
       </div>
-
-      {/* Create Task Modal */}
-      <CreateTaskModal 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
-      />
-    </div>
-  );
+    </>
+  )
 }

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Navigation } from "@/components/layout/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,6 @@ import {
   Bell,
   CheckCircle
 } from "lucide-react";
-
 const stripeSettingsSchema = z.object({
   publicKey: z.string().min(1, "Public key is required").startsWith("pk_", "Must start with pk_"),
   secretKey: z.string().min(1, "Secret key is required").startsWith("sk_", "Must start with sk_"),
@@ -35,14 +33,11 @@ const stripeSettingsSchema = z.object({
   enableSubscriptions: z.boolean().default(true),
   testMode: z.boolean().default(false),
 });
-
 type StripeSettings = z.infer<typeof stripeSettingsSchema>;
-
 export default function StripeSettings() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | "testing">("disconnected");
-
   const form = useForm<StripeSettings>({
     resolver: zodResolver(stripeSettingsSchema),
     defaultValues: {
@@ -58,7 +53,6 @@ export default function StripeSettings() {
       testMode: false,
     },
   });
-
   const onSubmit = async (data: StripeSettings) => {
     setIsLoading(true);
     try {
@@ -68,11 +62,9 @@ export default function StripeSettings() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-
       if (!response.ok) {
         throw new Error("Failed to save settings");
       }
-
       setConnectionStatus("connected");
       toast({
         title: "Settings Saved",
@@ -88,7 +80,6 @@ export default function StripeSettings() {
       setIsLoading(false);
     }
   };
-
   const testConnection = async () => {
     setConnectionStatus("testing");
     try {
@@ -101,7 +92,6 @@ export default function StripeSettings() {
           secretKey: formData.secretKey,
         }),
       });
-
       if (response.ok) {
         setConnectionStatus("connected");
         toast({
@@ -125,7 +115,6 @@ export default function StripeSettings() {
       });
     }
   };
-
   const StatusIcon = () => {
     switch (connectionStatus) {
       case "connected":
@@ -136,11 +125,7 @@ export default function StripeSettings() {
         return <div className="w-5 h-5 rounded-full bg-gray-300" />;
     }
   };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
       <div className="flex">
         <div className="flex-1 p-8">
           <div className="max-w-4xl mx-auto">
@@ -155,7 +140,6 @@ export default function StripeSettings() {
                   <p className="text-gray-600">Configure your Stripe payment processing</p>
                 </div>
               </div>
-              
               <div className="flex items-center gap-2">
                 <StatusIcon />
                 <span className="text-sm font-medium">
@@ -164,7 +148,6 @@ export default function StripeSettings() {
                 </span>
               </div>
             </div>
-
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 {/* API Keys Section */}
@@ -196,7 +179,6 @@ export default function StripeSettings() {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="secretKey"
@@ -218,7 +200,6 @@ export default function StripeSettings() {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="webhookSecret"
@@ -240,7 +221,6 @@ export default function StripeSettings() {
                         </FormItem>
                       )}
                     />
-
                     <div className="flex gap-4">
                       <Button type="button" variant="outline" onClick={testConnection}>
                         Test Connection
@@ -248,7 +228,6 @@ export default function StripeSettings() {
                     </div>
                   </CardContent>
                 </Card>
-
                 {/* Payment Configuration */}
                 <Card>
                   <CardHeader>
@@ -282,9 +261,7 @@ export default function StripeSettings() {
                         </FormItem>
                       )}
                     />
-
                     <Separator />
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField
                         control={form.control}
@@ -306,7 +283,6 @@ export default function StripeSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="requireBillingAddress"
@@ -327,7 +303,6 @@ export default function StripeSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="automaticTax"
@@ -348,7 +323,6 @@ export default function StripeSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="enableSubscriptions"
@@ -372,7 +346,6 @@ export default function StripeSettings() {
                     </div>
                   </CardContent>
                 </Card>
-
                 {/* Test Mode */}
                 <Card>
                   <CardHeader>
@@ -404,7 +377,6 @@ export default function StripeSettings() {
                     />
                   </CardContent>
                 </Card>
-
                 {/* Actions */}
                 <div className="flex justify-end space-x-4">
                   <Button type="button" variant="outline">
@@ -419,6 +391,5 @@ export default function StripeSettings() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

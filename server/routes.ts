@@ -55,10 +55,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      let user = await storage.getUser(userId);
       
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        // In development mode, create a default user if none exists
+        if (process.env.NODE_ENV === "development") {
+          console.log("Creating default user for development");
+          user = await storage.upsertUser({
+            id: userId,
+            email: req.user.claims.email || "ws24adwords@gmail.com",
+            firstName: req.user.claims.first_name || "Test",
+            lastName: req.user.claims.last_name || "User",
+            username: "testuser",
+            role: "admin",
+            balance: "1000.00",
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+        } else {
+          return res.status(404).json({ message: "User not found" });
+        }
       }
       
       res.json(user);
@@ -169,8 +186,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      if (!user || user.role !== "client") {
-        return res.status(403).json({ message: "Only clients can create tasks" });
+      if (!user || (user.role !== "client" && user.role !== "admin")) {
+        return res.status(403).json({ message: "Only clients and admins can create tasks" });
       }
 
       const validatedData = insertTaskSchema.parse(req.body);

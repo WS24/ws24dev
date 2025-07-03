@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +14,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Settings, FileUp, Users, Edit, Lock, Star, Mail, Database, Cog } from "lucide-react";
-
 const ticketSettingsSchema = z.object({
   // General Ticket Settings
   allowFileUpload: z.boolean().default(true),
@@ -24,11 +22,9 @@ const ticketSettingsSchema = z.object({
   requireLogin: z.boolean().default(false),
   allowTicketRating: z.boolean().default(true),
   preventRepliesAfterClose: z.boolean().default(true),
-  
   // Auto Status Settings
   staffReplyAction: z.string().default("nothing"),
   clientReplyAction: z.string().default("nothing"),
-  
   // IMAP Settings
   imapProtocol: z.string().default("imap"),
   imapHost: z.string().default("imap.timeweb.ru:993"),
@@ -36,28 +32,22 @@ const ticketSettingsSchema = z.object({
   imapSkipCertValidation: z.boolean().default(false),
   imapEmail: z.string().email().default("ticket@ws24.pro"),
   imapPassword: z.string().min(1),
-  
   // Default Settings
   ticketTitle: z.string().default("Support Ticket"),
   defaultCategory: z.string().default("general"),
   defaultStatus: z.string().default("new"),
-  
   // IMAP String Settings
   imapTicketString: z.string().default("## Номер заявки:"),
   imapReplyString: z.string().default("##- Введите свой ответ над этой строкой -##"),
 });
-
 type TicketSettings = z.infer<typeof ticketSettingsSchema>;
-
 export default function TicketSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
   const { data: settings, isLoading } = useQuery({
     queryKey: ["/api/ticket-settings"],
     staleTime: 5 * 60 * 1000,
   });
-
   const form = useForm<TicketSettings>({
     resolver: zodResolver(ticketSettingsSchema),
     defaultValues: settings || {
@@ -82,7 +72,6 @@ export default function TicketSettings() {
       imapReplyString: "##- Введите свой ответ над этой строкой -##",
     },
   });
-
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: TicketSettings) => {
       const response = await apiRequest("PUT", "/api/ticket-settings", data);
@@ -103,11 +92,9 @@ export default function TicketSettings() {
       });
     },
   });
-
   const onSubmit = (data: TicketSettings) => {
     updateSettingsMutation.mutate(data);
   };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -115,11 +102,7 @@ export default function TicketSettings() {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
       <div className="flex">
         <div className="flex-1 p-8">
           <div className="max-w-4xl mx-auto">
@@ -130,7 +113,6 @@ export default function TicketSettings() {
                 <p className="text-gray-600">Configure ticket system preferences and IMAP settings</p>
               </div>
             </div>
-
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* General Ticket Settings */}
@@ -165,7 +147,6 @@ export default function TicketSettings() {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="allowGuestTickets"
@@ -186,7 +167,6 @@ export default function TicketSettings() {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="allowTicketEdit"
@@ -207,7 +187,6 @@ export default function TicketSettings() {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="requireLogin"
@@ -228,7 +207,6 @@ export default function TicketSettings() {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="allowTicketRating"
@@ -249,7 +227,6 @@ export default function TicketSettings() {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="preventRepliesAfterClose"
@@ -272,7 +249,6 @@ export default function TicketSettings() {
                     />
                   </CardContent>
                 </Card>
-
                 {/* Auto Status Settings */}
                 <Card>
                   <CardHeader>
@@ -305,7 +281,6 @@ export default function TicketSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="clientReplyAction"
@@ -331,7 +306,6 @@ export default function TicketSettings() {
                     </div>
                   </CardContent>
                 </Card>
-
                 {/* IMAP Settings */}
                 <Card>
                   <CardHeader>
@@ -363,7 +337,6 @@ export default function TicketSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="imapHost"
@@ -377,7 +350,6 @@ export default function TicketSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="imapSsl"
@@ -395,7 +367,6 @@ export default function TicketSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="imapSkipCertValidation"
@@ -417,7 +388,6 @@ export default function TicketSettings() {
                         )}
                       />
                     </div>
-
                     <FormField
                       control={form.control}
                       name="imapEmail"
@@ -434,7 +404,6 @@ export default function TicketSettings() {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="imapPassword"
@@ -450,7 +419,6 @@ export default function TicketSettings() {
                     />
                   </CardContent>
                 </Card>
-
                 {/* Default Settings */}
                 <Card>
                   <CardHeader>
@@ -473,7 +441,6 @@ export default function TicketSettings() {
                         </FormItem>
                       )}
                     />
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
@@ -501,7 +468,6 @@ export default function TicketSettings() {
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="defaultStatus"
@@ -530,7 +496,6 @@ export default function TicketSettings() {
                     </div>
                   </CardContent>
                 </Card>
-
                 {/* IMAP String Settings */}
                 <Card>
                   <CardHeader>
@@ -559,7 +524,6 @@ export default function TicketSettings() {
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="imapReplyString"
@@ -578,7 +542,6 @@ export default function TicketSettings() {
                     />
                   </CardContent>
                 </Card>
-
                 {/* Cron Settings */}
                 <Card>
                   <CardHeader>
@@ -597,7 +560,6 @@ export default function TicketSettings() {
                         wget https://ws24.pro/cron/ticket_replies
                       </div>
                     </div>
-
                     <div className="space-y-2">
                       <Label>Получение новых заявок (создание)</Label>
                       <div className="bg-gray-100 p-3 rounded-md font-mono text-sm">
@@ -606,7 +568,6 @@ export default function TicketSettings() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <div className="flex justify-end gap-4">
                   <Button type="button" variant="outline">
                     Reset
@@ -620,6 +581,5 @@ export default function TicketSettings() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

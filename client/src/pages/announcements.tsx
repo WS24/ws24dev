@@ -1,6 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -11,13 +9,11 @@ import {
   Info,
   CheckCircle
 } from "lucide-react";
-
 export default function Announcements() {
   const { data: announcements, isLoading } = useQuery<any[]>({
     queryKey: ["/api/announcements"],
     retry: false,
   });
-
   const getAnnouncementIcon = (status: number) => {
     switch (status) {
       case 1:
@@ -30,7 +26,6 @@ export default function Announcements() {
         return <Info className="w-5 h-5 text-gray-500" />;
     }
   };
-
   const getAnnouncementBadge = (status: number) => {
     switch (status) {
       case 1:
@@ -43,16 +38,10 @@ export default function Announcements() {
         return <Badge variant="outline">Объявление</Badge>;
     }
   };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="flex pt-16">
-        <Sidebar />
-        
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <div className="p-6">
+    <div className="flex">
+      <div className="flex-1">
+        <div className="p-6">
               {/* Header */}
               <div className="mb-8">
                 <div className="flex items-center space-x-3">
@@ -65,7 +54,6 @@ export default function Announcements() {
                   </div>
                 </div>
               </div>
-
               {/* Announcements List */}
               {isLoading ? (
                 <div className="space-y-6">
@@ -107,7 +95,6 @@ export default function Announcements() {
                           <div className="flex-shrink-0 mt-1">
                             {getAnnouncementIcon(announcement.status)}
                           </div>
-                          
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-3">
                               <h3 className="text-lg font-semibold text-gray-900">
@@ -121,7 +108,6 @@ export default function Announcements() {
                                 </div>
                               </div>
                             </div>
-                            
                             <div className="prose prose-sm max-w-none text-gray-700">
                               <div dangerouslySetInnerHTML={{ __html: announcement.body.replace(/\n/g, '<br>') }} />
                             </div>
@@ -133,9 +119,7 @@ export default function Announcements() {
                 </div>
               )}
             </div>
-          </div>
         </div>
       </div>
-    </div>
   );
 }

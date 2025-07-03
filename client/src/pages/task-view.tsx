@@ -5,8 +5,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,14 +14,12 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Send, Clock, DollarSign, User, Calendar, MessageSquare, FileText } from "lucide-react";
 import { Link } from "wouter";
-
 export default function TaskView() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
   const { id } = useParams();
   const [comment, setComment] = useState("");
   const queryClient = useQueryClient();
-
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -38,21 +34,18 @@ export default function TaskView() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
-
   // Fetch task details
   const { data: task, isLoading: taskLoading } = useQuery<any>({
     queryKey: ["/api/tasks", id],
     retry: false,
     enabled: !!user && !!id,
   });
-
   // Fetch task comments/updates
   const { data: comments, isLoading: commentsLoading } = useQuery<any[]>({
     queryKey: ["/api/tasks", id, "updates"],
     retry: false,
     enabled: !!user && !!id,
   });
-
   // Add comment mutation
   const addCommentMutation = useMutation({
     mutationFn: async (commentData: { content: string }) => {
@@ -86,7 +79,6 @@ export default function TaskView() {
       });
     },
   });
-
   if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -97,13 +89,9 @@ export default function TaskView() {
       </div>
     );
   }
-
   if (taskLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="flex">
-          <Sidebar />
           <div className="flex-1 p-6">
             <div className="max-w-4xl mx-auto">
               <div className="animate-pulse space-y-6">
@@ -114,16 +102,11 @@ export default function TaskView() {
             </div>
           </div>
         </div>
-      </div>
     );
   }
-
   if (!task) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
         <div className="flex">
-          <Sidebar />
           <div className="flex-1 p-6">
             <div className="max-w-4xl mx-auto text-center py-12">
               <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
@@ -138,10 +121,8 @@ export default function TaskView() {
             </div>
           </div>
         </div>
-      </div>
     );
   }
-
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "created":
@@ -160,7 +141,6 @@ export default function TaskView() {
         return "bg-gray-100 text-gray-800";
     }
   };
-
   const getPriorityColor = (priority: string) => {
     switch (priority?.toLowerCase()) {
       case "high":
@@ -173,21 +153,15 @@ export default function TaskView() {
         return "bg-gray-100 text-gray-800";
     }
   };
-
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!comment.trim()) return;
-    
     addCommentMutation.mutate({
       content: comment.trim(),
     });
   };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
       <div className="flex">
-        <Sidebar />
         <div className="flex-1 p-6">
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Header */}
@@ -205,7 +179,6 @@ export default function TaskView() {
                 {task.status?.replace('_', ' ').toUpperCase()}
               </Badge>
             </div>
-
             {/* Task Information */}
             <Card>
               <CardHeader>
@@ -239,14 +212,12 @@ export default function TaskView() {
                   <Label className="text-sm font-medium text-gray-700">Description</Label>
                   <p className="mt-1 text-gray-900 whitespace-pre-wrap">{task.description}</p>
                 </div>
-                
                 {task.requirements && (
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Requirements</Label>
                     <p className="mt-1 text-gray-900 whitespace-pre-wrap">{task.requirements}</p>
                   </div>
                 )}
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
                   <div className="flex items-center space-x-2">
                     <User className="w-4 h-4 text-gray-400" />
@@ -255,7 +226,6 @@ export default function TaskView() {
                       <p className="text-sm text-gray-600">{task.clientId}</p>
                     </div>
                   </div>
-                  
                   {task.specialistId && (
                     <div className="flex items-center space-x-2">
                       <User className="w-4 h-4 text-gray-400" />
@@ -265,7 +235,6 @@ export default function TaskView() {
                       </div>
                     </div>
                   )}
-                  
                   {task.deadline && (
                     <div className="flex items-center space-x-2">
                       <Clock className="w-4 h-4 text-gray-400" />
@@ -280,7 +249,6 @@ export default function TaskView() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Comments Section */}
             <Card>
               <CardHeader>
@@ -334,9 +302,7 @@ export default function TaskView() {
                     </div>
                   )}
                 </div>
-
                 <Separator />
-
                 {/* Add Comment Form */}
                 <form onSubmit={handleAddComment} className="space-y-4">
                   <div>
@@ -374,6 +340,5 @@ export default function TaskView() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

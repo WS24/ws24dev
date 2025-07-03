@@ -29,14 +29,12 @@ import {
   Edit,
   MessageSquare
 } from "lucide-react";
-
 export default function AdminDemo() {
   const [demoData, setDemoData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
-
   useEffect(() => {
     fetch("/api/admin/demo")
       .then(res => res.json())
@@ -49,7 +47,6 @@ export default function AdminDemo() {
         setLoading(false);
       });
   }, []);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -60,7 +57,6 @@ export default function AdminDemo() {
       </div>
     );
   }
-
   if (!demoData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -70,17 +66,14 @@ export default function AdminDemo() {
       </div>
     );
   }
-
   // Filter tasks
   const filteredTasks = (demoData.tasks || []).filter((task: any) => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          task.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || task.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || task.priority === priorityFilter;
-    
     return matchesSearch && matchesStatus && matchesPriority;
   });
-
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
       created: { label: "Новый", className: "bg-blue-100 text-blue-800" },
@@ -90,29 +83,24 @@ export default function AdminDemo() {
       in_progress: { label: "В работе", className: "bg-green-100 text-green-800" },
       completed: { label: "Завершен", className: "bg-gray-100 text-gray-800" },
     };
-
     const config = statusConfig[status] || { label: status, className: "bg-gray-100 text-gray-800" };
     return <Badge className={config.className}>{config.label}</Badge>;
   };
-
   const getPriorityBadge = (priority: string) => {
     const priorityConfig: Record<string, { label: string; className: string }> = {
       high: { label: "Высокий", className: "bg-red-100 text-red-800" },
       medium: { label: "Средний", className: "bg-yellow-100 text-yellow-800" },
       low: { label: "Низкий", className: "bg-green-100 text-green-800" },
     };
-
     const config = priorityConfig[priority] || { label: priority, className: "bg-gray-100 text-gray-800" };
     return <Badge className={config.className}>{config.label}</Badge>;
   };
-
   const formatCurrency = (amount: string | number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
     }).format(Number(amount) || 0);
   };
-
   const getUserDisplayName = (task: any) => {
     if (task.clientFirstName && task.clientLastName) {
       return `${task.clientFirstName} ${task.clientLastName}`;
@@ -122,7 +110,6 @@ export default function AdminDemo() {
     }
     return task.clientEmail || "Unknown";
   };
-
   const getUserInitials = (task: any) => {
     if (task.clientFirstName && task.clientLastName) {
       return `${task.clientFirstName.charAt(0)}${task.clientLastName.charAt(0)}`;
@@ -132,7 +119,6 @@ export default function AdminDemo() {
     }
     return "?";
   };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -151,7 +137,6 @@ export default function AdminDemo() {
           </div>
         </div>
       </div>
-
       <div className="p-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -170,7 +155,6 @@ export default function AdminDemo() {
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -186,7 +170,6 @@ export default function AdminDemo() {
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -202,7 +185,6 @@ export default function AdminDemo() {
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -219,7 +201,6 @@ export default function AdminDemo() {
             </CardContent>
           </Card>
         </div>
-
         {/* Tasks Table */}
         <Card>
           <CardHeader>
@@ -229,7 +210,6 @@ export default function AdminDemo() {
                 <span>Заявки</span>
               </CardTitle>
             </div>
-            
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
               <div className="flex-1 relative">

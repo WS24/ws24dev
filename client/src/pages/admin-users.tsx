@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,16 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CreateUserModal } from "@/components/modals/create-user-modal";
 import { Users, Search, Filter, UserPlus, MoreHorizontal } from "lucide-react";
 import type { User } from "@shared/schema";
-
 export default function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
   });
-
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -28,7 +23,6 @@ export default function AdminUsersPage() {
     const matchesRole = roleFilter === "all" || user.role === roleFilter;
     return matchesSearch && matchesRole;
   });
-
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case "admin": return "destructive";
@@ -37,19 +31,15 @@ export default function AdminUsersPage() {
       default: return "outline";
     }
   };
-
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
-      <Navigation />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
         <div className="flex-1 overflow-auto">
           <div className="p-6">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">User Management</h1>
               <p className="text-gray-600">Manage all platform users and their permissions</p>
             </div>
-
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -87,7 +77,6 @@ export default function AdminUsersPage() {
                     </SelectContent>
                   </Select>
                 </div>
-
                 {isLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
@@ -154,7 +143,6 @@ export default function AdminUsersPage() {
                     </TableBody>
                   </Table>
                 )}
-
                 {filteredUsers.length === 0 && !isLoading && (
                   <div className="text-center py-8 text-gray-500">
                     No users found matching your criteria
@@ -165,7 +153,6 @@ export default function AdminUsersPage() {
           </div>
         </div>
       </div>
-      
       <CreateUserModal 
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

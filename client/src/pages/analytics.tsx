@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell } from "recharts";
 import { BarChart3, TrendingUp, DollarSign, Users, FileText, Download, Calendar } from "lucide-react";
-
 // Sample data for charts
 const performanceData = [
   { month: "Jan", tasks: 65, revenue: 4200, users: 120 },
@@ -16,7 +14,6 @@ const performanceData = [
   { month: "May", tasks: 96, revenue: 7200, users: 201 },
   { month: "Jun", tasks: 103, revenue: 8500, users: 225 }
 ];
-
 const revenueData = [
   { month: "Jan", revenue: 4200 },
   { month: "Feb", revenue: 5100 },
@@ -25,14 +22,12 @@ const revenueData = [
   { month: "May", revenue: 7200 },
   { month: "Jun", revenue: 8500 }
 ];
-
 const taskData = [
   { name: "Completed", value: 45, color: "#10B981" },
   { name: "In Progress", value: 28, color: "#3B82F6" },
   { name: "Pending", value: 18, color: "#F59E0B" },
   { name: "Cancelled", value: 9, color: "#EF4444" }
 ];
-
 const userActivityData = [
   { day: "Mon", activeUsers: 142, newUsers: 12, totalUsers: 1250 },
   { day: "Tue", activeUsers: 158, newUsers: 18, totalUsers: 1268 },
@@ -42,7 +37,6 @@ const userActivityData = [
   { day: "Sat", activeUsers: 98, newUsers: 6, totalUsers: 1319 },
   { day: "Sun", activeUsers: 76, newUsers: 4, totalUsers: 1323 }
 ];
-
 // Analytics Menu Component
 const AnalyticsMenu = ({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) => (
   <div className="border-b border-gray-200 mb-6">
@@ -72,16 +66,13 @@ const AnalyticsMenu = ({ activeTab, onTabChange }: { activeTab: string; onTabCha
     </nav>
   </div>
 );
-
 export default function Analytics() {
   const [activeTab, setActiveTab] = useState("overview");
   const [dateRange, setDateRange] = useState("30d");
-
   const { data: analyticsData, isLoading } = useQuery({
     queryKey: ["/api/analytics", dateRange],
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -89,11 +80,7 @@ export default function Analytics() {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      
       <div className="flex">
         <div className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
@@ -105,7 +92,6 @@ export default function Analytics() {
                   <p className="text-gray-600">Comprehensive business insights and performance metrics</p>
                 </div>
               </div>
-              
               <div className="flex items-center gap-4">
                 <Select value={dateRange} onValueChange={setDateRange}>
                   <SelectTrigger className="w-40">
@@ -119,16 +105,13 @@ export default function Analytics() {
                     <SelectItem value="1y">Last year</SelectItem>
                   </SelectContent>
                 </Select>
-                
                 <Button variant="outline" className="flex items-center gap-2">
                   <Download className="w-4 h-4" />
                   Export Report
                 </Button>
               </div>
             </div>
-
             <AnalyticsMenu activeTab={activeTab} onTabChange={setActiveTab} />
-
             {/* Overview Tab */}
             {activeTab === "overview" && (
               <>
@@ -149,7 +132,6 @@ export default function Analytics() {
                       </div>
                     </CardContent>
                   </Card>
-
                   <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -165,7 +147,6 @@ export default function Analytics() {
                       </div>
                     </CardContent>
                   </Card>
-
                   <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -181,7 +162,6 @@ export default function Analytics() {
                       </div>
                     </CardContent>
                   </Card>
-
                   <Card className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -198,7 +178,6 @@ export default function Analytics() {
                     </CardContent>
                   </Card>
                 </div>
-
                 {/* Overview Charts */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card>
@@ -220,7 +199,6 @@ export default function Analytics() {
                       </ResponsiveContainer>
                     </CardContent>
                   </Card>
-
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -243,7 +221,6 @@ export default function Analytics() {
                 </div>
               </>
             )}
-
             {/* Tasks Analytics Tab */}
             {activeTab === "tasks" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -276,7 +253,6 @@ export default function Analytics() {
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -298,7 +274,6 @@ export default function Analytics() {
                 </Card>
               </div>
             )}
-
             {/* Revenue Analytics Tab */}
             {activeTab === "revenue" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -321,7 +296,6 @@ export default function Analytics() {
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -343,7 +317,6 @@ export default function Analytics() {
                 </Card>
               </div>
             )}
-
             {/* Users Analytics Tab */}
             {activeTab === "users" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -368,7 +341,6 @@ export default function Analytics() {
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -393,6 +365,5 @@ export default function Analytics() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

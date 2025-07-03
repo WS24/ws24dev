@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { UserManagementTable } from "@/components/admin/user-management-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,12 +11,10 @@ import {
   DollarSign, 
   TrendingUp
 } from "lucide-react";
-
 export default function AdminPanel() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
   const [activeTab, setActiveTab] = useState("tasks");
-
   // Set active tab based on URL
   useEffect(() => {
     if (location.includes('/admin/users')) {
@@ -27,7 +23,6 @@ export default function AdminPanel() {
       setActiveTab("tasks");
     }
   }, [location]);
-
   // Fetch admin stats
   const { data: adminStats, isLoading: adminStatsLoading } = useQuery<{
     totalTasks: string;
@@ -39,21 +34,18 @@ export default function AdminPanel() {
     retry: false,
     enabled: !!user && user.role === "admin",
   });
-
   // Fetch users for user management tab
   const { data: users, isLoading: usersLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/users"],
     retry: false,
     enabled: !!user && user.role === "admin" && activeTab === "users",
   });
-
   const formatCurrency = (amount: string) => {
     return new Intl.NumberFormat('ru-RU', {
       style: 'currency',
       currency: 'RUB',
     }).format(parseFloat(amount || "0"));
   };
-
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -61,7 +53,6 @@ export default function AdminPanel() {
       </div>
     );
   }
-
   if (!isAuthenticated || !user || user.role !== "admin") {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -72,16 +63,10 @@ export default function AdminPanel() {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="flex pt-16">
-        <Sidebar />
-        
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <div className="p-6">
+    <div className="flex">
+      <div className="flex-1">
+        <div className="p-6">
               {/* Header */}
               <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">Панель администратора</h1>
@@ -89,7 +74,6 @@ export default function AdminPanel() {
                   Управление заявками и пользователями системы
                 </p>
               </div>
-
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card>
@@ -107,7 +91,6 @@ export default function AdminPanel() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center">
@@ -123,7 +106,6 @@ export default function AdminPanel() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center">
@@ -139,7 +121,6 @@ export default function AdminPanel() {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center">
@@ -156,7 +137,6 @@ export default function AdminPanel() {
                   </CardContent>
                 </Card>
               </div>
-
               {/* Tabs for Tasks and Users Management */}
               <Tabs value={activeTab} onValueChange={(value) => {
                 setActiveTab(value);
@@ -176,7 +156,6 @@ export default function AdminPanel() {
                     User Management
                   </TabsTrigger>
                 </TabsList>
-
                 <TabsContent value="tasks">
                   <Card>
                     <CardHeader>
@@ -194,7 +173,6 @@ export default function AdminPanel() {
                     </CardContent>
                   </Card>
                 </TabsContent>
-
                 <TabsContent value="users">
                   <Card>
                     <CardHeader>
@@ -212,7 +190,5 @@ export default function AdminPanel() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
   );
 }

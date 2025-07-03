@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Navigation } from "@/components/layout/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,21 +16,17 @@ import {
   HelpCircle,
   CreditCard
 } from "lucide-react";
-
 export default function KnowledgeBase() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-
   const { data: categories, isLoading: categoriesLoading } = useQuery<any[]>({
     queryKey: ["/api/knowledge/categories"],
     retry: false,
   });
-
   const { data: articles, isLoading: articlesLoading } = useQuery<any[]>({
     queryKey: ["/api/knowledge/articles", selectedCategory],
     retry: false,
   });
-
   const getIconByName = (iconName: string) => {
     const icons: Record<string, any> = {
       "code": Code,
@@ -42,21 +36,12 @@ export default function KnowledgeBase() {
     };
     return icons[iconName] || FileText;
   };
-
   const filteredArticles = (articles || []).filter((article: any) =>
     article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     article.body.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="flex pt-16">
-        <Sidebar />
-        
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <div className="p-6">
+    <div>
               {/* Header */}
               <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">Knowledge Base</h1>
@@ -64,7 +49,6 @@ export default function KnowledgeBase() {
                   Documentation and guides for web development
                 </p>
               </div>
-
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Categories Sidebar */}
                 <div className="lg:col-span-1">
@@ -115,7 +99,6 @@ export default function KnowledgeBase() {
                     </CardContent>
                   </Card>
                 </div>
-
                 {/* Articles Content */}
                 <div className="lg:col-span-3">
                   {/* Search */}
@@ -132,7 +115,6 @@ export default function KnowledgeBase() {
                       </div>
                     </CardContent>
                   </Card>
-
                   {/* Articles List */}
                   {articlesLoading ? (
                     <div className="space-y-4">
@@ -173,7 +155,6 @@ export default function KnowledgeBase() {
                                 <p className="text-gray-600 mb-4 line-clamp-2">
                                   {article.body.substring(0, 200)}...
                                 </p>
-                                
                                 <div className="flex items-center space-x-4 text-sm text-gray-500">
                                   <div className="flex items-center space-x-1">
                                     <Eye className="w-4 h-4" />
@@ -188,7 +169,6 @@ export default function KnowledgeBase() {
                                   </span>
                                 </div>
                               </div>
-                              
                               <Button size="sm" variant="outline">
                                 Читать
                               </Button>
@@ -200,10 +180,6 @@ export default function KnowledgeBase() {
                   )}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
