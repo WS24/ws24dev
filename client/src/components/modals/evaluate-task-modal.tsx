@@ -255,10 +255,11 @@ export function EvaluateTaskModal({ isOpen, onClose, task, onSuccess }: Evaluate
                 <FormItem>
                   <FormLabel>Additional Notes</FormLabel>
                   <FormControl>
-                    <Textarea
+<Textarea
                       placeholder="Provide any additional details about your approach, timeline, or requirements..."
                       rows={4}
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />

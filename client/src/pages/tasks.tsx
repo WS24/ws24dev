@@ -31,7 +31,7 @@ export default function Tasks() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
-  const { data: tasks, isLoading: tasksLoading, refetch } = useQuery({
+const { data: tasks = [], isLoading: tasksLoading, refetch } = useQuery<import("@shared/schema").Task[]>({
     queryKey: ["/api/tasks"],
     retry: false,
     enabled: !!user,

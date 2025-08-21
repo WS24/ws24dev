@@ -11,8 +11,13 @@
  * @requires morgan - HTTP request logging middleware
  */
 
+// Load environment variables first
 import dotenv from "dotenv";
 dotenv.config();
+
+// Then validate environment variables before importing other modules
+import { validateEnvironmentOrExit } from "./env-validation";
+const validatedEnv = validateEnvironmentOrExit();
 
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
@@ -28,7 +33,7 @@ const app = express();
 
 // Security middleware - must be first
 app.use(helmet({
-  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+  contentSecurityPolicy: validatedEnv.NODE_ENV === 'production' ? {
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
@@ -46,8 +51,8 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.REPLIT_DOMAINS?.split(',') || false
+  origin: validatedEnv.NODE_ENV === 'production' 
+    ? validatedEnv.REPLIT_DOMAINS || false
     : true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -55,7 +60,7 @@ app.use(cors({
 }));
 
 // Request logging
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(morgan(validatedEnv.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Body parsing middleware with size limits
 app.use(express.json({ limit: '10mb' }));
@@ -91,6 +96,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check endpoint for Docker/Kubernetes
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: validatedEnv.NODE_ENV,
+    version: '1.0.0'
+  });
+});
+
 (async () => {
   const server = await registerRoutes(app);
 
@@ -105,7 +121,7 @@ app.use((req, res, next) => {
    */
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = process.env.NODE_ENV === 'production' 
+    const message = validatedEnv.NODE_ENV === 'production' 
       ? 'Internal Server Error' 
       : err.message || "Internal Server Error";
 
@@ -113,7 +129,7 @@ app.use((req, res, next) => {
     console.error('Server Error:', {
       status,
       message: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+      stack: validatedEnv.NODE_ENV === 'development' ? err.stack : undefined,
       timestamp: new Date().toISOString(),
       url: _req.url,
       method: _req.method
@@ -125,17 +141,14 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  if (validatedEnv.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 3000
-  // this serves both the API and the client.
-  // Changed from 5000 to avoid conflict with macOS Control Center
-  const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
-  server.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
+  // Use validated port from environment validation
+  server.listen(validatedEnv.PORT, "0.0.0.0", () => {
+    log(`serving on port ${validatedEnv.PORT}`);
   });
 })();

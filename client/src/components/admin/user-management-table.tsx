@@ -78,8 +78,8 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
     },
     onSuccess: () => {
       toast({
-        title: "Пользователь обновлен",
-        description: "Данные пользователя успешно сохранены",
+        title: "User Updated",
+        description: "User data has been successfully saved",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setIsDialogOpen(false);
@@ -87,8 +87,8 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
     },
     onError: (error: Error) => {
       toast({
-        title: "Ошибка",
-        description: error.message || "Не удалось обновить пользователя",
+        title: "Error",
+        description: error.message || "Failed to update user",
         variant: "destructive",
       });
     },
@@ -137,17 +137,17 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
     if (user.username) {
       return user.username;
     }
-    return user.email || "Пользователь";
+    return user.email || "User";
   };
 
   const getRoleBadge = (role: string) => {
     switch (role) {
       case "admin":
-        return <Badge variant="destructive">Администратор</Badge>;
+        return <Badge variant="destructive">Administrator</Badge>;
       case "specialist":
-        return <Badge variant="secondary">Специалист</Badge>;
+        return <Badge variant="secondary">Specialist</Badge>;
       case "client":
-        return <Badge variant="outline">Заказчик</Badge>;
+        return <Badge variant="outline">Client</Badge>;
       default:
         return <Badge variant="outline">{role}</Badge>;
     }
@@ -166,14 +166,14 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Пользователь</TableHead>
-            <TableHead>Email / Телефон</TableHead>
-            <TableHead>Роль</TableHead>
-            <TableHead>Баланс</TableHead>
-            <TableHead>Последний вход</TableHead>
-            <TableHead>IP адрес</TableHead>
-            <TableHead>Статус</TableHead>
-            <TableHead>Действия</TableHead>
+            <TableHead>User</TableHead>
+            <TableHead>Email / Phone</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Balance</TableHead>
+            <TableHead>Last Login</TableHead>
+            <TableHead>IP Address</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -195,7 +195,7 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
               </TableCell>
               <TableCell>
                 <div>
-                  <p className="text-sm">{user.email || "Не указан"}</p>
+                  <p className="text-sm">{user.email || "Not specified"}</p>
                   {user.phone && (
                     <p className="text-sm text-gray-500 flex items-center gap-1">
                       <Phone className="w-3 h-3" />
@@ -208,15 +208,15 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
               <TableCell>
                 <div className="flex items-center gap-1">
                   <DollarSign className="w-4 h-4" />
-                  <span>{user.balance || "0.00"} ₽</span>
+                  <span>${user.balance || "0.00"}</span>
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-1 text-sm">
                   <Calendar className="w-3 h-3" />
                   {user.lastLogin 
-                    ? new Date(user.lastLogin).toLocaleDateString('ru-RU')
-                    : "Никогда"
+                    ? new Date(user.lastLogin).toLocaleDateString('en-US')
+                    : "Never"
                   }
                 </div>
               </TableCell>
@@ -229,10 +229,10 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
               <TableCell>
                 {user.isActive !== false ? (
                   <Badge variant="default" className="bg-green-100 text-green-800">
-                    Активен
+                    Active
                   </Badge>
                 ) : (
-                  <Badge variant="secondary">Неактивен</Badge>
+                  <Badge variant="secondary">Inactive</Badge>
                 )}
               </TableCell>
               <TableCell>
@@ -253,19 +253,19 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Редактирование пользователя</DialogTitle>
+            <DialogTitle>Edit User</DialogTitle>
             <DialogDescription>
-              Изменение данных пользователя {editingUser ? getUserDisplayName(editingUser) : ""}
+              Editing user data for {editingUser ? getUserDisplayName(editingUser) : ""}
             </DialogDescription>
           </DialogHeader>
 
           {editingUser && (
             <div className="space-y-6">
-              {/* Основная информация */}
+              {/* Basic Information */}
               <div className="space-y-4">
                 <h4 className="font-medium flex items-center gap-2">
                   <Shield className="w-4 h-4" />
-                  Основная информация
+                  Basic Information
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -277,7 +277,7 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-username">Имя пользователя</Label>
+                    <Label htmlFor="edit-username">Username</Label>
                     <Input
                       id="edit-username"
                       value={editingUser.username || ""}
@@ -285,7 +285,7 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-firstName">Имя</Label>
+                    <Label htmlFor="edit-firstName">First Name</Label>
                     <Input
                       id="edit-firstName"
                       value={editingUser.firstName || ""}
@@ -293,7 +293,7 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-lastName">Фамилия</Label>
+                    <Label htmlFor="edit-lastName">Last Name</Label>
                     <Input
                       id="edit-lastName"
                       value={editingUser.lastName || ""}
@@ -301,7 +301,7 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-phone">Телефон</Label>
+                    <Label htmlFor="edit-phone">Phone</Label>
                     <Input
                       id="edit-phone"
                       value={editingUser.phone || ""}
@@ -309,7 +309,7 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-role">Роль пользователя</Label>
+                    <Label htmlFor="edit-role">User Role</Label>
                     <Select
                       value={editingUser.role}
                       onValueChange={(value) => updateEditingUser("role", value)}
@@ -318,23 +318,23 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="client">Заказчик</SelectItem>
-                        <SelectItem value="specialist">Специалист</SelectItem>
-                        <SelectItem value="admin">Администратор</SelectItem>
+                        <SelectItem value="client">Client</SelectItem>
+                        <SelectItem value="specialist">Specialist</SelectItem>
+                        <SelectItem value="admin">Administrator</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
               </div>
 
-              {/* Финансовая информация */}
+              {/* Financial Information */}
               <div className="space-y-4">
                 <h4 className="font-medium flex items-center gap-2">
                   <DollarSign className="w-4 h-4" />
-                  Финансовая информация
+                  Financial Information
                 </h4>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-balance">Баланс</Label>
+                  <Label htmlFor="edit-balance">Balance</Label>
                   <Input
                     id="edit-balance"
                     value={editingUser.balance || ""}
@@ -343,15 +343,15 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                 </div>
               </div>
 
-              {/* Дополнительная информация */}
+              {/* Additional Information */}
               <div className="space-y-4">
                 <h4 className="font-medium flex items-center gap-2">
                   <Users className="w-4 h-4" />
-                  Дополнительная информация
+                  Additional Information
                 </h4>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-bio">Обо мне</Label>
+                    <Label htmlFor="edit-bio">About Me</Label>
                     <Textarea
                       id="edit-bio"
                       value={editingUser.bio || ""}
@@ -360,7 +360,7 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-userGroups">Группы пользователя</Label>
+                    <Label htmlFor="edit-userGroups">User Groups</Label>
                     <Input
                       id="edit-userGroups"
                       value={editingUser.userGroups || ""}
@@ -368,7 +368,7 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-clientNotes">Клиентские заметки</Label>
+                    <Label htmlFor="edit-clientNotes">Client Notes</Label>
                     <Textarea
                       id="edit-clientNotes"
                       value={editingUser.clientNotes || ""}
@@ -377,7 +377,7 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="edit-isActive">Активировать пользователя</Label>
+                    <Label htmlFor="edit-isActive">Activate User</Label>
                     <Switch
                       id="edit-isActive"
                       checked={editingUser.isActive !== false}
@@ -387,16 +387,16 @@ export function UserManagementTable({ users, isLoading }: UserManagementTablePro
                 </div>
               </div>
 
-              {/* Кнопки действий */}
+              {/* Action Buttons */}
               <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Отмена
+                  Cancel
                 </Button>
                 <Button
                   onClick={handleSaveUser}
                   disabled={updateUserMutation.isPending}
                 >
-                  {updateUserMutation.isPending ? "Сохранение..." : "Сохранить"}
+                  {updateUserMutation.isPending ? "Saving..." : "Save"}
                 </Button>
               </div>
             </div>

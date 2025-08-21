@@ -76,21 +76,21 @@ export default function AdminDemo() {
   });
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
-      created: { label: "Новый", className: "bg-blue-100 text-blue-800" },
-      evaluating: { label: "Оценка", className: "bg-yellow-100 text-yellow-800" },
-      evaluated: { label: "Оценен", className: "bg-orange-100 text-orange-800" },
-      paid: { label: "Оплачен", className: "bg-purple-100 text-purple-800" },
-      in_progress: { label: "В работе", className: "bg-green-100 text-green-800" },
-      completed: { label: "Завершен", className: "bg-gray-100 text-gray-800" },
+      created: { label: "New", className: "bg-blue-100 text-blue-800" },
+      evaluating: { label: "Evaluating", className: "bg-yellow-100 text-yellow-800" },
+      evaluated: { label: "Evaluated", className: "bg-orange-100 text-orange-800" },
+      paid: { label: "Paid", className: "bg-purple-100 text-purple-800" },
+      in_progress: { label: "In Progress", className: "bg-green-100 text-green-800" },
+      completed: { label: "Completed", className: "bg-gray-100 text-gray-800" },
     };
     const config = statusConfig[status] || { label: status, className: "bg-gray-100 text-gray-800" };
     return <Badge className={config.className}>{config.label}</Badge>;
   };
   const getPriorityBadge = (priority: string) => {
     const priorityConfig: Record<string, { label: string; className: string }> = {
-      high: { label: "Высокий", className: "bg-red-100 text-red-800" },
-      medium: { label: "Средний", className: "bg-yellow-100 text-yellow-800" },
-      low: { label: "Низкий", className: "bg-green-100 text-green-800" },
+      high: { label: "High", className: "bg-red-100 text-red-800" },
+      medium: { label: "Medium", className: "bg-yellow-100 text-yellow-800" },
+      low: { label: "Low", className: "bg-green-100 text-green-800" },
     };
     const config = priorityConfig[priority] || { label: priority, className: "bg-gray-100 text-gray-800" };
     return <Badge className={config.className}>{config.label}</Badge>;
@@ -125,14 +125,14 @@ export default function AdminDemo() {
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">ws24 Админ панель</h1>
+            <h1 className="text-2xl font-bold text-gray-900">WS24 Admin Panel</h1>
             <p className="text-gray-600 mt-1">
-              Управление заявками и пользователями системы
+              Manage system requests and users
             </p>
           </div>
           <div className="flex items-center space-x-4">
             <Button size="sm" className="bg-primary hover:bg-blue-700">
-              Добавить новую заявку
+              Add New Request
             </Button>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function AdminDemo() {
                   <CheckSquare className="w-6 h-6 text-blue-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Всего заявок</p>
+                  <p className="text-sm font-medium text-gray-600">Total Requests</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {demoData.stats?.totalTasks || 0}
                   </p>
@@ -162,7 +162,7 @@ export default function AdminDemo() {
                   <Users className="w-6 h-6 text-green-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Пользователи</p>
+                  <p className="text-sm font-medium text-gray-600">Users</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {demoData.stats?.totalUsers || 0}
                   </p>
@@ -177,7 +177,7 @@ export default function AdminDemo() {
                   <TrendingUp className="w-6 h-6 text-orange-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Активные</p>
+                  <p className="text-sm font-medium text-gray-600">Active</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {demoData.stats?.activeTasks || 0}
                   </p>
@@ -192,7 +192,7 @@ export default function AdminDemo() {
                   <DollarSign className="w-6 h-6 text-purple-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Доход</p>
+                  <p className="text-sm font-medium text-gray-600">Revenue</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {formatCurrency(demoData.stats?.totalRevenue || 0)}
                   </p>
@@ -207,7 +207,7 @@ export default function AdminDemo() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center space-x-2">
                 <CheckSquare className="w-5 h-5" />
-                <span>Заявки</span>
+                <span>Requests</span>
               </CardTitle>
             </div>
             {/* Filters */}
@@ -215,7 +215,7 @@ export default function AdminDemo() {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder="Поиск заявок..."
+                  placeholder="Search requests..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -223,27 +223,27 @@ export default function AdminDemo() {
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Статус" />
+                  <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Все статусы</SelectItem>
-                  <SelectItem value="created">Новый</SelectItem>
-                  <SelectItem value="evaluating">Оценка</SelectItem>
-                  <SelectItem value="evaluated">Оценен</SelectItem>
-                  <SelectItem value="paid">Оплачен</SelectItem>
-                  <SelectItem value="in_progress">В работе</SelectItem>
-                  <SelectItem value="completed">Завершен</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="created">New</SelectItem>
+                  <SelectItem value="evaluating">Evaluating</SelectItem>
+                  <SelectItem value="evaluated">Evaluated</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={priorityFilter} onValueChange={setPriorityFilter}>
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Приоритет" />
+                  <SelectValue placeholder="Priority" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Все приоритеты</SelectItem>
-                  <SelectItem value="high">Высокий</SelectItem>
-                  <SelectItem value="medium">Средний</SelectItem>
-                  <SelectItem value="low">Низкий</SelectItem>
+                  <SelectItem value="all">All Priorities</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -254,14 +254,14 @@ export default function AdminDemo() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-16">#</TableHead>
-                    <TableHead>Название</TableHead>
-                    <TableHead>Приоритет</TableHead>
-                    <TableHead>Статус</TableHead>
-                    <TableHead>Категория</TableHead>
-                    <TableHead>Пользователь</TableHead>
-                    <TableHead>Назначен</TableHead>
-                    <TableHead>Последний ответ</TableHead>
-                    <TableHead className="text-right">Опции</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Assigned</TableHead>
+                    <TableHead>Last Response</TableHead>
+                    <TableHead className="text-right">Options</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -303,7 +303,7 @@ export default function AdminDemo() {
                             <span className="text-sm">Specialist</span>
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">Не назначен</span>
+                          <span className="text-sm text-gray-400">Not Assigned</span>
                         )}
                       </TableCell>
                       <TableCell>

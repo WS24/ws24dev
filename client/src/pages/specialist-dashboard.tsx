@@ -306,7 +306,7 @@ export default function SpecialistDashboard() {
                       </TableCell>
                       <TableCell>Client #{task.clientId.slice(-6)}</TableCell>
                       <TableCell>{task.category}</TableCell>
-                      <TableCell>${task.budget || "TBD"}</TableCell>
+<TableCell>${task.totalCost || "TBD"}</TableCell>
                       <TableCell>
                         {task.deadline 
                           ? formatDistanceToNow(new Date(task.deadline), { addSuffix: true })
@@ -369,7 +369,7 @@ export default function SpecialistDashboard() {
                           }
                         </TableCell>
                         <TableCell className="font-medium text-green-600">
-                          ${((Number(task.budget) || 0) * 0.5).toFixed(2)}
+${((Number(task.totalCost) || 0) * 0.5).toFixed(2)}
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">Pending</Badge>

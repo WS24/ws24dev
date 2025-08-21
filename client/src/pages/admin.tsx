@@ -69,9 +69,9 @@ export default function AdminPanel() {
         <div className="p-6">
               {/* Header */}
               <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Панель администратора</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
                 <p className="text-gray-600 mt-1">
-                  Управление заявками и пользователями системы
+                  Manage system requests and users
                 </p>
               </div>
               {/* Stats Cards */}
@@ -83,7 +83,7 @@ export default function AdminPanel() {
                         <CheckSquare className="w-6 h-6 text-blue-600" />
                       </div>
                       <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Всего заявок</p>
+                        <p className="text-sm font-medium text-gray-600">Total Tasks</p>
                         <p className="text-2xl font-bold text-gray-900">
                           {adminStatsLoading ? "..." : adminStats?.totalTasks || 0}
                         </p>
@@ -98,7 +98,7 @@ export default function AdminPanel() {
                         <Users className="w-6 h-6 text-green-600" />
                       </div>
                       <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Пользователи</p>
+                        <p className="text-sm font-medium text-gray-600">Users</p>
                         <p className="text-2xl font-bold text-gray-900">
                           {adminStatsLoading ? "..." : adminStats?.totalUsers || 0}
                         </p>
@@ -113,7 +113,7 @@ export default function AdminPanel() {
                         <TrendingUp className="w-6 h-6 text-orange-600" />
                       </div>
                       <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Активные</p>
+                        <p className="text-sm font-medium text-gray-600">Active</p>
                         <p className="text-2xl font-bold text-gray-900">
                           {adminStatsLoading ? "..." : adminStats?.activeTasks || 0}
                         </p>
@@ -128,7 +128,7 @@ export default function AdminPanel() {
                         <DollarSign className="w-6 h-6 text-purple-600" />
                       </div>
                       <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Доход</p>
+                        <p className="text-sm font-medium text-gray-600">Revenue</p>
                         <p className="text-2xl font-bold text-gray-900">
                           {adminStatsLoading ? "..." : formatCurrency(adminStats?.totalRevenue || "0")}
                         </p>
@@ -167,8 +167,8 @@ export default function AdminPanel() {
                     <CardContent>
                       <div className="text-center text-gray-500 p-8">
                         <CheckSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p className="text-lg font-medium mb-2">Управление задачами</p>
-                        <p>Функционал управления задачами будет добавлен в следующих версиях</p>
+                        <p className="text-lg font-medium mb-2">Task Management</p>
+                        <p>Task management functionality will be added in future versions</p>
                       </div>
                     </CardContent>
                   </Card>

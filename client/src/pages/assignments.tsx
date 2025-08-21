@@ -45,12 +45,12 @@ export default function Assignments() {
       return;
     }
   }, [user, toast]);
-  const { data: assignedTasks, isLoading: assignedLoading, refetch: refetchAssigned } = useQuery({
+const { data: assignedTasks = [], isLoading: assignedLoading, refetch: refetchAssigned } = useQuery<import("@shared/schema").Task[]>({
     queryKey: ["/api/tasks"],
     retry: false,
     enabled: !!user && user.role === "specialist",
   });
-  const { data: pendingTasks, isLoading: pendingLoading, refetch: refetchPending } = useQuery({
+const { data: pendingTasks = [], isLoading: pendingLoading, refetch: refetchPending } = useQuery<import("@shared/schema").Task[]>({
     queryKey: ["/api/tasks/pending"],
     retry: false,
     enabled: !!user && user.role === "specialist",

@@ -8,10 +8,6 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
-}
-
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
@@ -24,38 +20,52 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const isProduction = process.env.NODE_ENV === "production";
   
   // Development mode: use memory store
-  if (process.env.NODE_ENV === "development") {
+  if (!isProduction) {
     return session({
+      name: 'ws24.sid', // Custom session name
       secret: process.env.SESSION_SECRET!,
       resave: false,
       saveUninitialized: false,
+      rolling: true, // Reset expiration on activity
       cookie: {
         httpOnly: true,
         secure: false, // Allow non-HTTPS in development
+        sameSite: 'lax',
         maxAge: sessionTtl,
+        path: '/',
       },
     });
   }
   
-  // Production mode: use PostgreSQL store
+  // Production mode: use PostgreSQL store with enhanced security
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
     createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
+    ttl: Math.floor(sessionTtl / 1000), // Convert to seconds
+    tableName: "user_sessions", // More descriptive name
+    schemaName: "public",
+    pruneSessionInterval: 15 * 60, // Clean up expired sessions every 15 minutes
   });
+  
   return session({
+    name: 'ws24.sid', // Custom session name (obscure default)
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    rolling: true, // Reset expiration on activity
+    proxy: true, // Trust reverse proxy
     cookie: {
-      httpOnly: true,
-      secure: true,
+      httpOnly: true, // Prevent XSS
+      secure: true, // HTTPS only
+      sameSite: 'strict', // CSRF protection
       maxAge: sessionTtl,
+      path: '/',
+      domain: undefined, // Let browser set domain
     },
   });
 }
@@ -115,7 +125,8 @@ export async function setupAuth(app: Express) {
           lastName: mockUser.claims.last_name,
         });
       } catch (error) {
-        console.log("Database not available, continuing with mock auth:", error.message);
+const msg = error instanceof Error ? error.message : String(error);
+        console.log("Database not available, continuing with mock auth:", msg);
       }
       
       req.login(mockUser, (err) => {
@@ -123,6 +134,7 @@ export async function setupAuth(app: Express) {
           console.error("Login error:", err);
           return res.status(500).json({ message: "Login failed" });
         }
+        // Redirect based on user role
         res.redirect("/");
       });
     });

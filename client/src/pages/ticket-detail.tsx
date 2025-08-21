@@ -2,6 +2,52 @@ import { useState } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+
+// Types for ticket details and related data
+type TicketDetails = {
+  id: number;
+  title: string;
+  description?: string;
+  status: string;
+  priority?: string;
+  category?: string;
+  clientId?: string;
+  specialistId?: string | null;
+  estimatedHours?: number | null;
+  createdAt?: string | Date | null;
+  completedAt?: string | Date | null;
+  deadline?: string | Date | null;
+  quotedCost?: string | number | null;
+  adminApproval?: boolean | null;
+  clientName?: string | null;
+  specialistName?: string | null;
+  rating?: number | null;
+  budget?: string | number | null;
+};
+
+type MessageItem = {
+  id: number;
+  message: string;
+  userId: string;
+  userName?: string;
+  createdAt: string | Date;
+  isInternal?: boolean;
+};
+
+type AttachmentItem = {
+  id: number;
+  name: string;
+  size: string;
+  url?: string;
+  createdAt: string | Date;
+};
+
+type ChangeLogItem = {
+  description: string;
+  userName?: string;
+  createdAt: string | Date;
+};
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,16 +83,16 @@ export default function TicketDetail() {
   const [message, setMessage] = useState("");
   const [internalNote, setInternalNote] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { data: ticket, isLoading } = useQuery({
+const { data: ticket, isLoading } = useQuery<TicketDetails>({
     queryKey: [`/api/tickets/${id}`],
   });
-  const { data: messages } = useQuery({
+const { data: messages = [] } = useQuery<MessageItem[]>({
     queryKey: [`/api/tickets/${id}/messages`],
   });
-  const { data: changeLog } = useQuery({
+const { data: changeLog = [] } = useQuery<ChangeLogItem[]>({
     queryKey: [`/api/tickets/${id}/changelog`],
   });
-  const { data: attachments } = useQuery({
+const { data: attachments = [] } = useQuery<AttachmentItem[]>({
     queryKey: [`/api/tickets/${id}/attachments`],
   });
   const sendMessageMutation = useMutation({
@@ -133,7 +179,7 @@ export default function TicketDetail() {
       </div>
     );
   }
-  const isOverdue = ticket.deadline && new Date(ticket.deadline) < new Date();
+const isOverdue = (ticket as any).deadline && new Date((ticket as any).deadline) < new Date();
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
@@ -144,7 +190,7 @@ export default function TicketDetail() {
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <span>Ticket #{ticket.id}</span>
               <span>•</span>
-              <span>Created {format(new Date(ticket.createdAt), "MMM d, yyyy")}</span>
+<span>Created {ticket.createdAt ? format(new Date(ticket.createdAt as any), "MMM d, yyyy") : "-"}</span>
               {isOverdue && (
                 <>
                   <span>•</span>
@@ -160,7 +206,7 @@ export default function TicketDetail() {
             <Badge className={`${getStatusColor(ticket.status)} text-white`}>
               {ticket.status}
             </Badge>
-            <Flag className={`h-5 w-5 ${getPriorityColor(ticket.priority)}`} />
+<Flag className={`h-5 w-5 ${getPriorityColor((ticket as any).priority || "low")}`} />
           </div>
         </div>
       </div>
@@ -390,7 +436,7 @@ export default function TicketDetail() {
                         <Label>Deadline</Label>
                         <Input
                           type="date"
-                          value={ticket.deadline?.split("T")[0] || ""}
+value={ticket.deadline ? format(new Date(ticket.deadline as any), "yyyy-MM-dd") : ""}
                           onChange={(e) => updateTicketMutation.mutate({ deadline: e.target.value })}
                         />
                       </div>
@@ -456,7 +502,7 @@ export default function TicketDetail() {
                       <Star
                         key={i}
                         className={`h-4 w-4 ${
-                          i < ticket.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+i < (ticket.rating ?? 0) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
                         }`}
                       />
                     ))}

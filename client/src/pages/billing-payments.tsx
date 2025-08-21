@@ -28,6 +28,7 @@ import {
   XCircle
 } from "lucide-react";
 import { format } from "date-fns";
+import type { Transaction, Invoice } from "@shared/schema";
 export default function BillingPayments() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -43,17 +44,17 @@ export default function BillingPayments() {
     companyTaxId: ""
   });
   // Fetch user balance and stats
-  const { data: billingStats, isLoading: loadingStats } = useQuery({
+const { data: billingStats, isLoading: loadingStats } = useQuery<{ totalInAccount: string; incomeInOrders: string; expensesInOrders: string; monthlyRevenue: string }>({
     queryKey: ["/api/billing/stats"],
     retry: false
   });
   // Fetch transaction history
-  const { data: transactions = [], isLoading: loadingTransactions } = useQuery({
+const { data: transactions = [], isLoading: loadingTransactions } = useQuery<Transaction[]>({
     queryKey: ["/api/billing/transactions"],
     retry: false
   });
   // Fetch invoices
-  const { data: invoices = [], isLoading: loadingInvoices } = useQuery({
+const { data: invoices = [], isLoading: loadingInvoices } = useQuery<Invoice[]>({
     queryKey: ["/api/billing/invoices"],
     retry: false
   });
@@ -189,7 +190,7 @@ export default function BillingPayments() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(billingStats?.balance || 0)}</div>
+<div className="text-2xl font-bold">{formatCurrency(billingStats?.totalInAccount || 0)}</div>
             <p className="text-xs text-muted-foreground">Available for services</p>
           </CardContent>
         </Card>
@@ -199,7 +200,7 @@ export default function BillingPayments() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(billingStats?.totalSpent || 0)}</div>
+<div className="text-2xl font-bold">{formatCurrency(billingStats?.expensesInOrders || 0)}</div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>
@@ -209,9 +210,9 @@ export default function BillingPayments() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{billingStats?.pendingInvoices || 0}</div>
+<div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">
-              Total: {formatCurrency(billingStats?.pendingAmount || 0)}
+Total: {formatCurrency(0)}
             </p>
           </CardContent>
         </Card>
@@ -274,8 +275,8 @@ export default function BillingPayments() {
                         </TableCell>
                         <TableCell>{transaction.description}</TableCell>
                         <TableCell>
-                          <span className={transaction.toUserId === user?.id ? 'text-green-600' : 'text-red-600'}>
-                            {transaction.toUserId === user?.id ? '+' : '-'}
+<span className={transaction.type === 'payout' ? 'text-green-600' : 'text-red-600'}>
+                            {transaction.type === 'payout' ? '+' : '-'}
                             {formatCurrency(transaction.amount)}
                           </span>
                         </TableCell>

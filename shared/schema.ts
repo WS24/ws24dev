@@ -336,9 +336,9 @@ export const insertTaskSchema = createInsertSchema(tasks).pick({
   description: true,
   category: true,
   priority: true,
-  deadline: true,
   attachments: true,
 }).extend({
+  deadline: z.string().datetime().transform(str => new Date(str)).optional(),
   budget: z.string().optional(),
 });
 

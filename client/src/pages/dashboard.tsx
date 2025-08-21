@@ -209,7 +209,7 @@ export default function Dashboard() {
                           <Button
                             variant="outline"
                             className="w-full"
-                            onClick={() => startTransition(() => window.location.href = "/billing")}
+onClick={() => startTransition(() => { window.location.href = "/billing"; })}
                           >
                             <CreditCard className="mr-2 w-4 h-4" />
                             View Billing
@@ -219,7 +219,7 @@ export default function Dashboard() {
                         <>
                           <Button
                             className="w-full bg-primary text-white hover:bg-blue-700"
-                            onClick={() => startTransition(() => window.location.href = "/assignments")}
+onClick={() => startTransition(() => { window.location.href = "/assignments"; })}
                           >
                             <Clock className="mr-2 w-4 h-4" />
                             View Assignments
@@ -227,7 +227,7 @@ export default function Dashboard() {
                           <Button
                             variant="outline"
                             className="w-full"
-                            onClick={() => startTransition(() => window.location.href = "/assignments")}
+onClick={() => startTransition(() => { window.location.href = "/assignments"; })}
                           >
                             <AlertCircle className="mr-2 w-4 h-4" />
                             Pending Evaluations

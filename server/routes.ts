@@ -10,7 +10,7 @@
  * @requires zod - Schema validation
  */
 
-import type { Express } from "express";
+import type { Express, Response } from "express";
 import { createServer, type Server } from "http";
 import { body, param, query, validationResult } from "express-validator";
 import { storage } from "./storage";
@@ -206,7 +206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tasks/:id/updates", isAuthenticated, async (req: any, res) => {
+app.get("/api/tasks/:id/updates", isAuthenticated, async (req: any, res: Response) => {
     try {
       const userId = req.user.claims.sub;
       const taskId = parseInt(req.params.id);
@@ -240,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tasks/:id/updates", isAuthenticated, [
     body('content').trim().isLength({ min: 1 }).withMessage('Content is required'),
     handleValidationErrors,
-  ], async (req: any, res) => {
+], async (req: any, res: Response) => {
     try {
       const userId = req.user.claims.sub;
       const taskId = parseInt(req.params.id);
@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/tasks/:id/status", isAuthenticated, async (req: any, res) => {
+app.patch("/api/tasks/:id/status", isAuthenticated, async (req: any, res: Response) => {
     try {
       const taskId = parseInt(req.params.id);
       const { status } = req.body;
@@ -311,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Evaluation routes
-  app.post("/api/tasks/:id/evaluate", isAuthenticated, async (req: any, res) => {
+app.post("/api/tasks/:id/evaluate", isAuthenticated, async (req: any, res: Response) => {
     try {
       const taskId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
@@ -347,7 +347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tasks/:id/evaluations", isAuthenticated, async (req: any, res) => {
+app.get("/api/tasks/:id/evaluations", isAuthenticated, async (req: any, res: Response) => {
     try {
       const taskId = parseInt(req.params.id);
       const evaluations = await storage.getEvaluationsByTask(taskId);
@@ -358,7 +358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/tasks/:taskId/evaluations/:evaluationId/accept", isAuthenticated, async (req: any, res) => {
+app.post("/api/tasks/:taskId/evaluations/:evaluationId/accept", isAuthenticated, async (req: any, res: Response) => {
     try {
       const taskId = parseInt(req.params.taskId);
       const evaluationId = parseInt(req.params.evaluationId);
@@ -391,7 +391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment routes
-  app.get("/api/tasks/:id/payments", isAuthenticated, async (req: any, res) => {
+app.get("/api/tasks/:id/payments", isAuthenticated, async (req: any, res: Response) => {
     try {
       const taskId = parseInt(req.params.id);
       const payments = await storage.getPaymentsByTask(taskId);
@@ -402,7 +402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/payments/:id/status", isAuthenticated, async (req: any, res) => {
+app.patch("/api/payments/:id/status", isAuthenticated, async (req: any, res: Response) => {
     try {
       const paymentId = parseInt(req.params.id);
       const { status, transactionId } = req.body;
@@ -602,7 +602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     body('role').isIn(['client', 'specialist', 'admin']).withMessage('Invalid role'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
     handleValidationErrors,
-  ], async (req: any, res) => {
+  ], async (req: any, res: Response) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -1079,7 +1079,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     body('imapTicketString').optional().isString(),
     body('imapReplyString').optional().isString(),
     handleValidationErrors,
-  ], async (req: any, res) => {
+  ], async (req: any, res: Response) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -1120,7 +1120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     body('reason').notEmpty().withMessage('Reason is required'),
     body('type').isIn(['credit', 'debit']).withMessage('Type must be credit or debit'),
     handleValidationErrors,
-  ], async (req: any, res) => {
+  ], async (req: any, res: Response) => {
     try {
       const adminId = req.user.claims.sub;
       const admin = await storage.getUser(adminId);
@@ -1159,7 +1159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     body('taskId').isNumeric().withMessage('Task ID must be numeric'),
     body('specialistId').notEmpty().withMessage('Specialist ID is required'),
     handleValidationErrors,
-  ], async (req: any, res) => {
+  ], async (req: any, res: Response) => {
     try {
       const adminId = req.user.claims.sub;
       const admin = await storage.getUser(adminId);
@@ -1197,7 +1197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/platform-settings/:key', isAuthenticated, [
     body('value').notEmpty().withMessage('Value is required'),
     handleValidationErrors,
-  ], async (req: any, res) => {
+  ], async (req: any, res: Response) => {
     try {
       const adminId = req.user.claims.sub;
       const admin = await storage.getUser(adminId);
@@ -1263,7 +1263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = await storage.getSpecialistStats(userId);
       
       // Get specializations from user profile
-      const specializations = user.specializations ? user.specializations.split(',').map(s => s.trim()) : [];
+const specializations = user.specialization ? user.specialization.split(',').map((s: string) => s.trim()) : [];
       
       res.json({
         ...stats,
@@ -1313,7 +1313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/tasks/:id/complete', isAuthenticated, [
     param('id').isNumeric().withMessage('Task ID must be numeric'),
     handleValidationErrors,
-  ], async (req: any, res) => {
+  ], async (req: any, res: Response) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -1561,7 +1561,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updates = req.body;
         const oldValues = { ...ticket };
         
-        await storage.updateTicketSettings(ticketId, updates);
+        await storage.updateTicketFields(ticketId, updates);
         
         // Log changes
         await storage.logActivity({

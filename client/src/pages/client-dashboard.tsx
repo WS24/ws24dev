@@ -180,14 +180,14 @@ export default function ClientDashboard() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {task.estimatedCost ? (
-                          <span className="font-medium">${task.estimatedCost}</span>
+{task.totalCost ? (
+                          <span className="font-medium">${task.totalCost}</span>
                         ) : (
                           <span className="text-gray-500">TBD</span>
                         )}
                       </TableCell>
                       <TableCell>
-                        {formatDistanceToNow(new Date(task.createdAt), { addSuffix: true })}
+{task.createdAt ? formatDistanceToNow(new Date(task.createdAt), { addSuffix: true }) : "-"}
                       </TableCell>
                       <TableCell>
                         <Link href={`/tasks/${task.id}`}>
@@ -224,7 +224,7 @@ export default function ClientDashboard() {
                     <TableHead>Description</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Amount</TableHead>
-                    <TableHead>Balance</TableHead>
+<TableHead></TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -232,7 +232,7 @@ export default function ClientDashboard() {
                   {transactions.map((transaction) => (
                     <TableRow key={transaction.id}>
                       <TableCell>
-                        {new Date(transaction.createdAt).toLocaleDateString()}
+{transaction.createdAt ? new Date(transaction.createdAt as any).toLocaleDateString() : "-"}
                       </TableCell>
                       <TableCell>{transaction.description}</TableCell>
                       <TableCell>
@@ -243,7 +243,7 @@ export default function ClientDashboard() {
                       <TableCell className={transaction.type === "credit" ? "text-green-600" : "text-red-600"}>
                         {transaction.type === "credit" ? "+" : "-"}${transaction.amount}
                       </TableCell>
-                      <TableCell>${transaction.balance}</TableCell>
+<TableCell>-</TableCell>
                       <TableCell>
                         <Badge variant="outline">{transaction.status}</Badge>
                       </TableCell>

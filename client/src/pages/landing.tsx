@@ -2,10 +2,54 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Users, Zap, Shield, ArrowRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { useLocation } from "wouter";
+
 export default function Landing() {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && user) {
+      // Redirect authenticated users to appropriate dashboard based on role
+      switch (user.role) {
+        case "admin":
+          setLocation("/admin/dashboard");
+          break;
+        case "client":
+          setLocation("/client");
+          break;
+        case "specialist":
+          setLocation("/specialist");
+          break;
+        default:
+          setLocation("/dashboard");
+          break;
+      }
+    }
+  }, [isAuthenticated, user, isLoading, setLocation]);
+
   const handleLogin = () => {
     window.location.href = "/api/login";
   };
+  
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Only show landing page if user is not authenticated
+  if (isAuthenticated) {
+    return null; // Will be redirected by useEffect
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
