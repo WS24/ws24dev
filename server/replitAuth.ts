@@ -145,7 +145,7 @@ const msg = error instanceof Error ? error.message : String(error);
 
     app.get("/api/logout", (req, res) => {
       req.logout(() => {
-        res.redirect("/");
+        res.redirect("/admin/dashboard");
       });
     });
     

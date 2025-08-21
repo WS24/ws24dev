@@ -148,7 +148,7 @@ app.get('/api/health', (req, res) => {
   }
 
   // Use validated port from environment validation
-  server.listen(validatedEnv.PORT, "0.0.0.0", () => {
-    log(`serving on port ${validatedEnv.PORT}`);
+  server.listen(8000, "0.0.0.0", () => {
+    log(`serving on port 8000`);
   });
 })();

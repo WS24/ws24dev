@@ -1,0 +1,193 @@
+# WS24 Dev - Production Docker Compose Configuration
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: ws24dev-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ws24_prod
+      POSTGRES_USER: ws24user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    secrets:
+      - postgres_password
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d/migrations:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - ws24dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ws24user -d ws24_prod"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # WS24 Dev Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: ws24dev-app-prod
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://ws24user:${POSTGRES_PASSWORD}@postgres:5432/ws24_prod
+      SESSION_SECRET_FILE: /run/secrets/session_secret
+      ISSUER_URL: ${ISSUER_URL:-https://replit.com/oidc}
+      REPL_ID: ${REPL_ID}
+      REPLIT_DOMAINS: ${REPLIT_DOMAINS}
+      PORT: 3000
+      # Additional production environment variables
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      TRUST_PROXY: 1
+    secrets:
+      - session_secret
+    ports:
+      - "3000:3000"
+    networks:
+      - ws24dev-network
+    volumes:
+      - app_logs_prod:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+
+  # pgAdmin for Database Administration
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: ws24dev-pgadmin-prod
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ws24dev.com}
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin_password
+      PGADMIN_CONFIG_SERVER_MODE: 'True'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'True'
+    secrets:
+      - pgadmin_password
+    ports:
+      - "8080:80"
+    networks:
+      - ws24dev-network
+    volumes:
+      - pgadmin_data_prod:/var/lib/pgadmin
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/misc/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+
+  # Nginx Reverse Proxy (Optional - for production load balancing)
+  nginx:
+    image: nginx:alpine
+    container_name: ws24dev-nginx-prod
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - ws24dev-network
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - nginx_logs_prod:/var/log/nginx
+      - ssl_certs:/etc/nginx/ssl:ro
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+
+# Docker Secrets for sensitive data
+secrets:
+  postgres_password:
+    external: true
+    name: ws24dev_postgres_password
+  session_secret:
+    external: true
+    name: ws24dev_session_secret
+  pgadmin_password:
+    external: true
+    name: ws24dev_pgadmin_password
+
+# Named volumes for persistent data
+volumes:
+  postgres_data_prod:
+    driver: local
+    name: ws24dev_postgres_data_prod
+  pgadmin_data_prod:
+    driver: local
+    name: ws24dev_pgadmin_data_prod
+  app_logs_prod:
+    driver: local
+    name: ws24dev_app_logs_prod
+  nginx_logs_prod:
+    driver: local
+    name: ws24dev_nginx_logs_prod
+  ssl_certs:
+    driver: local
+    name: ws24dev_ssl_certs
+
+# Private network for service communication
+networks:
+  ws24dev-network:
+    driver: bridge
+    name: ws24dev_prod_network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

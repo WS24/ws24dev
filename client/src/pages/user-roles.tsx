@@ -131,21 +131,21 @@ export default function UserRoles() {
         return (
           <Badge className={`${baseClasses} bg-blue-100 text-blue-800`}>
             {getRoleIcon(role)}
-            <span>Специалист</span>
+            <span>Specialist</span>
           </Badge>
         );
       case "client":
         return (
           <Badge className={`${baseClasses} bg-green-100 text-green-800`}>
             {getRoleIcon(role)}
-            <span>Заказчик</span>
+            <span>Client</span>
           </Badge>
         );
       case "blocked":
         return (
           <Badge className={`${baseClasses} bg-red-100 text-red-800`}>
             {getRoleIcon(role)}
-            <span>Заблокирован</span>
+            <span>Blocked</span>
           </Badge>
         );
       default:
@@ -214,7 +214,7 @@ export default function UserRoles() {
                     <div className="flex items-center space-x-3">
                       <Briefcase className="w-5 h-5 text-blue-600" />
                       <div>
-                        <h3 className="font-semibold text-blue-800">Специалист</h3>
+                        <h3 className="font-semibold text-blue-800">Specialist</h3>
                         <p className="text-sm text-gray-600">
                           Evaluates tasks, provides estimates, executes work, and earns 50% of task value upon completion.
                         </p>
@@ -225,7 +225,7 @@ export default function UserRoles() {
                     <div className="flex items-center space-x-3">
                       <UserCheck className="w-5 h-5 text-green-600" />
                       <div>
-                        <h3 className="font-semibold text-green-800">Заказчик</h3>
+                        <h3 className="font-semibold text-green-800">Client</h3>
                         <p className="text-sm text-gray-600">
                           Creates tasks, reviews specialist evaluations, makes payments, and communicates requirements.
                         </p>
@@ -234,7 +234,7 @@ export default function UserRoles() {
                     <div className="flex items-center space-x-3">
                       <UserX className="w-5 h-5 text-red-600" />
                       <div>
-                        <h3 className="font-semibold text-red-800">Заблокирован</h3>
+                        <h3 className="font-semibold text-red-800">Blocked</h3>
                         <p className="text-sm text-gray-600">
                           Account suspended. No access to any system functionality.
                         </p>
@@ -307,9 +307,9 @@ export default function UserRoles() {
                                     </SelectTrigger>
                                     <SelectContent>
                                       <SelectItem value="admin">Admin</SelectItem>
-                                      <SelectItem value="specialist">Специалист</SelectItem>
-                                      <SelectItem value="client">Заказчик</SelectItem>
-                                      <SelectItem value="blocked">Заблокирован</SelectItem>
+                                      <SelectItem value="specialist">Specialist</SelectItem>
+                                      <SelectItem value="client">Client</SelectItem>
+                                      <SelectItem value="blocked">Blocked</SelectItem>
                                     </SelectContent>
                                   </Select>
                                   <Button

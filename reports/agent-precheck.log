@@ -1,0 +1,489 @@
+=== AGENT PRECHECK START 2025-08-21T08:44:08Z ===
+PWD: /Users/bodre/Dev/GIT/ws24dev
+
+-- Clean install --
+Removed node_modules and package-lock.json
+
+Running npm install...
+npm install failed due to peer deps; retrying with --legacy-peer-deps
+
+added 878 packages in 39s
+
+-- Detect scripts --
+Available scripts:
+
+-- Lint (if available) --
+No lint script configured; skipping lint
+
+-- Type check --
+No type-check script configured; skipping type-check
+
+-- Dev build (vite build --mode development) --
+vite v7.1.3 building for development...
+transforming...
+✓ 3320 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   0.88 kB │ gzip:   0.46 kB
+../dist/public/assets/index-DDyPYMID.css   83.32 kB │ gzip:  13.27 kB
+../dist/public/assets/ui-CjlCKxBy.js       29.24 kB │ gzip:   5.69 kB
+../dist/public/assets/vendor-j68n1bCX.js   40.31 kB │ gzip:  13.05 kB
+../dist/public/assets/react-Dazix4UH.js   141.85 kB │ gzip:  45.48 kB
+../dist/public/assets/index-BcOb9TPs.js   999.54 kB │ gzip: 261.44 kB
+✓ built in 3.38s
+
+-- Unit tests (if jest present) --
+Running: npx jest --runInBand
+Tests finished with non-zero exit code
+
+=== AGENT PRECHECK END 2025-08-21T08:46:55Z ===
+\n=== ADDING LINT/TEST TOOLING 2025-08-21T08:55:32Z ===
+Installing ESLint and Babel presets...
+Some deps may have failed - continuing
+\n-- Regenerating lock file --
+Lockfile regenerated after adding lint/test deps
+\n-- Running linter --
+
+> rest-express@1.0.0 lint
+> eslint . --ext .ts,.tsx --max-warnings=0
+
+Lint finished with errors
+\n-- Type check --
+
+> rest-express@1.0.0 check
+> tsc
+
+client/src/__tests__/routing.test.tsx(1,18): error TS2305: Module '"@testing-library/react"' has no exported member 'screen'.
+client/src/__tests__/routing.test.tsx(2,30): error TS2307: Cannot find module 'wouter/memory' or its corresponding type declarations.
+client/src/components/modals/evaluate-task-modal.tsx(258,22): error TS2322: Type '{ onChange: (...event: any[]) => void; onBlur: Noop; value: string | null | undefined; disabled?: boolean | undefined; name: "notes"; ref: RefCallBack; placeholder: string; rows: number; }' is not assignable to type 'Omit<DetailedHTMLProps<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>, "ref">'.
+  Types of property 'value' are incompatible.
+    Type 'string | null | undefined' is not assignable to type 'string | number | readonly string[] | undefined'.
+      Type 'null' is not assignable to type 'string | number | readonly string[] | undefined'.
+client/src/lib/queryClient.ts(52,7): error TS2353: Object literal may only specify known properties, and 'suspense' does not exist in type 'OmitKeyof<QueryObserverOptions<unknown, Error, unknown, unknown, readonly unknown[], never>, "queryKey" | "suspense", "strictly">'.
+client/src/pages/assignments.tsx(72,24): error TS2461: Type '{}' is not an array type.
+client/src/pages/assignments.tsx(72,50): error TS2461: Type '{}' is not an array type.
+client/src/pages/billing-payments.tsx(192,79): error TS2339: Property 'balance' does not exist on type '{}'.
+client/src/pages/billing-payments.tsx(202,79): error TS2339: Property 'totalSpent' does not exist on type '{}'.
+client/src/pages/billing-payments.tsx(212,64): error TS2339: Property 'pendingInvoices' does not exist on type '{}'.
+client/src/pages/billing-payments.tsx(214,52): error TS2339: Property 'pendingAmount' does not exist on type '{}'.
+client/src/pages/billing-payments.tsx(250,19): error TS18046: 'transactions' is of type 'unknown'.
+client/src/pages/billing-payments.tsx(266,22): error TS18046: 'transactions' is of type 'unknown'.
+client/src/pages/billing-payments.tsx(303,19): error TS18046: 'invoices' is of type 'unknown'.
+client/src/pages/billing-payments.tsx(320,22): error TS18046: 'invoices' is of type 'unknown'.
+client/src/pages/client-dashboard.tsx(183,31): error TS2551: Property 'estimatedCost' does not exist on type '{ title: string; id: number; status: string; description: string; createdAt: Date | null; updatedAt: Date | null; category: string; priority: string; clientId: string; specialistId: string | null; ... 5 more ...; completedAt: Date | null; }'. Did you mean 'estimatedHours'?
+client/src/pages/client-dashboard.tsx(184,64): error TS2551: Property 'estimatedCost' does not exist on type '{ title: string; id: number; status: string; description: string; createdAt: Date | null; updatedAt: Date | null; category: string; priority: string; clientId: string; specialistId: string | null; ... 5 more ...; completedAt: Date | null; }'. Did you mean 'estimatedHours'?
+client/src/pages/client-dashboard.tsx(190,55): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'Date | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'Date | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.
+client/src/pages/client-dashboard.tsx(235,35): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'Date | null' is not assignable to parameter of type 'string | number | Date'.
+      Type 'null' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'Date | null' is not assignable to parameter of type 'string | number'.
+      Type 'null' is not assignable to type 'string | number'.
+client/src/pages/client-dashboard.tsx(246,48): error TS2339: Property 'balance' does not exist on type '{ type: string; id: number; status: string; description: string | null; createdAt: Date | null; updatedAt: Date | null; taskId: number | null; amount: string; paymentMethod: string | null; ... 5 more ...; day: number; }'.
+client/src/pages/dashboard.tsx(212,66): error TS2322: Type 'string' is not assignable to type 'VoidOrUndefinedOnly'.
+client/src/pages/dashboard.tsx(222,66): error TS2322: Type 'string' is not assignable to type 'VoidOrUndefinedOnly'.
+client/src/pages/dashboard.tsx(230,66): error TS2322: Type 'string' is not assignable to type 'VoidOrUndefinedOnly'.
+client/src/pages/specialist-dashboard.tsx(309,41): error TS2339: Property 'budget' does not exist on type '{ title: string; id: number; status: string; description: string; createdAt: Date | null; updatedAt: Date | null; category: string; priority: string; clientId: string; specialistId: string | null; ... 5 more ...; completedAt: Date | null; }'.
+client/src/pages/specialist-dashboard.tsx(372,43): error TS2339: Property 'budget' does not exist on type '{ title: string; id: number; status: string; description: string; createdAt: Date | null; updatedAt: Date | null; category: string; priority: string; clientId: string; specialistId: string | null; ... 5 more ...; completedAt: Date | null; }'.
+client/src/pages/tasks.tsx(50,39): error TS2339: Property 'filter' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(136,28): error TS2339: Property 'deadline' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(136,56): error TS2339: Property 'deadline' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(143,61): error TS2339: Property 'title' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(145,37): error TS2339: Property 'id' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(147,53): error TS2339: Property 'createdAt' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(160,56): error TS2339: Property 'status' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(161,23): error TS2339: Property 'status' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(163,65): error TS2339: Property 'priority' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(196,32): error TS2339: Property 'map' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(294,37): error TS2339: Property 'map' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(310,38): error TS2339: Property 'length' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(325,33): error TS2339: Property 'map' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(338,34): error TS2339: Property 'length' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(346,63): error TS2339: Property 'specialistId' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(357,43): error TS2339: Property 'status' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(375,43): error TS2339: Property 'priority' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(393,41): error TS2339: Property 'deadline' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(401,41): error TS2339: Property 'quotedCost' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(411,45): error TS2339: Property 'adminApproval' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(433,52): error TS2339: Property 'clientName' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(437,52): error TS2339: Property 'specialistName' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(441,52): error TS2339: Property 'category' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(445,52): error TS2339: Property 'estimatedHours' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(449,53): error TS2339: Property 'budget' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(451,23): error TS2339: Property 'status' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(451,56): error TS2339: Property 'rating' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(459,38): error TS2339: Property 'rating' does not exist on type '{}'.
+client/src/pages/ticket-detail.tsx(473,46): error TS2339: Property 'description' does not exist on type '{}'.
+server/replitAuth.ts(118,75): error TS18046: 'error' is of type 'unknown'.
+server/routes.ts(243,23): error TS7006: Parameter 'res' implicitly has an 'any' type.
+server/routes.ts(605,23): error TS7006: Parameter 'res' implicitly has an 'any' type.
+server/routes.ts(1082,23): error TS7006: Parameter 'res' implicitly has an 'any' type.
+server/routes.ts(1123,23): error TS7006: Parameter 'res' implicitly has an 'any' type.
+server/routes.ts(1162,23): error TS7006: Parameter 'res' implicitly has an 'any' type.
+server/routes.ts(1200,23): error TS7006: Parameter 'res' implicitly has an 'any' type.
+server/routes.ts(1266,36): error TS2551: Property 'specializations' does not exist on type '{ id: string; role: string; email: string | null; firstName: string | null; lastName: string | null; profileImageUrl: string | null; username: string | null; balance: string | null; ... 9 more ...; updatedAt: Date | null; }'. Did you mean 'specialization'?
+server/routes.ts(1266,59): error TS2551: Property 'specializations' does not exist on type '{ id: string; role: string; email: string | null; firstName: string | null; lastName: string | null; profileImageUrl: string | null; username: string | null; balance: string | null; ... 9 more ...; updatedAt: Date | null; }'. Did you mean 'specialization'?
+server/routes.ts(1266,90): error TS7006: Parameter 's' implicitly has an 'any' type.
+server/routes.ts(1316,23): error TS7006: Parameter 'res' implicitly has an 'any' type.
+server/routes.ts(1340,50): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1344,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1347,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1351,61): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1355,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1358,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1362,60): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1366,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1369,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1374,56): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<any>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<any>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1380,20): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1384,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1387,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1397,61): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1400,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1403,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1413,61): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1416,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1419,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1429,48): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<any>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<any>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1437,20): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1444,20): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1447,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1450,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1460,57): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1467,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1470,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1485,5): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1506,18): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1509,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1520,58): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1524,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1527,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1545,5): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<any>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<any>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1553,22): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1558,22): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1576,18): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1579,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1590,60): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1594,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1597,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1607,61): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1629,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1632,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1639,50): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1658,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1666,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1670,57): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1674,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1677,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1681,53): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1685,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1688,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1698,5): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1719,18): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1722,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1738,5): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<any>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<any>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1744,22): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1763,18): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1766,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes.ts(1773,5): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: any, res: Response) => Promise<void>' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: any, res: Response) => Promise<void>' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'res' and 'res' are incompatible.
+          Type 'Response<any, Record<string, any>, number>' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 8 more.
+server/routes.ts(1781,18): error TS2554: Expected 0 arguments, but got 1.
+server/routes.ts(1787,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/storage.ts(441,15): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { amount: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<string, any> | undefined; status?: string | SQL<unknown> | Placeholder<...> | undefined; ... 11 more ...; paidAt?: Date | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Argument of type 'Partial<{ id: number; status: string; createdAt: Date | null; taskId: number | null; amount: string; paymentMethod: string | null; transactionId: string | null; paymentType: string | null; ... 6 more ...; paidAt: Date | null; }>' is not assignable to parameter of type '{ amount: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<string, any> | undefined; status?: string | SQL<unknown> | Placeholder<...> | undefined; ... 11 more ...; paidAt?: Date | ... 3 more ... | undefined; }'.
+      Types of property 'amount' are incompatible.
+        Type 'string | undefined' is not assignable to type 'string | SQL<unknown> | Placeholder<string, any>'.
+          Type 'undefined' is not assignable to type 'string | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { amount: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<string, any> | undefined; status?: string | SQL<unknown> | Placeholder<...> | undefined; ... 11 more ...; paidAt?: Date | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Argument of type 'Partial<{ id: number; status: string; createdAt: Date | null; taskId: number | null; amount: string; paymentMethod: string | null; transactionId: string | null; paymentType: string | null; ... 6 more ...; paidAt: Date | null; }>' is not assignable to parameter of type '{ amount: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<string, any> | undefined; status?: string | SQL<unknown> | Placeholder<...> | undefined; ... 11 more ...; paidAt?: Date | ... 3 more ... | undefined; }[]'.
+      Type 'Partial<{ id: number; status: string; createdAt: Date | null; taskId: number | null; amount: string; paymentMethod: string | null; transactionId: string | null; paymentType: string | null; ... 6 more ...; paidAt: Date | null; }>' is missing the following properties from type '{ amount: string | SQL<unknown> | Placeholder<string, any>; id?: number | SQL<unknown> | Placeholder<string, any> | undefined; status?: string | SQL<unknown> | Placeholder<...> | undefined; ... 11 more ...; paidAt?: Date | ... 3 more ... | undefined; }[]': length, pop, push, concat, and 35 more.
+server/storage.ts(941,9): error TS2416: Property 'updateTicketSettings' in type 'DatabaseStorage' is not assignable to the same property in base type 'IStorage'.
+  Type '(settingsData: Partial<{ allowFileUpload?: boolean | null | undefined; allowGuestTickets?: boolean | null | undefined; allowTicketEdit?: boolean | null | undefined; requireLogin?: boolean | null | undefined; ... 14 more ...; imapReplyString?: string | ... 1 more ... | undefined; }>) => Promise<...>' is not assignable to type '{ (settings: Partial<{ allowFileUpload?: boolean | null | undefined; allowGuestTickets?: boolean | null | undefined; allowTicketEdit?: boolean | null | undefined; requireLogin?: boolean | null | undefined; ... 14 more ...; imapReplyString?: string | ... 1 more ... | undefined; }>): Promise<...>; (ticketId: number, u...'.
+    Types of parameters 'settingsData' and 'ticketId' are incompatible.
+      Type 'number' has no properties in common with type 'Partial<{ allowFileUpload?: boolean | null | undefined; allowGuestTickets?: boolean | null | undefined; allowTicketEdit?: boolean | null | undefined; requireLogin?: boolean | null | undefined; ... 14 more ...; imapReplyString?: string | ... 1 more ... | undefined; }>'.
+server/storage.ts(1149,11): error TS2461: Type 'QueryResult<Record<string, unknown>>' is not an array type.
+server/storage.ts(1165,5): error TS2740: Type 'QueryResult<Record<string, unknown>>' is missing the following properties from type 'any[]': length, pop, push, concat, and 35 more.
+server/storage.ts(1205,7): error TS2740: Type 'QueryResult<Record<string, unknown>>' is missing the following properties from type 'any[]': length, pop, push, concat, and 35 more.
+server/storage.ts(1212,7): error TS2740: Type 'QueryResult<Record<string, unknown>>' is missing the following properties from type 'any[]': length, pop, push, concat, and 35 more.
+server/storage.ts(1326,32): error TS2339: Property 'estimatedDelivery' does not exist on type 'PgTableWithColumns<{ name: "tasks"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "tasks"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; hasDefault: true; ... 6 more ...; generated: undefined; }, {}, {}>; ... 14 more ...; completedAt: PgColumn<......'.
+server/storage.ts(1328,21): error TS2339: Property 'budget' does not exist on type 'PgTableWithColumns<{ name: "tasks"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "tasks"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; hasDefault: true; ... 6 more ...; generated: undefined; }, {}, {}>; ... 14 more ...; completedAt: PgColumn<......'.
+server/storage.ts(1346,28): error TS2339: Property 'update' does not exist on type 'PgTableWithColumns<{ name: "task_updates"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "task_updates"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 4 more ...; createdAt: PgColumn<...>; }; d...'.
+server/storage.ts(1368,8): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { content: string | SQL<unknown> | Placeholder<string, any>; taskId: number | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<...>; type?: string | ... 2 more ... | undefined; id?: number | ... 2 more ... | undefined; createdAt?: Date | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'update' does not exist in type '{ content: string | SQL<unknown> | Placeholder<string, any>; taskId: number | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<...>; type?: string | ... 2 more ... | undefined; id?: number | ... 2 more ... | undefined; createdAt?: Date | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { content: string | SQL<unknown> | Placeholder<string, any>; taskId: number | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<...>; type?: string | ... 2 more ... | undefined; id?: number | ... 2 more ... | undefined; createdAt?: Date | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'taskId' does not exist in type '{ content: string | SQL<unknown> | Placeholder<string, any>; taskId: number | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<...>; type?: string | ... 2 more ... | undefined; id?: number | ... 2 more ... | undefined; createdAt?: Date | ... 3 more ... | undefined; }[]'.
+server/storage.ts(1384,20): error TS2304: Cannot find name 'activityLogs'.
+server/storage.ts(1385,65): error TS2304: Cannot find name 'activityLogs'.
+server/storage.ts(1386,18): error TS2304: Cannot find name 'activityLogs'.
+server/storage.ts(1388,11): error TS2304: Cannot find name 'activityLogs'.
+server/storage.ts(1390,10): error TS2304: Cannot find name 'activityLogs'.
+server/storage.ts(1391,10): error TS2304: Cannot find name 'activityLogs'.
+server/storage.ts(1393,19): error TS2304: Cannot find name 'activityLogs'.
+server/storage.ts(1407,16): error TS2561: Object literal may only specify known properties, but 'estimatedCost' does not exist in type '{ specialistId?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | undefined; estimatedHours?: number | ... 2 more ... | undefined; ... 6 more ...; acceptedByClient?: boolean | ... 3 more ... | undefined; }'. Did you mean to write 'estimatedHours'?
+server/storage.ts(1410,30): error TS2339: Property 'accepted' does not exist on type 'PgTableWithColumns<{ name: "task_evaluations"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "task_evaluations"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 7 more ...; createdAt: PgColumn<.....'.
+server/storage.ts(1424,12): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { specialistId: string | SQL<unknown> | Placeholder<string, any>; taskId: number | SQL<unknown> | Placeholder<string, any>; assignedBy: string | SQL<...> | Placeholder<...>; id?: number | ... 2 more ... | undefined; status?: string | ... 2 more ... | undefined; notes?: string | ... 3 more ... | undefined; assignedAt?: Date | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, but 'assignedTo' does not exist in type '{ specialistId: string | SQL<unknown> | Placeholder<string, any>; taskId: number | SQL<unknown> | Placeholder<string, any>; assignedBy: string | SQL<unknown> | Placeholder<...>; id?: number | ... 2 more ... | undefined; status?: string | ... 2 more ... | undefined; notes?: string | ... 3 more ... | undefined; assign...'. Did you mean to write 'assignedAt'?
+  Overload 2 of 2, '(values: { specialistId: string | SQL<unknown> | Placeholder<string, any>; taskId: number | SQL<unknown> | Placeholder<string, any>; assignedBy: string | SQL<...> | Placeholder<...>; id?: number | ... 2 more ... | undefined; status?: string | ... 2 more ... | undefined; notes?: string | ... 3 more ... | undefined; assignedAt?: Date | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'taskId' does not exist in type '{ specialistId: string | SQL<unknown> | Placeholder<string, any>; taskId: number | SQL<unknown> | Placeholder<string, any>; assignedBy: string | SQL<unknown> | Placeholder<...>; id?: number | ... 2 more ... | undefined; status?: string | ... 2 more ... | undefined; notes?: string | ... 3 more ... | undefined; assign...'.
+server/storage.ts(1508,25): error TS2339: Property 'fromUserId' does not exist on type 'PgTableWithColumns<{ name: "transactions"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "transactions"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 13 more ...; updatedAt: PgColumn<...>; }; ...'.
+server/storage.ts(1509,25): error TS2551: Property 'toUserId' does not exist on type 'PgTableWithColumns<{ name: "transactions"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "transactions"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 13 more ...; updatedAt: PgColumn<...>; }; ...'. Did you mean 'userId'?
+server/storage.ts(1601,7): error TS2353: Object literal may only specify known properties, and 'fromUserId' does not exist in type '{ type: string; status: string; amount: string; year: number; month: number; day: number; id?: number | undefined; description?: string | null | undefined; createdAt?: Date | null | undefined; ... 5 more ...; currency?: string | ... 1 more ... | undefined; }'.
+server/storage.ts(1655,7): error TS2353: Object literal may only specify known properties, and 'fromUserId' does not exist in type '{ type: string; status: string; amount: string; year: number; month: number; day: number; id?: number | undefined; description?: string | null | undefined; createdAt?: Date | null | undefined; ... 5 more ...; currency?: string | ... 1 more ... | undefined; }'.
+server/storage.ts(1928,9): error TS2322: Type '(settings: Partial<{ allowFileUpload?: boolean | null | undefined; allowGuestTickets?: boolean | null | undefined; allowTicketEdit?: boolean | null | undefined; requireLogin?: boolean | null | undefined; ... 14 more ...; imapReplyString?: string | ... 1 more ... | undefined; }>) => Promise<...>' is not assignable to type '{ (settings: Partial<{ allowFileUpload?: boolean | null | undefined; allowGuestTickets?: boolean | null | undefined; allowTicketEdit?: boolean | null | undefined; requireLogin?: boolean | null | undefined; ... 14 more ...; imapReplyString?: string | ... 1 more ... | undefined; }>): Promise<...>; (ticketId: number, u...'.
+  Types of parameters 'settings' and 'ticketId' are incompatible.
+    Type 'number' has no properties in common with type 'Partial<{ allowFileUpload?: boolean | null | undefined; allowGuestTickets?: boolean | null | undefined; allowTicketEdit?: boolean | null | undefined; requireLogin?: boolean | null | undefined; ... 14 more ...; imapReplyString?: string | ... 1 more ... | undefined; }>'.
+server/storage.ts(2176,29): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+server/storage.ts(2192,35): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+server/storage.ts(2198,33): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+server/storage.ts(2203,47): error TS2339: Property 'id' does not exist on type 'never'.
+server/storage.ts(2357,5): error TS2322: Type 'DatabaseStorage' is not assignable to type 'IStorage'.
+  Types of property 'updateTicketSettings' are incompatible.
+    Type '(settingsData: Partial<{ allowFileUpload?: boolean | null | undefined; allowGuestTickets?: boolean | null | undefined; allowTicketEdit?: boolean | null | undefined; requireLogin?: boolean | null | undefined; ... 14 more ...; imapReplyString?: string | ... 1 more ... | undefined; }>) => Promise<...>' is not assignable to type '{ (settings: Partial<{ allowFileUpload?: boolean | null | undefined; allowGuestTickets?: boolean | null | undefined; allowTicketEdit?: boolean | null | undefined; requireLogin?: boolean | null | undefined; ... 14 more ...; imapReplyString?: string | ... 1 more ... | undefined; }>): Promise<...>; (ticketId: number, u...'.
+      Types of parameters 'settingsData' and 'ticketId' are incompatible.
+        Type 'number' has no properties in common with type 'Partial<{ allowFileUpload?: boolean | null | undefined; allowGuestTickets?: boolean | null | undefined; allowTicketEdit?: boolean | null | undefined; requireLogin?: boolean | null | undefined; ... 14 more ...; imapReplyString?: string | ... 1 more ... | undefined; }>'.
+server/storage.ts(2360,80): error TS18046: 'error' is of type 'unknown'.
+server/vite.ts(39,5): error TS2322: Type '{ middlewareMode: boolean; hmr: { server: Server<typeof IncomingMessage, typeof ServerResponse>; }; allowedHosts: boolean; }' is not assignable to type 'ServerOptions$1 | ResolvedServerOptions | undefined'.
+  Type '{ middlewareMode: boolean; hmr: { server: Server<typeof IncomingMessage, typeof ServerResponse>; }; allowedHosts: boolean; }' is missing the following properties from type 'ResolvedServerOptions': fs, sourcemapIgnoreList, open, headers, and 6 more.
+Type check failed
+\n-- Dev build --
+vite v7.1.3 building for development...
+transforming...
+✓ 3320 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   0.88 kB │ gzip:   0.46 kB
+../dist/public/assets/index-DDyPYMID.css   83.32 kB │ gzip:  13.27 kB
+../dist/public/assets/ui-CjlCKxBy.js       29.24 kB │ gzip:   5.69 kB
+../dist/public/assets/vendor-j68n1bCX.js   40.31 kB │ gzip:  13.05 kB
+../dist/public/assets/react-Dazix4UH.js   141.85 kB │ gzip:  45.48 kB
+../dist/public/assets/index-BcOb9TPs.js   999.54 kB │ gzip: 261.44 kB
+✓ built in 3.46s
+\n-- Unit tests --
+
+> rest-express@1.0.0 test
+> jest --runInBand
+
+Tests failed
+\n=== TOOLING SETUP COMPLETE 2025-08-21T08:56:04Z ===
+\n=== STEP: install dev deps with legacy-peer-deps 2025-08-21T09:00:22Z ===
+
+added 364 packages, and audited 1139 packages in 5s
+
+207 packages are looking for funding
+  run `npm fund` for details
+
+4 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+\n=== STEP: run lint, type-check, dev build, tests 2025-08-21T09:00:27Z ===
+
+> rest-express@1.0.0 lint
+> eslint . --ext .ts,.tsx --max-warnings=0
+
+lint failed
+
+> rest-express@1.0.0 check
+> tsc
+
+server/storage.ts(247,48): error TS1127: Invalid character.
+server/storage.ts(247,49): error TS1131: Property or signature expected.
+server/storage.ts(247,53): error TS1011: An element access expression should take an argument.
+server/storage.ts(247,54): error TS1127: Invalid character.
+server/storage.ts(248,30): error TS1005: ',' expected.
+server/storage.ts(248,47): error TS1005: ',' expected.
+server/storage.ts(248,53): error TS1005: ';' expected.
+server/storage.ts(248,62): error TS1127: Invalid character.
+server/storage.ts(248,67): error TS1127: Invalid character.
+server/storage.ts(249,32): error TS1005: ',' expected.
+server/storage.ts(249,41): error TS1005: ';' expected.
+server/storage.ts(249,50): error TS1127: Invalid character.
+server/storage.ts(249,55): error TS1011: An element access expression should take an argument.
+server/storage.ts(249,56): error TS1127: Invalid character.
+server/storage.ts(250,36): error TS1005: ',' expected.
+server/storage.ts(251,21): error TS1005: ',' expected.
+server/storage.ts(252,19): error TS1005: ',' expected.
+server/storage.ts(253,17): error TS1005: ',' expected.
+server/storage.ts(254,17): error TS1005: ',' expected.
+server/storage.ts(255,16): error TS1005: ',' expected.
+server/storage.ts(256,5): error TS1005: ';' expected.
+server/storage.ts(259,24): error TS1005: ',' expected.
+server/storage.ts(259,33): error TS1005: ';' expected.
+server/storage.ts(260,27): error TS1005: ',' expected.
+server/storage.ts(260,43): error TS1005: ',' expected.
+server/storage.ts(260,62): error TS1005: ',' expected.
+server/storage.ts(260,83): error TS1005: ';' expected.
+server/storage.ts(261,27): error TS1005: ',' expected.
+server/storage.ts(261,36): error TS1005: ';' expected.
+server/storage.ts(262,25): error TS1005: ',' expected.
+server/storage.ts(262,34): error TS1005: ';' expected.
+server/storage.ts(263,31): error TS1005: ',' expected.
+server/storage.ts(263,47): error TS1109: Expression expected.
+server/storage.ts(263,56): error TS1005: ';' expected.
+server/storage.ts(264,32): error TS1005: ',' expected.
+server/storage.ts(264,52): error TS1005: ';' expected.
+server/storage.ts(265,24): error TS1005: ',' expected.
+server/storage.ts(265,40): error TS1005: ';' expected.
+server/storage.ts(266,27): error TS1005: ',' expected.
+server/storage.ts(266,36): error TS1005: ';' expected.
+server/storage.ts(267,25): error TS1005: ',' expected.
+server/storage.ts(267,34): error TS1005: ';' expected.
+server/storage.ts(268,32): error TS1005: ',' expected.
+server/storage.ts(268,48): error TS1005: ',' expected.
+server/storage.ts(268,57): error TS1005: ';' expected.
+server/storage.ts(269,28): error TS1005: ',' expected.
+server/storage.ts(269,46): error TS1005: ',' expected.
+server/storage.ts(269,62): error TS1005: ',' expected.
+server/storage.ts(269,71): error TS1005: ';' expected.
+server/storage.ts(270,33): error TS1005: ',' expected.
+server/storage.ts(270,42): error TS1005: ';' expected.
+server/storage.ts(271,1): error TS1128: Declaration or statement expected.
+type-check failed
+vite v7.1.3 building for development...
+transforming...
+✓ 3320 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   0.88 kB │ gzip:   0.46 kB
+../dist/public/assets/index-DDyPYMID.css   83.32 kB │ gzip:  13.27 kB
+../dist/public/assets/ui-CjlCKxBy.js       29.24 kB │ gzip:   5.69 kB
+../dist/public/assets/vendor-j68n1bCX.js   40.31 kB │ gzip:  13.05 kB
+../dist/public/assets/react-Dazix4UH.js   141.85 kB │ gzip:  45.48 kB
+../dist/public/assets/index-BcOb9TPs.js   999.54 kB │ gzip: 261.44 kB
+✓ built in 3.59s
+
+> rest-express@1.0.0 test
+> jest --runInBand
+
+tests failed
